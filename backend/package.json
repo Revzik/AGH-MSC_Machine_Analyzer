@@ -1,0 +1,23 @@
+{
+  "name": "machine-analyzer-gui-backend",
+  "version": "1.0.0",
+  "description": "GUI backend for Raspberry MQTT machine analyzer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Revzik/AGH_MSC_Web_GUI.git"
+  },
+  "author": "Bartłomiej Piekarz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Revzik/AGH_MSC_Web_GUI/issues"
+  },
+  "homepage": "https://github.com/Revzik/AGH_MSC_Web_GUI#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.13.2"
+  }
+}
