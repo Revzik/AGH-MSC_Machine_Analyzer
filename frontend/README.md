@@ -1,5 +1,5 @@
-# AGH_MSC_Web_GUI
-GUI frontend for Raspberry MQTT machine analyzer
+# Machine analyzer GUI frontend
+ReactJS app that talks to the backend via http. It presents data from the database to the user.
 
 ***
 
