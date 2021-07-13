@@ -1,17 +1,19 @@
 import React from "react";
-import { Line, LineChart, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-import classes from './Chart.module.css';
+import classes from "./Chart.module.css";
 
 function Chart(props) {
   let data = props.data;
-  let { x, y } = data;
 
-  return (<LineChart data={data}>
-    <Line type='monotone' dataKey='y' />
-    <XAxis dataKey='x' />
-    <YAxis />
-  </LineChart>);
+  return (
+    <LineChart width={600} height={300} data={data} className={`${props.className}`}>
+      <Line type="monotone" dataKey="y" stroke="#000" isAnimationActive={false}/>
+      <CartesianGrid stroke="#ccc" />
+      <XAxis dataKey="x" />
+      <YAxis />
+    </LineChart>
+  );
 }
 
 export default Chart;
