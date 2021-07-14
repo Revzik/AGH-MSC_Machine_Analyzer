@@ -13,7 +13,9 @@ function MainData(props) {
         <SimpleParam name={"Kurtosis"} value={2} />
         <SimpleParam name={"Peak factor"} unit={""} value={2.5} />
       </div>
-      <Chart className={classes.chart}
+      <Chart
+        title="Order spectrum"
+        unit="m/s^2"
         data={[
           { x: 1, y: 0.1 },
           { x: 2, y: 1 },
