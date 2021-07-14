@@ -1,0 +1,22 @@
+.navi ul{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.navi li {
+  margin: 0;
+  margin-left: 2rem;
+}
+
+.navi a {
+  text-decoration: none;
+  color: white;
+}
+
+.navi a:hover,
+.navi a:active {
+  color: #f3cafb;
+}
