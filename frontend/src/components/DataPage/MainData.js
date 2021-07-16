@@ -1,29 +1,52 @@
-import React from "react";
-import Chart from "../UI/Chart";
+import React, { useState, useEffect } from "react";
+import DataPanel from "./DataPanel";
+import Card from "../UI/Card";
 
 import classes from "./MainData.module.css";
-import SimpleParam from "./SimpleParam";
 
 function MainData(props) {
+  const [isError, setError] = useState(null);
+  const [isLoading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+
+  async function fetchDataHandler() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:3001/data");
+
+      if (!response.ok) {
+        throw new Error("Not ok");
+      }
+      const data = await response.json();
+
+      setData(data);
+    } catch (error) {
+      setError(error.message);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchDataHandler();
+  }, []);
+
+  let content = <Card>No data</Card>;
+  if (data) {
+    content = <DataPanel data={data} />;
+  }
+  if (isError) {
+    content = <Card>Error: could not fetch data!</Card>;
+  }
+  if (isLoading) {
+    content = <Card>Loading data...</Card>;
+  }
+
   return (
     <main className={`${props.className} ${classes.main}`}>
-      <div>
-        <SimpleParam name={"Frequency"} unit={"Hz"} value={0.5} />
-        <SimpleParam name={"RMS"} unit={"m/s^2"} value={0.5} />
-        <SimpleParam name={"Kurtosis"} value={2} />
-        <SimpleParam name={"Peak factor"} unit={""} value={2.5} />
-      </div>
-      <Chart
-        title="Order spectrum"
-        unit="m/s^2"
-        data={[
-          { x: 1, y: 0.1 },
-          { x: 2, y: 1 },
-          { x: 3, y: 0.8 },
-          { x: 4, y: 0.7 },
-          { x: 5, y: 1.3 },
-        ]}
-      />
+      {content}
+      <button onClick={fetchDataHandler}>Refresh</button>
     </main>
   );
 }

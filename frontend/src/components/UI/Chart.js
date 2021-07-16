@@ -12,13 +12,11 @@ import Card from "./Card";
 import classes from "./Chart.module.css";
 
 function Chart(props) {
-  let data = props.data;
-
   return (
     <Card className={classes.box}>
       <div className={classes.title}>{props.title}</div>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} className={`${props.className}`}>
+        <LineChart data={props.data} className={`${props.className}`}>
           <Line
             type="monotone"
             dataKey="y"
