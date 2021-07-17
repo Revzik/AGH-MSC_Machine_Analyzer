@@ -7,21 +7,15 @@ function DataPanel(props) {
   return (
     <React.Fragment>
       <div>
-        <SimpleParam name="Frequency" unit="Hz" value={0.5} />
-        <SimpleParam name="RMS" unit="m/s^2" value={0.5} />
-        <SimpleParam name="Kurtosis" value={2} />
-        <SimpleParam name="Peak factor" unit="" value={2.5} />
+        <SimpleParam name="Frequency" unit="Hz" value={props.data.freq} />
+        <SimpleParam name="RMS" unit="m/s^2" value={props.data.rms} />
+        <SimpleParam name="Kurtosis" value={props.data.kurt} />
+        <SimpleParam name="Peak factor" unit="" value={props.data.peak} />
       </div>
       <Chart
         title="Order spectrum"
         unit="m/s^2"
-        data={[
-          { x: 1, y: 0.1 },
-          { x: 2, y: 1 },
-          { x: 3, y: 0.8 },
-          { x: 4, y: 0.7 },
-          { x: 5, y: 1.3 },
-        ]}
+        data={props.data.spec}
       />
     </React.Fragment>
   );

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import DataPanel from "./DataPanel";
 import Card from "../UI/Card";
+import Loader from "../UI/Loader";
+import Button from "../UI/Button";
 
 import classes from "./MainData.module.css";
 
@@ -14,7 +16,7 @@ function MainData(props) {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3001/data");
+      const response = await fetch("http://localhost:4200/data");
 
       if (!response.ok) {
         throw new Error("Not ok");
@@ -39,14 +41,12 @@ function MainData(props) {
   if (isError) {
     content = <Card>Error: could not fetch data!</Card>;
   }
-  if (isLoading) {
-    content = <Card>Loading data...</Card>;
-  }
 
   return (
     <main className={`${props.className} ${classes.main}`}>
       {content}
-      <button onClick={fetchDataHandler}>Refresh</button>
+      <Button className={classes.button} onClick={fetchDataHandler}>Refresh</Button>
+      {isLoading && <Loader />}
     </main>
   );
 }
