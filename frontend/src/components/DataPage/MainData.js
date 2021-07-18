@@ -11,8 +11,8 @@ function MainData(props) {
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
 
-  async function fetchDataHandler() {
-    setLoading(true);
+  async function fetchDataHandler(isPeriodic) {
+    setLoading(!isPeriodic && true);
     setError(null);
 
     try {
@@ -27,16 +27,16 @@ function MainData(props) {
     } catch (error) {
       setError(error.message);
     }
-    setLoading(false);
+    setLoading(!isPeriodic && false);
   }
 
   useEffect(() => {
-    fetchDataHandler();
+    fetchDataHandler(false);
   }, []);
 
   let content = <Card>No data</Card>;
   if (data) {
-    content = <DataPanel data={data} />;
+    content = <DataPanel refreshAction={fetchDataHandler} data={data} />;
   }
   if (isError) {
     content = <Card>Error: could not fetch data!</Card>;
@@ -45,7 +45,7 @@ function MainData(props) {
   return (
     <main className={`${props.className} ${classes.main}`}>
       {content}
-      <Button className={classes.button} onClick={fetchDataHandler}>Refresh</Button>
+      <Button className={classes.button} onClick={fetchDataHandler} onClickArgs={[false]}>Refresh</Button>
       {isLoading && <Loader />}
     </main>
   );

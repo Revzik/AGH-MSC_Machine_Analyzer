@@ -6,15 +6,45 @@ import classes from "./Chart.module.css";
 
 function Chart(props) {
   const [state, setState] = useState({
-    data: [props.data],
-    layout: {},
+    data: [
+      {
+        line: {
+          color: "#0064BE",
+          width: 1.5,
+        },
+      },
+    ],
+    layout: {
+      margin: {
+        l: 65,
+        r: 65,
+        t: 15,
+        b: 65,
+        pad: 4,
+      },
+      xaxis: {
+        title: {
+          text: "order",
+        },
+      },
+      yaxis: {
+        title: {
+          text: `a [${props.unit}]`,
+        },
+      },
+    },
     frames: [],
-    config: {},
+    config: {
+      responsive: true,
+    },
   });
 
   useEffect(() => {
     setState((prevState) => {
-      return { ...prevState, data: [props.data] };
+      let data = prevState.data[0];
+      data.x = props.data.x;
+      data.y = props.data.y;
+      return { ...prevState, data: [data] };
     });
   }, [props.data]);
 
@@ -29,20 +59,6 @@ function Chart(props) {
         onInitialized={(figure) => setState(figure)}
         onUpdate={(figure) => setState(figure)}
       />
-      {/* Recharts part - pretty but hard to work with, unintuative 
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={props.data} className={`${props.className}`}>
-          <Line
-            type="monotone"
-            dataKey="y"
-            stroke="#000"
-            isAnimationActive={false}
-          />
-          <CartesianGrid stroke="#ccc" />
-          <XAxis label={{value: "order", offset: -5, position: "insideBottom"}} dataKey="x" tick={getTicks(props.data)} />
-          <YAxis label={{value: `a [${props.unit}]`, position: "insideLeft", angle: -90}} />
-        </LineChart>
-      </ResponsiveContainer> */}
     </Card>
   );
 }
