@@ -1,33 +1,64 @@
-import React from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
+import React, { useState, useEffect } from "react";
+import Plot from "react-plotly.js";
 import Card from "./Card";
 
 import classes from "./Chart.module.css";
 
 function Chart(props) {
+  const [state, setState] = useState({
+    data: [
+      {
+        line: {
+          color: "#0064BE",
+          width: 1.5,
+        },
+      },
+    ],
+    layout: {
+      margin: {
+        l: 65,
+        r: 65,
+        t: 15,
+        b: 65,
+        pad: 4,
+      },
+      xaxis: {
+        title: {
+          text: "order",
+        },
+      },
+      yaxis: {
+        title: {
+          text: `a [${props.unit}]`,
+        },
+      },
+    },
+    frames: [],
+    config: {
+      responsive: true,
+    },
+  });
+
+  useEffect(() => {
+    setState((prevState) => {
+      let data = prevState.data[0];
+      data.x = props.data.x;
+      data.y = props.data.y;
+      return { ...prevState, data: [data] };
+    });
+  }, [props.data]);
+
   return (
     <Card className={classes.box}>
       <div className={classes.title}>{props.title}</div>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={props.data} className={`${props.className}`}>
-          <Line
-            type="monotone"
-            dataKey="y"
-            stroke="#000"
-            isAnimationActive={false}
-          />
-          <CartesianGrid stroke="#ccc" />
-          <XAxis label={{value: "order", offset: -5, position: "insideBottom"}} dataKey="x" />
-          <YAxis label={{value: `a [${props.unit}]`, position: "insideLeft", angle: -90}}/>
-        </LineChart>
-      </ResponsiveContainer>
+      <Plot
+        data={state.data}
+        layout={state.layout}
+        frames={state.frames}
+        config={state.config}
+        onInitialized={(figure) => setState(figure)}
+        onUpdate={(figure) => setState(figure)}
+      />
     </Card>
   );
 }

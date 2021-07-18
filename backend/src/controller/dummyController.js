@@ -30,18 +30,16 @@ function getOrderSpectrum(max_order, dOrder, orderAmplitudes, noiseAmplitude) {
 function getDummyData() {
   let dOrder = 0.2;
   let orderAmpl = [0.3, 1.8, 0.4, 1, 0.3, 0.5, 0.3, 0.2, 0.8, 0.2, 0.1];
-  let orderSpec = getOrderSpectrum(
-    orderAmpl.length - 1,
-    dOrder,
-    orderAmpl,
-    0.05
-  );
-  let x = 0;
-  let spec = [];
-  orderSpec.forEach((y) => {
-    spec.push({ x: x, y: y });
-    x = strip(x + dOrder);
-  });
+  let y = getOrderSpectrum(orderAmpl.length - 1, dOrder, orderAmpl, 0.05);
+
+  let currentX = 0;
+  let x = [];
+  for (let i = 0; i < y.length; i++) {
+    x.push(strip(currentX));
+    currentX += dOrder;
+  }
+
+  let spec = { x: x, y: y };
 
   return {
     freq: randomize(40),
