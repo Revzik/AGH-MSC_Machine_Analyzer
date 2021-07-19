@@ -10,10 +10,13 @@ app.get("/*", (req, res, next) => {
 });
 
 let dataController = null;
+let configController = null;
 if (dummy) {
-  dataController = require(__dirname + '/controller/dummyController');
-}
+  dataController = require(__dirname + '/controller/dummy/dataController');
+  configController = require(__dirname + '/controller/dummy/configController');
 
-app.use('/data', dataController);
+  app.use('/data', dataController);
+  app.use('/config', configController);
+}
 
 app.listen(port);
