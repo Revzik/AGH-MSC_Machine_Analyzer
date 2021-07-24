@@ -4,6 +4,7 @@
   "description": "GUI backend for Raspberry MQTT machine analyzer",
   "main": "src/index.js",
   "scripts": {
+    "start": "nodemon src/index.js --dummy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
