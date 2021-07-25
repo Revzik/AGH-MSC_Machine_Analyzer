@@ -13,14 +13,14 @@ router.get("/", (req, res) => {
   res.json(getData());
 });
 
-router.get("/start", (req, res) => {
+router.post("/start", (req, res) => {
   start(INTERVAL);
-  res.ok();
+  res.sendStatus(200);
 });
 
-router.get("/stop", (req, res) => {
+router.post("/stop", (req, res) => {
   stop();
-  res.ok();
+  res.sendStatus(200);
 });
 
 module.exports = router;

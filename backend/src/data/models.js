@@ -2,15 +2,15 @@ const log = require("#log/logger").createLogger(__filename);
 log.info("Setting up database models");
 
 const mongoose = require("mongoose");
-const { Schema, Model } = mongoose;
+const { Schema } = mongoose;
 
 const dataSchema = new Schema({
   label: String,
   frequency: Number,
   rms: Number,
   kurtosis: Number,
-  peak_factor: Number,
-  order_spectrum: {
+  peakFactor: Number,
+  orderSpectrum: {
     order0: Number,
     dOrder: Number,
     spectrum: [Number],
@@ -34,7 +34,10 @@ const configSchema = new Schema({
   averages: Number,
 });
 
+const Data = mongoose.model("Data", dataSchema);
+const Config = mongoose.model("Config", configSchema);
+
 module.exports = {
-  dataModel: new Model("Data", dataSchema),
-  configModel: new Model("Config", configSchema),
+  Data,
+  Config,
 };

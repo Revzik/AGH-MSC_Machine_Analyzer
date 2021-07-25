@@ -1,6 +1,8 @@
 const log = require("#log/logger").createLogger(__filename);
 log.info("Setting up data service");
 
+const { Data } = require("#data/models");
+
 let currentData = {
   frequency: 0,
   rms: 0,
@@ -20,6 +22,19 @@ function strip(number) {
 function setData(data) {
   log.debug("Received new data!");
   currentData = data;
+
+  if (capturing) {
+    log.info(`Saving ${label}...`);
+    const dataModel = new Data({ label: label, ...data });
+    dataModel.save((err) => {
+      if (err) {
+        log.error("Error while saving data!");
+        log.error(err);
+        return;
+      }
+      log.info("Sucessfully saved data!");
+    });
+  }
 }
 
 function getData() {
@@ -36,7 +51,22 @@ function getData() {
   return { ...currentData, orderSpectrum: { x: orders, y: spectrum } };
 }
 
+let capturing = false;
+let label = null;
+
+function startCapture(newLabel) {
+  capturing = true;
+  label = newLabel;
+}
+
+function stopCapture() {
+  capturing = false;
+  label = null;
+}
+
 module.exports = {
   setData,
   getData,
+  startCapture,
+  stopCapture,
 };
