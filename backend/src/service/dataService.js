@@ -1,3 +1,6 @@
+const log = require("#log/logger").createLogger(__filename);
+log.info("Setting up data service");
+
 let currentData = {
   frequency: 0,
   rms: 0,
@@ -15,20 +18,22 @@ function strip(number) {
 }
 
 function setData(data) {
-  currenntData = data;
+  log.debug("Received new data!");
+  currentData = data;
 }
 
 function getData() {
-  let { order0, dOrder, y } = currentData.orderSpectrum;
+  log.debug("Sending data");
+  let { order0, dOrder, spectrum } = currentData.orderSpectrum;
 
-  let currentX = order0;
-  let x = [];
-  for (let i = 0; i < y.length; i++) {
-    x.push(strip(currentX));
-    currentX += dOrder;
+  let currentOrder = order0;
+  let orders = [];
+  for (let i = 0; i < spectrum.length; i++) {
+    orders.push(strip(currentOrder));
+    currentOrder += dOrder;
   }
 
-  return { ...currentData, orderSpectrum: { x: x, y: y } };
+  return { ...currentData, orderSpectrum: { x: orders, y: spectrum } };
 }
 
 module.exports = {

@@ -1,5 +1,8 @@
 // This is used to simulate data being received from the broker
-const { setData } = require(__dirname + '../service/dataService');
+const log = require("#log/logger").createLogger(__filename);
+log.info("Setting up dummy MQTT subscriber");
+
+const { setData } = require("#service/dataService");
 
 function strip(number) {
   return parseFloat(parseFloat(number).toPrecision(7));
@@ -48,12 +51,15 @@ function getDummyData() {
 let timerId = null;
 
 function start(interval) {
+  log.info("Setting up dummy data generator");
   timerId = setInterval(() => {
+    log.debug("Generating data...");
     setData(getDummyData());
   }, interval);
 }
 
 function stop() {
+  log.info("Stopping dummy data generator");
   clearInterval(timerId);
 }
 

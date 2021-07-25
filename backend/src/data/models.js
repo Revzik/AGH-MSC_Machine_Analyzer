@@ -1,5 +1,7 @@
-const mongoose = require("mongoose");
+const log = require("#log/logger").createLogger(__filename);
+log.info("Setting up database models");
 
+const mongoose = require("mongoose");
 const { Schema, Model } = mongoose;
 
 const dataSchema = new Schema({
