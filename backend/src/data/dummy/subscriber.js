@@ -1,5 +1,8 @@
-const express = require("express");
-const router = express.Router();
+// This is used to simulate data being received from the broker
+const log = require("#log/logger").createLogger(__filename);
+log.info("Setting up dummy MQTT subscriber");
+
+const { setData } = require("#service/dataService");
 
 function strip(number) {
   return parseFloat(parseFloat(number).toPrecision(7));
@@ -32,26 +35,32 @@ function getDummyData() {
   let orderAmpl = [0.3, 1.8, 0.4, 1, 0.3, 0.5, 0.3, 0.2, 0.8, 0.2, 0.1];
   let y = getOrderSpectrum(orderAmpl.length - 1, dOrder, orderAmpl, 0.05);
 
-  let currentX = 0;
-  let x = [];
-  for (let i = 0; i < y.length; i++) {
-    x.push(strip(currentX));
-    currentX += dOrder;
-  }
-
-  let spec = { x: x, y: y };
-
   return {
-    freq: randomize(40),
+    frequency: randomize(40),
     rms: randomize(1.8),
-    kurt: randomize(3),
-    peak: randomize(0.7),
-    spec: spec,
+    kurtosis: randomize(3),
+    peakFactor: randomize(0.7),
+    orderSpectrum: {
+      order0: 0,
+      dOrder: dOrder,
+      spectrum: y,
+    },
   };
 }
 
-router.get("/", (req, res) => {
-  res.json(getDummyData());
-});
+let timerId = null;
 
-module.exports = router;
+function start(interval) {
+  log.info("Setting up dummy data generator");
+  timerId = setInterval(() => {
+    log.debug("Generating data...");
+    setData(getDummyData());
+  }, interval);
+}
+
+function stop() {
+  log.info("Stopping dummy data generator");
+  clearInterval(timerId);
+}
+
+module.exports = { start, stop };
