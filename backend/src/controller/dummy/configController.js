@@ -1,5 +1,11 @@
+const log = require("#log/logger").createLogger(__filename);
+log.info("Setting up config controller");
+
 const express = require("express");
 const router = express.Router();
+
+const { saveConfig, loadConfig } = require("#service/configService");
+const sendConfig = require("#data/dummy/configPublisher");
 
 const dropdownValues = {
   lowpass: {
@@ -12,29 +18,28 @@ const dropdownValues = {
   },
 };
 
-let settings = {
-  sensor: {
-    lowpass: 250,
-    range: 4,
-  },
-  tachoPoints: 1,
-  spectrum: {
-    dOrder: 0.1,
-    max_order: 10,
-  },
-  window: {
-    length: 1,
-    overlap: 0.5,
-  },
-  averages: 10,
-};
-
-router.get("/", (req, res) => {
-  res.json({ dropdown: dropdownValues, settings: settings });
+router.get("/dropdown", (req, res) => {
+  res.json(dropdownValues);
 });
 
-router.post("/", (req, res) => {
-  console.log(req.json());
-})
+router.get("/settings", (req, res) => {
+  loadConfig()
+    .then((config) => {
+      res.json(config);
+    })
+    .catch((err) => {
+      res.sendStatus(500);
+    });
+});
+
+router.post("/settings", (req, res) => {
+  saveConfig(req.body)
+    .then((config) => {
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      res.sendStatus(500);
+    });
+});
 
 module.exports = router;

@@ -1,6 +1,6 @@
 // This is used to simulate data being received from the broker
 const log = require("#log/logger").createLogger(__filename);
-log.info("Setting up dummy MQTT subscriber");
+log.info("Setting up dummy MQTT data subscriber");
 
 const { setData } = require("#service/dataService");
 
@@ -51,7 +51,7 @@ function getDummyData() {
 let timerId = null;
 
 function start(interval) {
-  log.info("Setting up dummy data generator");
+  log.info("Starting up dummy data generator");
   timerId = setInterval(() => {
     log.debug("Generating data...");
     setData(getDummyData());

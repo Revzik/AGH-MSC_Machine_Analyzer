@@ -4,7 +4,7 @@ log.info("Setting up dummy data controller");
 const express = require("express");
 const router = express.Router();
 const { getData } = require("#service/dataService");
-const { start, stop } = require("#data/dummy/subscriber");
+const { start, stop } = require("#data/dummy/dataSubscriber");
 
 const INTERVAL = 5000;
 start(INTERVAL);

@@ -19,19 +19,19 @@ const dataSchema = new Schema({
 
 const configSchema = new Schema({
   sensor: {
-    lowpass: Number,
-    range: Number,
+    lowpass: { type: Number, default: 250 },
+    range: { type: Number, default: 4 },
   },
-  tachoPoints: Number,
+  tachoPoints: { type: Number, default: 1 },
   spectrum: {
-    dOrder: Number,
-    max_order: Number,
+    dOrder: { type: Number, default: 0.1 },
+    max_order: { type: Number, default: 10 },
   },
   window: {
-    length: Number,
-    overlap: Number,
+    length: { type: Number, default: 1 },
+    overlap: { type: Number, default: 0.5 },
   },
-  averages: Number,
+  averages: { type: Number, default: 5 },
 });
 
 const Data = mongoose.model("Data", dataSchema);
