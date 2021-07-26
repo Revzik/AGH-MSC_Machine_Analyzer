@@ -7,7 +7,7 @@ function Header(props) {
   return (
     <header className={classes.header}>
       <h2>{props.title}</h2>
-      <Navigation />
+      <Navigation onSelect={props.onSelect}/>
     </header>
   );
 }
