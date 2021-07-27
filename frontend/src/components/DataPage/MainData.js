@@ -3,6 +3,7 @@ import DataPanel from "./DataPanel";
 import Card from "../UI/Card";
 import Loader from "../UI/Loader";
 import Button from "../UI/Button";
+import MainContainer from "../UI/MainContainer";
 
 import classes from "./MainData.module.css";
 
@@ -43,11 +44,17 @@ function MainData(props) {
   }
 
   return (
-    <main className={`${props.className} ${classes.main}`}>
+    <MainContainer>
       {content}
-      <Button className={classes.button} onClick={fetchDataHandler} onClickArgs={[false]}>Refresh</Button>
+      <Button
+        className={classes.button}
+        onClick={fetchDataHandler}
+        onClickArgs={[false]}
+      >
+        Refresh
+      </Button>
       {isLoading && <Loader />}
-    </main>
+    </MainContainer>
   );
 }
 

@@ -14,7 +14,7 @@ function NavButton(props) {
 
   return (
     <button
-      className={props.selected ? classes.default : classes.selected}
+      className={`${classes.default} ${props.selected && classes.selected}`}
       onClick={onClick}
     >
       {props.children}

@@ -1,15 +1,14 @@
 import Header from "./components/Header/Header";
 import MainData from "./components/DataPage/MainData";
+import MainConfig from "./components/ConfigPage/MainConfig";
 import React, { useState } from "react";
-
-import classes from './App.module.css';
 
 function App() {
   const [ currentPage, setCurrentPage ] = useState(null);
 
-  let content = <MainData className={classes.main} />;
+  let content = <MainData />;
   if (currentPage === 'config') {
-    content = <div className={classes.main}>Here I will create config page!</div>;
+    content = <MainConfig />;
   }
 
   function onNavigation(dest) {
@@ -18,7 +17,7 @@ function App() {
 
   return (
     <React.Fragment>
-      <Header title="Machine diagnostics" onSelect={onNavigation}/>
+      <Header title="Machine diagnostics" onSelect={onNavigation} currentPage={currentPage}/>
       {content}
     </React.Fragment>
   );

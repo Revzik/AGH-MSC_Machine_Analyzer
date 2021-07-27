@@ -1,0 +1,27 @@
+.param {
+  display: flex;
+}
+
+.param > * {
+  flex-basis: 100%;
+}
+
+.param input,
+.param select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.param input:focus,
+.param select:focus {
+  outline: none;
+  border-color: #FF9500;
+}
+
+.param select {
+  background-color: #fff;
+}
+
+.param select:focus {
+  background-color: #FF9500;
+}

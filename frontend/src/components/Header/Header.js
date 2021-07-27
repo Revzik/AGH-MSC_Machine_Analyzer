@@ -7,7 +7,7 @@ function Header(props) {
   return (
     <header className={classes.header}>
       <h2>{props.title}</h2>
-      <Navigation onSelect={props.onSelect}/>
+      <Navigation onSelect={props.onSelect} currentPage={props.currentPage}/>
     </header>
   );
 }
