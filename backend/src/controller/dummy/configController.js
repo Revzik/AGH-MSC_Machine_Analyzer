@@ -28,6 +28,7 @@ router.get("/settings", (req, res) => {
       res.json(config);
     })
     .catch((err) => {
+      console.error(err);
       res.sendStatus(500);
     });
 });
@@ -35,9 +36,11 @@ router.get("/settings", (req, res) => {
 router.post("/settings", (req, res) => {
   saveConfig(req.body)
     .then((config) => {
+      sendConfig(config);
       res.sendStatus(200);
     })
     .catch((err) => {
+      console.error(err);
       res.sendStatus(500);
     });
 });

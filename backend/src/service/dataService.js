@@ -20,7 +20,7 @@ function strip(number) {
 }
 
 function setData(data) {
-  log.debug("Received new data!");
+  log.debug("Received new data");
   currentData = data;
 
   if (capturing) {
@@ -32,7 +32,7 @@ function setData(data) {
         log.error(err);
         return;
       }
-      log.info("Sucessfully saved data!");
+      log.info("Data saved");
     });
   }
 }

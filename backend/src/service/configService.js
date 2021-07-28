@@ -1,8 +1,8 @@
 const log = require("#log/logger").createLogger(__filename);
 log.info("Setting up config service");
 
-const { Config } = require("#data/models");
-const defaultId = "def";
+const { Config, defaultId } = require("#data/models");
+const sendConfig = require("#data/dummy/configPublisher");
 
 function saveConfig(config) {
   return new Promise((resolve, reject) => {
@@ -37,4 +37,4 @@ function loadConfig() {
   });
 }
 
-module.exports = { saveConfig, loadConfig };
+module.exports = { saveConfig, loadConfig, defaultId };
