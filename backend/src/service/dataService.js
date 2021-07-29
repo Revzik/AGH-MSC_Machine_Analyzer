@@ -1,72 +1,50 @@
-const log = require("#log/logger").createLogger(__filename);
+const { container } = require("../di-setup");
+const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up data service");
 
-const { Data } = require("#data/models");
+class DataService {
+  constructor({ dataModel, dataMQTT }) {
+    this.dataModel = dataModel;
+    this.dataMQTT = dataMQTT;
 
-let currentData = {
-  frequency: 0,
-  rms: 0,
-  kurtosis: 0,
-  peakFactor: 0,
-  orderSpectrum: {
-    order0: 0,
-    dOrder: 0,
-    spectrum: [],
-  },
-};
+    this.capturing = false;
+    this.label = null;
+  }
 
-function strip(number) {
-  return parseFloat(parseFloat(number).toPrecision(7));
-}
+  strip(number) {
+    return parseFloat(parseFloat(number).toPrecision(7));
+  }
 
-function setData(data) {
-  log.debug("Received new data");
-  currentData = data;
+  getData() {
+    log.debug("Sending data");
+    let data = this.dataMQTT.getData()
+    let { order0, dOrder, spectrum } = data.orderSpectrum;
 
-  if (capturing) {
-    log.info(`Saving ${label}...`);
-    const dataModel = new Data({ label: label, ...data });
-    dataModel.save((err) => {
-      if (err) {
-        log.error("Error while saving data!");
-        log.error(err);
-        return;
-      }
-      log.info("Data saved");
-    });
+    let currentOrder = order0;
+    let orders = [];
+    for (let i = 0; i < spectrum.length; i++) {
+      orders.push(this.strip(currentOrder));
+      currentOrder += dOrder;
+    }
+
+    return { ...data, orderSpectrum: { x: orders, y: spectrum } };
+  }
+
+  startCapturing(newLabel) {
+    this.dataMQTT.startCapturing(newLabel);
+  }
+
+  stopCapturing() {
+    this.dataMQTT.stopCapturing();
+  }
+
+  startAcquisition() {
+    this.dataMQTT.startAcquisition();
+  }
+
+  stopAcquisition() {
+    this.dataMQTT.stopAcquisition();
   }
 }
 
-function getData() {
-  log.debug("Sending data");
-  let { order0, dOrder, spectrum } = currentData.orderSpectrum;
-
-  let currentOrder = order0;
-  let orders = [];
-  for (let i = 0; i < spectrum.length; i++) {
-    orders.push(strip(currentOrder));
-    currentOrder += dOrder;
-  }
-
-  return { ...currentData, orderSpectrum: { x: orders, y: spectrum } };
-}
-
-let capturing = false;
-let label = null;
-
-function startCapture(newLabel) {
-  capturing = true;
-  label = newLabel;
-}
-
-function stopCapture() {
-  capturing = false;
-  label = null;
-}
-
-module.exports = {
-  setData,
-  getData,
-  startCapture,
-  stopCapture,
-};
+module.exports = DataService;

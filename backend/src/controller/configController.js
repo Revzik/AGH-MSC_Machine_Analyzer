@@ -1,11 +1,11 @@
-const log = require("#log/logger").createLogger(__filename);
+const { container } = require("../di-setup");
+const log = container.resolve('logging').createLogger(__filename);
 log.info("Setting up config controller");
 
 const express = require("express");
 const router = express.Router();
 
-const { saveConfig, loadConfig } = require("#service/configService");
-const sendConfig = require("#data/dummy/configPublisher");
+const configService = container.resolve("configService");
 
 const dropdownValues = {
   lowpass: {
@@ -23,7 +23,7 @@ router.get("/dropdown", (req, res) => {
 });
 
 router.get("/settings", (req, res) => {
-  loadConfig()
+  configService.loadConfig()
     .then((config) => {
       res.json(config);
     })
@@ -34,9 +34,8 @@ router.get("/settings", (req, res) => {
 });
 
 router.post("/settings", (req, res) => {
-  saveConfig(req.body)
+  configService.saveConfig(req.body)
     .then((config) => {
-      sendConfig(config);
       res.sendStatus(200);
     })
     .catch((err) => {
