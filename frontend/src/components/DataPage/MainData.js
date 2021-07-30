@@ -20,13 +20,14 @@ function MainData(props) {
       const response = await fetch("http://localhost:4200/data");
 
       if (!response.ok) {
-        throw new Error("Not ok");
+        throw new Error(`Response status ${response.status}`);
       }
       const data = await response.json();
 
       setData(data);
     } catch (error) {
       setError(error.message);
+      setData(null);
     }
     setLoading(!isPeriodic && false);
   }
@@ -35,24 +36,37 @@ function MainData(props) {
     fetchDataHandler(false);
   }, []);
 
-  let content = <Card>No data</Card>;
+  const button = (
+    <Button
+      className={classes.button}
+      onClick={fetchDataHandler}
+      onClickArgs={[false]}
+    >
+      Refresh
+    </Button>
+  );
+
+  let content = (
+    <React.Fragment>
+      <Card>No data</Card>
+      {button}
+    </React.Fragment>
+  );
   if (data) {
     content = <DataPanel refreshAction={fetchDataHandler} data={data} />;
   }
   if (isError) {
-    content = <Card>Error: could not fetch data!</Card>;
+    content = (
+      <React.Fragment>
+        <Card>Error: could not fetch data!</Card>
+        {button}
+      </React.Fragment>
+    );
   }
 
   return (
     <MainContainer>
       {content}
-      <Button
-        className={classes.button}
-        onClick={fetchDataHandler}
-        onClickArgs={[false]}
-      >
-        Refresh
-      </Button>
       {isLoading && <Loader />}
     </MainContainer>
   );

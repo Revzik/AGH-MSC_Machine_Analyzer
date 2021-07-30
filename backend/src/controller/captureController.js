@@ -14,7 +14,7 @@ router.post("/start", (req, res) => {
     return;
   }
 
-  log.info(`Starting capture with ${req.body.label} label`);
+  log.info(`Starting capture with label: ${req.body.label}`);
   dataService.startCapturing(req.body.label);
   res.sendStatus(200);
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer, useState, useEffect } from "react";
 
 import MainContainer from "../UI/MainContainer";
 import Card from "../UI/Card";
@@ -7,6 +7,7 @@ import SimpleConfigParam from "./SimpleConfigParam";
 import SelectConfigParam from "./SelectConfigParam";
 
 import classes from "./MainConfig.module.css";
+import Loader from "../UI/Loader";
 
 function MainConfig(props) {
   const lowpassOptions = [
@@ -24,27 +25,48 @@ function MainConfig(props) {
     { value: 16, name: "16 g" },
   ];
 
+  let content = <Card>No data</Card>;
+  if (isError) {
+    content = <Card>Error: could not fetch data!</Card>;
+  } else {
+    content = (
+      <fieldset className={classes.fieldset} disabled={isAnyLoading}>
+        <form className={classes.form} onSubmit={applyConfigHandler}>
+          <Card className={classes.card} title="Sensor">
+            <SelectConfigParam
+              active={!isLoading}
+              name="Lowpass filter cutoff"
+              options={dropdownValues.lowpass}
+            />
+            <SelectConfigParam
+              active={!isLoading}
+              name="Sensor range"
+              options={dropdownValues.range}
+            />
+          </Card>
+          <Card className={classes.card} title="Order spectrum">
+            <SimpleConfigParam name="Order step" />
+            <SimpleConfigParam name="Maximum order" />
+          </Card>
+          <Card className={classes.card} title="Windowing">
+            <SimpleConfigParam name="Step" />
+            <SimpleConfigParam name="Overlap" />
+          </Card>
+          <Card className={classes.card} title="Others">
+            <SimpleConfigParam name="Tachometer points on the shaft" />
+            <SimpleConfigParam name="Number of averages" />
+          </Card>
+          <Button className={classes.button} type="submit">
+            Apply
+          </Button>
+        </form>
+      </fieldset>
+    );
+  }
+
   return (
     <MainContainer>
-      <form>
-        <Card className={classes.card} title="Sensor">
-          <SelectConfigParam name="Lowpass filter cutoff" options={lowpassOptions} />
-          <SelectConfigParam name="Sensor range" options={rangeOptions} />
-        </Card>
-        <Card className={classes.card} title="Order spectrum">
-          <SimpleConfigParam name="Order step" />
-          <SimpleConfigParam name="Maximum order" />
-        </Card>
-        <Card className={classes.card} title="Windowing">
-          <SimpleConfigParam name="Step" />
-          <SimpleConfigParam name="Overlap" />
-        </Card>
-        <Card className={classes.card} title="Others">
-          <SimpleConfigParam name="Tachometer points on the shaft" />
-          <SimpleConfigParam name="Number of averages" />
-        </Card>
-        <Button className={classes.button} type="submit">Apply</Button>
-      </form>
+      {content}
     </MainContainer>
   );
 }

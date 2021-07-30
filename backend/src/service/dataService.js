@@ -3,8 +3,7 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up data service");
 
 class DataService {
-  constructor({ dataModel, dataMQTT }) {
-    this.dataModel = dataModel;
+  constructor({ dataMQTT }) {
     this.dataMQTT = dataMQTT;
 
     this.capturing = false;
