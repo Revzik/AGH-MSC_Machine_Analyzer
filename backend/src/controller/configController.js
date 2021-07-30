@@ -7,7 +7,7 @@ const router = express.Router();
 
 const configService = container.resolve("configService");
 
-router.get("/settings", (req, res) => {
+router.get("/", (req, res) => {
   configService.loadConfig()
     .then((config) => {
       res.json(config);
@@ -18,7 +18,7 @@ router.get("/settings", (req, res) => {
     });
 });
 
-router.post("/settings", (req, res) => {
+router.post("/", (req, res) => {
   configService.saveConfig(req.body)
     .then((config) => {
       res.sendStatus(200);

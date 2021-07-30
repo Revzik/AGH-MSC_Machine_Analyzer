@@ -4,6 +4,10 @@ import classes from "./Button.module.css";
 
 function Button(props) {
   function onClick() {
+    if (!props.onClick) {
+      return;
+    }
+    
     if (props.onClickArgs) {
       props.onClick(...props.onClickArgs);
       return;

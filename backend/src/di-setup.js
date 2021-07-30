@@ -13,7 +13,7 @@ function setup(dummy) {
 
   const DataModel = require("./data/dataModel");
   const DataService = require("./service/dataService");
-  const { ConfigModel, defaultConfigId } = require("./data/configModel");
+  const { ConfigModel, defaultId } = require("./data/configModel");
   const ConfigService = require("./service/configService");
 
   let DataMQTT = undefined;
@@ -29,7 +29,7 @@ function setup(dummy) {
     dataMQTT: awilix.asClass(DataMQTT, { lifetime: awilix.Lifetime.SINGLETON }),
     dataService: awilix.asClass(DataService),
     configModel: awilix.asValue(ConfigModel),
-    configId: awilix.asValue(defaultConfigId),
+    configId: awilix.asValue(defaultId),
     configMQTT: awilix.asClass(ConfigMQTT, { lifetime: awilix.Lifetime.SINGLETON }),
     configService: awilix.asClass(ConfigService),
   });

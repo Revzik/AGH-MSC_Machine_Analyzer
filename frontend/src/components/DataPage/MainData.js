@@ -8,7 +8,7 @@ import MainContainer from "../UI/MainContainer";
 import classes from "./MainData.module.css";
 
 function MainData(props) {
-  const [isError, setError] = useState(null);
+  const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
 
@@ -55,7 +55,7 @@ function MainData(props) {
   if (data) {
     content = <DataPanel refreshAction={fetchDataHandler} data={data} />;
   }
-  if (isError) {
+  if (error) {
     content = (
       <React.Fragment>
         <Card>Error: could not fetch data!</Card>

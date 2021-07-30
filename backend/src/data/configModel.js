@@ -1,5 +1,5 @@
 const { container } = require("../di-setup");
-const log = container.resolve('logging').createLogger(__filename);
+const log = container.resolve("logging").createLogger(__filename);
 
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
@@ -14,7 +14,7 @@ const configSchema = new Schema({
   tachoPoints: { type: Number, default: 1 },
   spectrum: {
     dOrder: { type: Number, default: 0.1 },
-    max_order: { type: Number, default: 10 },
+    maxOrder: { type: Number, default: 10 },
   },
   window: {
     length: { type: Number, default: 1 },
@@ -24,6 +24,18 @@ const configSchema = new Schema({
 });
 
 const ConfigModel = mongoose.model("Config", configSchema);
+
+function createDefaultConfig() {
+  const defaultConfig = new ConfigModel({ _id: defaultId });
+  defaultConfig.save((err) => {
+    if (err) {
+      log.error("Error while inserting default config!");
+      log.error(err);
+      return;
+    }
+    log.info("Generated default config");
+  });
+}
 
 ConfigModel.exists({ _id: defaultId }, (err, exists) => {
   if (err) {
@@ -35,15 +47,8 @@ ConfigModel.exists({ _id: defaultId }, (err, exists) => {
     log.info("Config already exists");
     return;
   }
-  const defaultConfig = new Config({ _id: defaultId });
-  defaultConfig.save((err) => {
-    if (err) {
-      log.error("Error while inserting default config!");
-      log.error(err);
-      return;
-    }
-    log.info("Generated default config");
-  });
+
+  createDefaultConfig();
 });
 
 module.exports = {
