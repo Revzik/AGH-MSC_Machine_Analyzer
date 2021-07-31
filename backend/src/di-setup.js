@@ -15,6 +15,7 @@ function setup(dummy) {
   const DataService = require("./service/dataService");
   const { ConfigModel, defaultId } = require("./data/configModel");
   const ConfigService = require("./service/configService");
+  const AcquisitionService = require("./service/acquisitionService");
 
   let DataMQTT = undefined;
   let ConfigMQTT = undefined;
@@ -26,12 +27,17 @@ function setup(dummy) {
 
   container.register({
     dataModel: awilix.asValue(DataModel),
-    dataMQTT: awilix.asClass(DataMQTT, { lifetime: awilix.Lifetime.SINGLETON }),
+    dataMQTT: awilix.asClass(DataMQTT, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
     dataService: awilix.asClass(DataService),
     configModel: awilix.asValue(ConfigModel),
     configId: awilix.asValue(defaultId),
-    configMQTT: awilix.asClass(ConfigMQTT, { lifetime: awilix.Lifetime.SINGLETON }),
+    configMQTT: awilix.asClass(ConfigMQTT, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
     configService: awilix.asClass(ConfigService),
+    acquisitionService: awilix.asClass(AcquisitionService),
   });
 }
 

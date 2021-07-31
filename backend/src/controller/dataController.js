@@ -11,14 +11,4 @@ router.get("/", (req, res) => {
   res.json(dataService.getData());
 });
 
-router.post("/start", (req, res) => {
-  dataService.startAcquisition();
-  res.sendStatus(200);
-});
-
-router.post("/stop", (req, res) => {
-  dataService.stopAcquisition();
-  res.sendStatus(200);
-});
-
 module.exports = router;
