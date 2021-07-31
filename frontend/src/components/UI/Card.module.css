@@ -5,3 +5,8 @@
   margin: 1rem;
   padding: 0.5rem;
 }
+
+.title {
+  font-weight: bold;
+  text-align: center;
+}

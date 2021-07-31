@@ -1,16 +1,29 @@
 import React from "react";
+import NavButton from "../UI/NavButton";
 
 import classes from "./Navigation.module.css";
 
-function Navigation() {
+function Navigation(props) {
   return (
     <nav className={classes.navi}>
       <ul>
         <li>
-          <a href="/">Data</a>
+          <NavButton
+            onClick={props.onSelect}
+            selected={!props.currentPage || props.currentPage === "data"}
+            onClickArgs={["data"]}
+          >
+            Data
+          </NavButton>
         </li>
         <li>
-          <a href="/">Config</a>
+          <NavButton
+            onClick={props.onSelect}
+            selected={props.currentPage === "config"}
+            onClickArgs={["config"]}
+          >
+            Config
+          </NavButton>
         </li>
       </ul>
     </nav>

@@ -1,19 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 
 import SimpleParam from "./SimpleParam";
 import Chart from "../UI/Chart";
 
 function DataPanel(props) {
-  const refresh = () => {
+  const refresh = useCallback(() => {
     props.refreshAction(true);
-  };
+  }, [props]);
 
   useEffect(() => {
     const interval = setInterval(refresh, 2000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [refresh]);
 
   return (
     <React.Fragment>

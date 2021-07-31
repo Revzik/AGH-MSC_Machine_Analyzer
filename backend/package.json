@@ -5,16 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.js --dummy",
-    "postinstall": "link-module-alias",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "_moduleAliases": {
-    "~root": ".",
-    "#src": "src",
-    "#controller": "src/controller",
-    "#service": "src/service",
-    "#data": "src/data",
-    "#log": "src/log"
   },
   "repository": {
     "type": "git",
@@ -27,9 +18,11 @@
   },
   "homepage": "https://github.com/Revzik/AGH_MSC_Web_GUI#readme",
   "dependencies": {
+    "awilix": "^4.3.4",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
-    "link-module-alias": "^1.2.0",
     "mongoose": "^5.13.2",
+    "tslib": "^2.3.0",
     "winston": "^3.3.3"
   }
 }

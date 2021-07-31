@@ -49,9 +49,8 @@ function Chart(props) {
   }, [props.data]);
 
   return (
-    <Card className={classes.box}>
-      <div className={classes.title}>{props.title}</div>
-      <Plot
+    <Card className={classes.chart} title={props.title}>
+      <Plot 
         data={state.data}
         layout={state.layout}
         frames={state.frames}

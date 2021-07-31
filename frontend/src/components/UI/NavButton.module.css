@@ -1,0 +1,34 @@
+.active,
+.default {
+  border: 1px solid #0064BE;
+  background: #0064BE;
+  color: white;
+  padding: 0.5rem 2rem;
+  cursor: pointer;
+  border-radius: 30px;
+}
+
+.default:hover,
+.default:active {
+  background: #3890DF;
+  border-color: #3890DF;
+}
+
+.default:focus {
+  outline: none;
+}
+
+.selected {
+  background: #3890DF;
+  border-color: #3890DF;
+}
+
+button:disabled,
+button:focus:disabled,
+button:hover:disabled,
+button:active:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  color: #666666;
+  cursor: not-allowed;
+}

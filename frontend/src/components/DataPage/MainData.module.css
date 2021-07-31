@@ -1,13 +1,3 @@
-.main {
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-}
-
 .button {
   margin: auto;
 }
