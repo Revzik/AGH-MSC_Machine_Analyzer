@@ -7,20 +7,14 @@ const { Schema } = mongoose;
 const defaultId = 1;
 const configSchema = new Schema({
   _id: { type: Number },
-  sensor: {
-    lowpass: { type: Number, default: 250 },
-    range: { type: Number, default: 4 },
-  },
+  lowpass: { type: Number, default: 250 },
+  range: { type: Number, default: 4 },
+  dOrder: { type: Number, default: 0.1 },
+  maxOrder: { type: Number, default: 10 },
+  windowLength: { type: Number, default: 200 },
+  windowOverlap: { type: Number, default: 50 },
   tachoPoints: { type: Number, default: 1 },
-  spectrum: {
-    dOrder: { type: Number, default: 0.1 },
-    maxOrder: { type: Number, default: 10 },
-  },
-  window: {
-    length: { type: Number, default: 1 },
-    overlap: { type: Number, default: 0.5 },
-  },
-  averages: { type: Number, default: 5 },
+  averages: { type: Number, default: 10 },
 });
 
 const ConfigModel = mongoose.model("Config", configSchema);

@@ -17,7 +17,7 @@ function MainData(props) {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:4200/data");
+      const response = await fetch("http://localhost:4200/data/");
 
       if (!response.ok) {
         throw new Error(`Response status ${response.status}`);

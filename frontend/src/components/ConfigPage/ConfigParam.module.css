@@ -25,3 +25,8 @@
 .param select:focus {
   background-color: #FF9500;
 }
+
+.invalid input {
+  border-color: #D00;
+  background-color: #D99;
+}

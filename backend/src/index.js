@@ -5,7 +5,7 @@ app.use(express.json());
 const dummy = process.argv.slice(2).includes("--dummy");
 const { container, setup } = require("./di-setup");
 setup(dummy);
-const log = container.resolve('logging').createLogger(__filename);
+const log = container.resolve("logging").createLogger(__filename);
 
 log.info("Connecting to database...");
 const MongoClient = require("mongoose");
@@ -23,11 +23,13 @@ MongoClient.connect("mongodb://localhost:27017/analyzer", {
 
 const port = process.env.PORT || 4200;
 
-log.info("Setting Access-Controll...");
-app.get("/*", (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  next();
-});
+log.info("Setting up CORS");
+const cors = require("cors");
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 log.info("Setting up controllers...");
 app.use("/capture", require("./controller/captureController"));

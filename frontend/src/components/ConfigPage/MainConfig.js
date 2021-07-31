@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import MainContainer from "../UI/MainContainer";
 import Card from "../UI/Card";
@@ -24,31 +24,76 @@ const rangeOptions = [
   { value: 16, name: "16 g" },
 ];
 
-function settingsReducer(prevState, newSetting) {
-  return { ...prevState, ...newSetting };
-}
-
 function MainConfig(props) {
   const [error, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [settings, settingsDispatch] = useReducer(settingsReducer, {});
+  const [settings, setSettings] = useState({
+    lowpass: "",
+    range: "",
+    dOrder: "",
+    maxOrder: "",
+    windowLength: "",
+    windowOverlap: "",
+    tachoPoints: "",
+    averages: "",
+  });
+  const [validity, setValidity] = useState({
+    dOrder: true,
+    maxOrder: true,
+    windowLength: true,
+    windowOverlap: true,
+    tachoPoints: true,
+    averages: true,
+  });
+  const [isValid, setValid] = useState(true);
+
+  function onChangeHandler(key, value, validity) {
+    setSettings((prevState) => {
+      return { ...prevState, [key]: value };
+    });
+    if (typeof validity !== "undefined")
+      setValidity((prevState) => {
+        return { ...prevState, [key]: validity };
+      });
+  }
 
   async function fetchDataHandler() {
     setError(null);
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4200/config/", {
-        method: "GET",
-      });
+      const response = await fetch("http://localhost:4200/config/");
 
       if (!response.ok) {
         throw new Error(`Could not fetch config! ${response}`);
       }
 
       const config = await response.json();
-      console.log(`Settings body: ${JSON.stringify(config)}`);
-      settingsDispatch(config);
+      setSettings(config);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function applyConfigHandler(event) {
+    event.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:4200/config/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Could not fetch config! ${response}`);
+      }
     } catch (err) {
       setError(err.message);
       console.error(err);
@@ -61,13 +106,16 @@ function MainConfig(props) {
     fetchDataHandler();
   }, []);
 
-  function applyConfigHandler(event) {
-    event.preventDefault();
-    console.log("Settings:");
-    console.log(settings);
-    console.log("Event:");
-    console.log(event);
-  }
+  useEffect(() => {
+    console.log("Checking validity");
+    console.log(JSON.stringify(validity));
+    const isEverythingValid = Object.values(validity).every(
+      (value) => value === true
+    );
+    console.log(isEverythingValid);
+
+    setValid(isEverythingValid);
+  }, [validity]);
 
   let content = (
     <fieldset className={classes.fieldset} disabled={isLoading}>
@@ -77,52 +125,72 @@ function MainConfig(props) {
             name="lowpass"
             description="Lowpass filter cutoff"
             options={lowpassOptions}
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.lowpass}
           />
           <SelectConfigParam
             name="range"
             description="Sensor range"
             options={rangeOptions}
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.range}
           />
         </Card>
         <Card className={classes.card} title="Order spectrum">
           <SimpleConfigParam
             name="dOrder"
+            type="float:positive:nonZero"
             description="Step"
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.dOrder}
+            isValid={validity.dOrder}
           />
           <SimpleConfigParam
             name="maxOrder"
+            type="float:positive:nonZero"
             description="Maximum order"
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.maxOrder}
+            isValid={validity.maxOrder}
           />
         </Card>
         <Card className={classes.card} title="Windowing">
           <SimpleConfigParam
             name="windowLength"
-            description="Length"
-            changeHandler={settingsDispatch}
+            type="int:positive:nonZero"
+            description="Length [ms]"
+            changeHandler={onChangeHandler}
+            value={settings.windowLength}
+            isValid={validity.windowLength}
           />
           <SimpleConfigParam
             name="windowOverlap"
-            description="Overlap"
-            changeHandler={settingsDispatch}
+            type="float:between,0,100"
+            description="Overlap [%]"
+            changeHandler={onChangeHandler}
+            value={settings.windowOverlap}
+            isValid={validity.windowOverlap}
           />
         </Card>
         <Card className={classes.card} title="Others">
           <SimpleConfigParam
             name="tachoPoints"
+            type="int:positive:nonZero"
             description="Tachometer points on the shaft"
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.tachoPoints}
+            isValid={validity.tachoPoints}
           />
           <SimpleConfigParam
             name="averages"
+            type="int:positive:nonZero"
             description="Number of averages"
-            changeHandler={settingsDispatch}
+            changeHandler={onChangeHandler}
+            value={settings.averages}
+            isValid={validity.averages}
           />
         </Card>
-        <Button className={classes.button} type="submit">
+        <Button className={classes.button} type="submit" disabled={!isValid}>
           Apply
         </Button>
       </form>
