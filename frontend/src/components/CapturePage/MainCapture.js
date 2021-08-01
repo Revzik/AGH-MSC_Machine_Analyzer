@@ -3,19 +3,21 @@ import React, { useState, useEffect } from "react";
 import MainContainer from "../UI/MainContainer";
 import Button from "../UI/Button";
 import Card from "../UI/Card";
+import Loader from "../UI/Loader";
 import LabelModal from "./LabelModal";
 
 import classes from "./MainCapture.module.css";
 
 function MainCapture(props) {
-  const [acquiring, setAcquiring] = useState(false);
-  const [capturing, setCapturing] = useState(false);
+  const [isAcquiring, setAcquiring] = useState(false);
+  const [isCapturing, setCapturing] = useState(false);
   const [label, setLabel] = useState("");
-  const [settingLabel, setSettingLabel] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [isValid, setValid] = useState(true);
 
   function toggleAcquisition() {
-    if (acquiring) {
+    if (isAcquiring) {
       post("stop");
     } else {
       post("start");
@@ -24,11 +26,12 @@ function MainCapture(props) {
   }
 
   function toggleCapture() {
-    if (capturing) {
+    if (isCapturing) {
       post("capture/stop");
     } else {
-      post("capture/start");
+      setShowModal(true);
     }
+    fetchData();
   }
 
   async function post(path) {
@@ -45,6 +48,31 @@ function MainCapture(props) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function startCapture() {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:4200/acquire/capture/start`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ label: label }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      fetchData();
     }
   }
 
@@ -68,33 +96,69 @@ function MainCapture(props) {
     }
   }
 
+  function labelChangedHandler(newLabel) {
+    setValid(true);
+    setLabel(newLabel);
+  }
+
+  function labelConfirmHandler() {
+    if (validateLabel()) {
+      startCapture();
+      setShowModal(false);
+    }
+  }
+
+  function labelCancelHandler() {
+    setValid(true);
+    setShowModal(false);
+  }
+
+  function validateLabel() {
+    const valid =
+      label &&
+      label.length > 0 &&
+      label.length < 32 &&
+      label.match("^[A-Za-z0-9_]+$");
+    setValid(valid);
+    return valid;
+  }
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  const labelModal = <LabelModal title="Set label"/>
+  const labelModal = (
+    <LabelModal
+      title="Set label"
+      message="Label:"
+      valid={isValid}
+      onChange={labelChangedHandler}
+      onConfirm={labelConfirmHandler}
+      onCancel={labelCancelHandler}
+    />
+  );
 
   const acquisitionCard = (
     <Card className={classes.card}>
       <div className={classes.status}>
-        {acquiring ? "Sensor acquiring" : "Sensor not acquiring"}
+        {`Data acquisition: ${isAcquiring ? "on" : "off"}`}
       </div>
       <Button onClick={toggleAcquisition}>
-        {acquiring ? "Stop acquisition" : "Start acquisition"}
+        {isAcquiring ? "Stop acquisition" : "Start acquisition"}
       </Button>
     </Card>
   );
 
   let captureCard = null;
-  if (acquiring) {
+  if (isAcquiring) {
     captureCard = (
       <Card className={classes.card}>
         <div className={classes.status}>
-          {capturing ? "Data capturing" : "Data not capturing"}
+          {`Data capture: ${isCapturing ? "on" : "off"}`}
         </div>
-        {capturing && <div>Label: {label}</div>}
+        {isCapturing && <div>Label: {label}</div>}
         <Button onClick={toggleCapture}>
-          {capturing ? "Stop capture" : "Start capture"}
+          {isCapturing ? "Stop capture" : "Start capture"}
         </Button>
       </Card>
     );
@@ -102,9 +166,10 @@ function MainCapture(props) {
 
   return (
     <MainContainer>
-      {settingLabel && labelModal}
+      {showModal && labelModal}
       {acquisitionCard}
       {captureCard}
+      {isLoading && <Loader />}
     </MainContainer>
   );
 }

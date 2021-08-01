@@ -10,6 +10,7 @@
 .header {
   background: #0064BE;
   padding: 1rem;
+  margin: -0.5rem
 }
 
 .header h2 {
@@ -18,13 +19,33 @@
 }
 
 .content {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 1rem;
 }
 
 .actions {
   padding: 1rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.input {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FF9500;
+}
+
+.invalid {
+  border-color: #D00;
+  background-color: #D99;
 }
 
 @media (min-width: 768px) {

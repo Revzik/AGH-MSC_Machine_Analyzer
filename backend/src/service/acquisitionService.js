@@ -54,6 +54,9 @@ class AcquisitionService {
   }
 
   stopAcquisition() {
+    if (this.capturing) {
+      this.stopCapturing()
+    }
     this.dataMQTT
       .stopAcquisition()
       .then(() => {
