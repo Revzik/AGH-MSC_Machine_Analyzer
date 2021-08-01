@@ -32,7 +32,7 @@ app.use(
 );
 
 log.info("Setting up controllers...");
-app.use("/capture", require("./controller/captureController"));
+app.use("/acquire", require("./controller/acquisitionController"));
 app.use("/data", require("./controller/dataController"));
 app.use("/config", require("./controller/configController"));
 log.info("Controllers set!");

@@ -9,9 +9,6 @@ function strip(number) {
 class DataService {
   constructor({ dataMQTT }) {
     this.dataMQTT = dataMQTT;
-
-    this.capturing = false;
-    this.label = null;
   }
 
   getData() {
@@ -27,22 +24,6 @@ class DataService {
     }
 
     return { ...data, orderSpectrum: { x: orders, y: spectrum } };
-  }
-
-  startCapturing(newLabel) {
-    this.dataMQTT.startCapturing(newLabel);
-  }
-
-  stopCapturing() {
-    this.dataMQTT.stopCapturing();
-  }
-
-  startAcquisition() {
-    this.dataMQTT.startAcquisition();
-  }
-
-  stopAcquisition() {
-    this.dataMQTT.stopAcquisition();
   }
 }
 

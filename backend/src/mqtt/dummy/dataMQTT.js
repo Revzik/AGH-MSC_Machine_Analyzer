@@ -66,24 +66,32 @@ class DataMQTT {
         spectrum: [],
       },
     };
-
-    this.startAcquisition();
   }
 
   startAcquisition() {
-    log.info("Starting up dummy data generator");
-    this.timerId = setInterval(() => {
-      log.debug("Generating data...");
-      this.currentData = getDummyData();
-      if (this.capturing) {
-        this.saveData();
-      }
-    }, 5000);
+    return new Promise((resolve, reject) => {
+      log.info("Starting up dummy data generator");
+
+      this.timerId = setInterval(() => {
+        log.debug("Generating data...");
+        this.currentData = getDummyData();
+
+        if (this.capturing) {
+          this.saveData();
+        }
+      }, 5000);
+
+      resolve();
+    });
   }
 
   saveData() {
     log.info(`Saving ${this.label}...`);
-    const newData = new this.dataModel({ label: this.label, ...this.currentData });
+
+    const newData = new this.dataModel({
+      label: this.label,
+      ...this.currentData,
+    });
     newData.save((err) => {
       if (err) {
         log.error("Error while saving data!");
@@ -99,18 +107,32 @@ class DataMQTT {
   }
 
   stopAcquisition() {
-    log.info("Stopping dummy data generator");
-    clearInterval(timerId);
+    return new Promise((resolve, reject) => {
+      log.info("Stopping dummy data generator");
+
+      clearInterval(this.timerId);
+      resolve();
+    });
   }
 
   startCapturing(newLabel) {
-    this.label = newLabel;
-    this.capturing = true;
+    return new Promise((resolve, reject) => {
+      log.info(`Starting dummy capture with label: ${newLabel}`);
+
+      this.label = newLabel;
+      this.capturing = true;
+      resolve();
+    });
   }
 
   stopCapturing() {
-    this.label = "";
-    this.capturing = false;
+    return new Promise((resolve, reject) => {
+      log.info("Stopping dummy capture");
+
+      this.label = "";
+      this.capturing = false;
+      resolve();
+    });
   }
 }
 

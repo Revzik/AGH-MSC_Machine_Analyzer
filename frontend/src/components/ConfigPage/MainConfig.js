@@ -107,12 +107,9 @@ function MainConfig(props) {
   }, []);
 
   useEffect(() => {
-    console.log("Checking validity");
-    console.log(JSON.stringify(validity));
     const isEverythingValid = Object.values(validity).every(
       (value) => value === true
     );
-    console.log(isEverythingValid);
 
     setValid(isEverythingValid);
   }, [validity]);

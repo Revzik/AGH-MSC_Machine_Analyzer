@@ -4,27 +4,28 @@ import NavButton from "../UI/NavButton";
 import classes from "./Navigation.module.css";
 
 function Navigation(props) {
+  const pages = [
+    { title: "Data", key: "data" },
+    { title: "Capture", key: "capture" },
+    { title: "Config", key: "config" },
+  ];
+
   return (
     <nav className={classes.navi}>
       <ul>
-        <li>
-          <NavButton
-            onClick={props.onSelect}
-            selected={!props.currentPage || props.currentPage === "data"}
-            onClickArgs={["data"]}
-          >
-            Data
-          </NavButton>
-        </li>
-        <li>
-          <NavButton
-            onClick={props.onSelect}
-            selected={props.currentPage === "config"}
-            onClickArgs={["config"]}
-          >
-            Config
-          </NavButton>
-        </li>
+        {pages.map((page) => {
+          return (
+            <li key={page.key}>
+              <NavButton
+                onClick={props.onSelect}
+                selected={props.currentPage === page.key}
+                onClickArgs={[page.key]}
+              >
+                {page.title}
+              </NavButton>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
