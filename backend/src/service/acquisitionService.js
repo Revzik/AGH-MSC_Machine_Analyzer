@@ -3,8 +3,8 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up acquisition service");
 
 class AcquisitionService {
-  constructor({ dataMQTT }) {
-    this.dataMQTT = dataMQTT;
+  constructor({ dataMqtt }) {
+    this.dataMqtt = dataMqtt;
 
     this.acquiring = false;
     this.capturing = false;
@@ -20,7 +20,7 @@ class AcquisitionService {
   }
 
   startCapturing(newLabel) {
-    this.dataMQTT
+    this.dataMqtt
       .startCapturing(newLabel)
       .then(() => {
         this.capturing = true;
@@ -32,7 +32,7 @@ class AcquisitionService {
   }
 
   stopCapturing() {
-    this.dataMQTT
+    this.dataMqtt
       .stopCapturing()
       .then(() => {
         this.capturing = false;
@@ -43,7 +43,7 @@ class AcquisitionService {
   }
 
   startAcquisition() {
-    this.dataMQTT
+    this.dataMqtt
       .startAcquisition()
       .then(() => {
         this.acquiring = true;
@@ -57,7 +57,7 @@ class AcquisitionService {
     if (this.capturing) {
       this.stopCapturing()
     }
-    this.dataMQTT
+    this.dataMqtt
       .stopAcquisition()
       .then(() => {
         this.acquiring = false;

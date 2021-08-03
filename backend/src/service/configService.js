@@ -3,15 +3,15 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up config service");
 
 class ConfigService {
-  constructor({ configModel, configId, configMQTT }) {
+  constructor({ configModel, configId, configMqtt }) {
     this.configModel = configModel;
     this.configId = configId;
-    this.configMQTT = configMQTT;
+    this.configMqtt = configMqtt;
   }
 
   saveConfig(config) {
     log.info("Saving config to the database");
-    this.configMQTT.publishConfig(config);
+    this.configMqtt.publishConfig(config);
 
     return new Promise((resolve, reject) => {
       this.configModel.updateOne(

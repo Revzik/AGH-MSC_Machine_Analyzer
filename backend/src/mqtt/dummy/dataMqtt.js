@@ -46,7 +46,7 @@ function getDummyData() {
   };
 }
 
-class DataMQTT {
+class DataMqtt {
   constructor({ dataModel }) {
     this.dataModel = dataModel;
 
@@ -136,4 +136,4 @@ class DataMQTT {
   }
 }
 
-module.exports = DataMQTT;
+module.exports = DataMqtt;

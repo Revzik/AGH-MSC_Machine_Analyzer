@@ -17,27 +17,33 @@ function setup(dummy) {
   const ConfigService = require("./service/configService");
   const AcquisitionService = require("./service/acquisitionService");
 
-  let DataMQTT = undefined;
-  let ConfigMQTT = undefined;
+  let DataMqtt = undefined;
+  let ConfigMqtt = undefined;
   if (dummy) {
     log.info("App working in dummy mode");
-    DataMQTT = require("./mqtt/dummy/dataMQTT");
-    ConfigMQTT = require("./mqtt/dummy/configMQTT");
+    DataMqtt = require("./mqtt/dummy/dataMqtt");
+    ConfigMqtt = require("./mqtt/dummy/configMqtt");
+  } else {
+    DataMqtt = require("./mqtt/dataMqtt");
+    ConfigMqtt = require("./mqtt/configMqtt");
   }
+
+  const MqttDispatcher = require("./mqtt/mqttDispatcher");
 
   container.register({
     dataModel: awilix.asValue(DataModel),
-    dataMQTT: awilix.asClass(DataMQTT, {
+    dataMqtt: awilix.asClass(DataMqtt, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     dataService: awilix.asClass(DataService),
     configModel: awilix.asValue(ConfigModel),
     configId: awilix.asValue(defaultId),
-    configMQTT: awilix.asClass(ConfigMQTT, {
+    configMqtt: awilix.asClass(ConfigMqtt, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     configService: awilix.asClass(ConfigService),
     acquisitionService: awilix.asClass(AcquisitionService),
+    mqttDispatcher: awilix.asClass(MqttDispatcher),
   });
 }
 

@@ -21,6 +21,13 @@ MongoClient.connect("mongodb://localhost:27017/analyzer", {
     log.error(err);
   });
 
+if (!dummy) {
+  log.info("Connecting to the MQTT broker...");
+  const mqtt = require("mqtt");
+  const mqttClient = mqtt.connect("mqtt://localhost:1883");
+  mqttClient.on("connect", () => {});
+}
+
 const port = process.env.PORT || 4200;
 
 log.info("Setting up CORS");
