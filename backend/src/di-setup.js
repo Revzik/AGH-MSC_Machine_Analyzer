@@ -11,23 +11,14 @@ function setup(dummy) {
   log.info("Registering dependencies...");
   container.register({ logging: awilix.asClass(Logging) });
 
+  const DataMqtt = require("./mqtt/dataMqtt");
   const DataModel = require("./data/dataModel");
   const DataService = require("./service/dataService");
+  const ConfigMqtt = require("./mqtt/configMqtt");
   const { ConfigModel, defaultId } = require("./data/configModel");
   const ConfigService = require("./service/configService");
+  const AcquisitionMqtt = require("./mqtt/acquisitionMqtt");
   const AcquisitionService = require("./service/acquisitionService");
-
-  let DataMqtt = undefined;
-  let ConfigMqtt = undefined;
-  if (dummy) {
-    log.info("App working in dummy mode");
-    DataMqtt = require("./mqtt/dummy/dataMqtt");
-    ConfigMqtt = require("./mqtt/dummy/configMqtt");
-  } else {
-    DataMqtt = require("./mqtt/dataMqtt");
-    ConfigMqtt = require("./mqtt/configMqtt");
-  }
-
   const MqttDispatcher = require("./mqtt/mqttDispatcher");
 
   container.register({
@@ -42,9 +33,22 @@ function setup(dummy) {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     configService: awilix.asClass(ConfigService),
+    acquisitionMqtt: awilix.asClass(AcquisitionMqtt),
     acquisitionService: awilix.asClass(AcquisitionService),
     mqttDispatcher: awilix.asClass(MqttDispatcher),
   });
+
+  if (dummy) {
+    const DummyDataMqtt = require("./mqtt/dummy/dummyDataMqtt");
+    const DummyConfigMqtt = require("./mqtt/dummy/dummyConfigMqtt");
+    const DummyAcquisitionMqtt = require("./mqtt/dummy/dummyAcquisitionMqtt");
+
+    container.register({
+      dummyData: awilix.asClass(DummyDataMqtt),
+      dummyConfig: awilix.asClass(DummyConfigMqtt),
+      dummyAcquisition: awilix.asClass(DummyAcquisitionMqtt),
+    })
+  }
 }
 
 module.exports = { container, setup };

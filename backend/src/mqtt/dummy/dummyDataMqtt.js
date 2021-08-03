@@ -1,6 +1,6 @@
 const { container } = require("../../di-setup");
 const log = container.resolve("logging").createLogger(__filename);
-log.info("Setting up dummy MQTT data subscriber");
+log.info("Setting up dummy MQTT data publisher");
 
 function strip(number) {
   return parseFloat(parseFloat(number).toPrecision(7));
@@ -46,7 +46,7 @@ function getDummyData() {
   };
 }
 
-class DataMqtt {
+class DummyDataMqtt {
   constructor({ dataModel }) {
     this.dataModel = dataModel;
 
@@ -136,4 +136,4 @@ class DataMqtt {
   }
 }
 
-module.exports = DataMqtt;
+module.exports = DummyDataMqtt;

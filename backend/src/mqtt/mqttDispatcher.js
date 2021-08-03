@@ -3,24 +3,39 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up MQTT dispatcher");
 
 class MqttDispatcher {
-  constructor({ configMqtt, dataMqtt }) {
-    this.configMqtt = configMqtt;
+  constructor({ dataMqtt, configMqtt, acquisitionMqtt }) {
     this.dataMqtt = dataMqtt;
+    this.configMqtt = configMqtt;
+    this.acquisitionMqtt = acquisitionMqtt;
 
+    this.client = null;
     this.initialized = false;
   }
 
-  init() {
-    this.configMqtt.init();
-    this.dataMqtt.init();
+  init(client) {
+    this.dataMqtt.init(client);
+    this.configMqtt.init(client);
+    this.acquisitionMqtt.init(client);
+
+    this.client = client;
     this.initialized = true;
   }
 
-  isInitialized() {
-    return this.initialized;
+  dispatch(topic, message) {
+    switch (topic) {
+      case "data":
+        this.dataMqtt.process(message);
+        break;
+      case "config":
+        this.configMqtt.process(message);
+        break;
+      case "acquisition":
+        this.acquisitionMqtt.process(message);
+        break;
+      default:
+        log.error(`Unknown topic ${topic}`)
+    }
   }
-
-  
 }
 
 module.exports = MqttDispatcher;
