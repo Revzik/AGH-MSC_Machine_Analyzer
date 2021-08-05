@@ -7,13 +7,10 @@ function strip(number) {
 }
 
 class DataService {
-  constructor({ dataMqtt }) {
-    this.dataMqtt = dataMqtt;
-  }
+  constructor() {}
 
-  getData() {
+  porocessData(data) {
     log.debug("Sending data");
-    let data = this.dataMqtt.getData();
     let { order0, dOrder, spectrum } = data.orderSpectrum;
 
     let currentOrder = order0;

@@ -2,3 +2,4 @@
 mosquitto/
 db/
 .env
+tmp/

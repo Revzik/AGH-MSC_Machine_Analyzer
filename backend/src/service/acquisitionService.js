@@ -3,8 +3,8 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up acquisition service");
 
 class AcquisitionService {
-  constructor({ dataMqtt }) {
-    this.dataMqtt = dataMqtt;
+  constructor({ acquisitionMqtt }) {
+    this.acquisitionMqtt = acquisitionMqtt;
 
     this.acquiring = false;
     this.capturing = false;
@@ -20,51 +20,28 @@ class AcquisitionService {
   }
 
   startCapturing(newLabel) {
-    this.dataMqtt
-      .startCapturing(newLabel)
-      .then(() => {
-        this.capturing = true;
-        this.label = newLabel;
-      })
-      .catch(() => {
-        this.capturing = false;
-      });
+    this.acquisitionMqtt.publish(`startCapture:${newLabel}`);
+    this.capturing = true;
+    this.label = newLabel;
   }
 
   stopCapturing() {
-    this.dataMqtt
-      .stopCapturing()
-      .then(() => {
-        this.capturing = false;
-      })
-      .catch(() => {
-        this.capturing = true;
-      });
+    this.acquisitionMqtt.publish("stopCapture");
+    this.capturing = false;
   }
 
   startAcquisition() {
-    this.dataMqtt
-      .startAcquisition()
-      .then(() => {
-        this.acquiring = true;
-      })
-      .catch(() => {
-        this.acquiring = false;
-      });
+    this.acquisitionMqtt.publish("start");
+    this.acquiring = true;
   }
 
   stopAcquisition() {
     if (this.capturing) {
-      this.stopCapturing()
+      this.acquisitionMqtt.publish("stopCapture");
+      this.capturing = false;
     }
-    this.dataMqtt
-      .stopAcquisition()
-      .then(() => {
-        this.acquiring = false;
-      })
-      .catch(() => {
-        this.acquiring = true;
-      });
+    this.acquisitionMqtt.publish("stop");
+    this.acquiring = false;
   }
 }
 

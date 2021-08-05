@@ -11,7 +11,7 @@ class ConfigService {
 
   saveConfig(config) {
     log.info("Saving config to the database");
-    this.configMqtt.publishConfig(config);
+    this.configMqtt.publish(JSON.stringify(config));
 
     return new Promise((resolve, reject) => {
       this.configModel.updateOne(
