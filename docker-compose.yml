@@ -12,9 +12,9 @@ services:
     image: eclipse-mosquitto
     container_name: mosquitto
     volumes:
-      - ${MOSQUITTO_PATH}/config
-      - ${MOSQUITTO_PATH}/data
-      - ${MOSQUITTO_PATH}/log
+      - ${MOSQUITTO_PATH}/config:/mosquitto/config
+      - ${MOSQUITTO_PATH}/data:/mosquitto/data
+      - ${MOSQUITTO_PATH}/log:/mosquitto/log
     ports:
       - 1883:1883
     restart: unless-stopped

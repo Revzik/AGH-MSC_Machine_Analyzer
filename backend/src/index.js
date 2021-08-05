@@ -2,9 +2,8 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const dummy = process.argv.slice(2).includes("--dummy");
 const { container, setup } = require("./di-setup");
-setup(dummy);
+setup();
 const log = container.resolve("logging").createLogger(__filename);
 
 log.info("Connecting to database...");
@@ -21,12 +20,8 @@ MongoClient.connect("mongodb://localhost:27017/analyzer", {
     log.error(err);
   });
 
-if (!dummy) {
-  log.info("Connecting to the MQTT broker...");
-  const mqtt = require("mqtt");
-  const mqttClient = mqtt.connect("mqtt://localhost:1883");
-  mqttClient.on("connect", () => {});
-}
+log.info("Setting up MQTT client...");
+container.resolve("mqttDispatcher").init();
 
 const port = process.env.PORT || 4200;
 
