@@ -7,7 +7,22 @@ function strip(number) {
 }
 
 class DataService {
-  constructor() {}
+  constructor({ acquisitionService, dataModel }) {
+    this.acquisitionService = acquisitionService;
+    this.dataModel = dataModel;
+
+    this.data = {
+      frequency: 0,
+      rms: 0,
+      kurtosis: 0,
+      peakFactor: 0,
+      orderSpectrum: {
+        order0: 0,
+        dOrder: 0,
+        spectrum: [],
+      },
+    };
+  }
 
   porocessData(data) {
     log.debug("Sending data");
@@ -20,7 +35,31 @@ class DataService {
       currentOrder += dOrder;
     }
 
-    return { ...data, orderSpectrum: { x: orders, y: spectrum } };
+    this.data = { ...data, orderSpectrum: { x: orders, y: spectrum } };
+    this.save();
+  }
+
+  save() {
+    const acquisitionStatus = this.acquisitionService.getStatus();
+
+    if (acquisitionStatus.capturing) {
+      const newDataModel = new this.dataModel({
+        label: acquisitionStatus.label,
+        ...this.data,
+      });
+      newDataModel.save((err) => {
+        if (err) {
+          log.error("Error while saving data!");
+          log.error(err);
+          return;
+        }
+        log.info("Data saved");
+      });
+    }
+  }
+
+  getData() {
+    return this.data;
   }
 }
 
