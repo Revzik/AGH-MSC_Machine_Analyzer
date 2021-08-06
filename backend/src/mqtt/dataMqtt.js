@@ -8,11 +8,17 @@ class DataMqtt {
 
     this.publishCallback = null;
     this.initialized = false;
+    this.topic = "sensor/data";
   }
 
-  init(publishCallback) {
+  init(publishCallback, subscribeCallback) {
+    subscribeCallback(this.topic);
     this.publishCallback = publishCallback;
     this.initialized = true;
+  }
+
+  getTopic() {
+    return this.topic;
   }
 
   publish(message) {
