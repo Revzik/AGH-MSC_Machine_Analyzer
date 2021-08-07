@@ -10,8 +10,7 @@ class DummyGenerator:
                     'windowOverlap': 50, 
                     'tachoPoints': 1, 
                     'averages': 10 }
-    self.state = { 'acquiring': False, 
-                   'capturing': False }
+    self.acquiring = False
 
   def setConfig(self, config):
     self.config = config
