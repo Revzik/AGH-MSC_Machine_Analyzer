@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 app.use(express.json());
@@ -8,7 +10,7 @@ const log = container.resolve("logging").createLogger(__filename);
 
 log.info("Connecting to database...");
 const MongoClient = require("mongoose");
-MongoClient.connect("mongodb://localhost:27017/analyzer", {
+MongoClient.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -29,7 +31,7 @@ log.info("Setting up CORS");
 const cors = require("cors");
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_ORIGIN,
   })
 );
 

@@ -20,13 +20,11 @@ class AcquisitionService {
   }
 
   startCapturing(newLabel) {
-    this.acquisitionMqtt.publish(`startCapture:${newLabel}`);
     this.capturing = true;
     this.label = newLabel;
   }
 
   stopCapturing() {
-    this.acquisitionMqtt.publish("stopCapture");
     this.capturing = false;
   }
 
@@ -37,7 +35,6 @@ class AcquisitionService {
 
   stopAcquisition() {
     if (this.capturing) {
-      this.acquisitionMqtt.publish("stopCapture");
       this.capturing = false;
     }
     this.acquisitionMqtt.publish("stop");
