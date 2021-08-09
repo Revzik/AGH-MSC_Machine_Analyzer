@@ -53,6 +53,7 @@ class DummyGenerator(metaclass=PySingleton):
             self._thread.join()
 
     def setConfig(self, config):
+        print(config)
         self._config = config
 
     def setState(self, state):
@@ -80,13 +81,7 @@ class DummyGenerator(metaclass=PySingleton):
         wL = config["windowLength"]
         ovlap = config["windowOverlap"] / 100
         avg = config["averages"]
-        interval = wL * (1 + (avg - 1) * (1 - ovlap))
-        print(
-            "Length: {}, Overlap: {}, Averages: {}, Interval: {}".format(
-                wL, ovlap, avg, interval
-            )
-        )
-        return interval
+        return wL * (1 + (avg - 1) * (1 - ovlap))
 
     def _generateData(self, config):
         frequency = 40 + 3 * np.random.randn()

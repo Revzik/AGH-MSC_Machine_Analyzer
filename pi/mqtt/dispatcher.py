@@ -3,11 +3,11 @@ from paho.mqtt import client as mqtt
 from pysingleton import PySingleton
 import json
 
-# TODO: Add subscribers / publishers, connect them to the generator
 TOPIC_SENSOR = "sensor"
 TOPIC_ACQUISITION = TOPIC_SENSOR + "/acquisition"
 TOPIC_CONFIG = TOPIC_SENSOR + "/config"
 TOPIC_DATA = TOPIC_SENSOR + "/data"
+
 
 class Dispatcher(metaclass=PySingleton):
     def __init__(self, generator):
@@ -31,25 +31,26 @@ class Dispatcher(metaclass=PySingleton):
         print("Subscribed to topics: {}".format([TOPIC_ACQUISITION, TOPIC_CONFIG]))
 
     def on_message(self, client, userdata, msg):
+        print("Received message: {}".format(msg.payload.decode("ascii")))
         if msg.topic == TOPIC_ACQUISITION:
-            self.process_acquisition(msg.payload)
+            self.process_acquisition(msg.payload.decode("ascii"))
         elif msg.topic == TOPIC_CONFIG:
-            self.process_config(msg.payload)
-            
+            self.process_config(msg.payload.decode("ascii"))
+
     def process_acquisition(self, msg):
         if msg == "start":
             self._generator.start()
         elif msg == "stop":
             self._generator.stop()
-            
+
     def process_config(self, msg):
         self._generator.setConfig(json.loads(msg))
 
     def start(self):
-        self._client.loop_start()
+        self._client.loop_forever()
 
     def stop(self):
-        self._client.loop_stop()
+        self._client.disconnect()
 
     def publish(self, message):
         self._client.publish(TOPIC_DATA, json.dumps(message), qos=0)

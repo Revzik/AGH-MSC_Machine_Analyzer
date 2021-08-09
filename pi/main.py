@@ -21,6 +21,7 @@ else:
 dispatcher = Dispatcher(dataGenerator)
 
 if __name__ == "__main__":
-    dispatcher.start_generator()
-    time.sleep(10)
-    dispatcher.stop_generator()
+    try:
+        dispatcher.start()
+    except KeyboardInterrupt:
+        dispatcher.stop()
