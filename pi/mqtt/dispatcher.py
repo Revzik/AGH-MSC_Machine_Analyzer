@@ -52,7 +52,7 @@ class Dispatcher(metaclass=PySingleton):
         self._client.loop_stop()
 
     def publish(self, message):
-        print(message)
+        self._client.publish(TOPIC_DATA, json.dumps(message), qos=0)
 
     def start_generator(self):
         self._generator.start()

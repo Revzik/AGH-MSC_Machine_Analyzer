@@ -124,6 +124,6 @@ class DummyGenerator(metaclass=PySingleton):
             "orderSpectrum": {
                 "order0": order0,
                 "dOrder": config["dOrder"],
-                "spectrum": spectrum,
+                "spectrum": spectrum.tolist(),
             },
         }

@@ -46,7 +46,7 @@ class MqttDispatcher {
     });
   }
 
-  internalPublish() {
+  internalPublish(topic, message, options) {
     if (this.client.connected) {
       log.info(`Publishing to topic: ${topic}`);
       this.client.publish(topic, message, options);
