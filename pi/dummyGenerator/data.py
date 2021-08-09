@@ -1,11 +1,13 @@
 import numpy as np
 from pysingleton import PySingleton
-from threading import Timer
+from threading import Thread
+import time
 
 
 class DummyGenerator(metaclass=PySingleton):
     def __init__(self):
         self._initialized = False
+        self._delay = None
         self._sendDataCallback = None
 
         self._config = {
@@ -18,11 +20,12 @@ class DummyGenerator(metaclass=PySingleton):
             "tachoPoints": 1,
             "averages": 10,
         }
-        self._acquiring = False
-        self._timer = None
+        
+        self._thread = None
         self.is_running = False
 
-    def init(self, sendDataCallback):
+    def init(self, sendDataCallback, delay=5.0):
+        self._delay = delay
         self._sendDataCallback = sendDataCallback
         self._initialized = True
 
@@ -30,14 +33,24 @@ class DummyGenerator(metaclass=PySingleton):
         return self._initialized and self._sendDataCallback is not None
 
     def start(self):
-        if not self.isRunning:
-            self._timer = Timer(self._getInterval(), self._sendData)
-            self._timer.start()
-            self.is_running = True
+        if not self._initialized:
+            print("The generator is not yet initialized")
+            raise Exception("DummyGenerator is not initialized")
+
+        if self.is_running:
+            print("The thread is already running")
+            return
+
+        print("Starting data generation in {} seconds".format(self._delay))
+        self.is_running = True
+        self._thread = Thread(target=self._sendData)
+        self._thread.start()
 
     def stop(self):
-        self._timer.cancel()
-        self.is_running
+        if self.is_running:
+            print("Stopping data generation")
+            self.is_running = False
+            self._thread.join()
 
     def setConfig(self, config):
         self._config = config
@@ -46,15 +59,36 @@ class DummyGenerator(metaclass=PySingleton):
         self.state = state
 
     def _sendData(self):
-        print(self._generateData())
+        time.sleep(self._delay)
+        while self.is_running:
+            print("Generating data...")
+            startTime = time.time_ns()
+            config_snapshot = self._config
+            interval = max(
+                0.0,
+                (
+                    self._getInterval(config_snapshot)
+                    - (time.time_ns() - startTime) / 1e6
+                )
+                / 1e3,
+            )
+            self._sendDataCallback(self._generateData(config_snapshot))
+            print("Executing next in {}".format(interval))
+            time.sleep(interval)
 
-    def _getInterval(self):
-        wL = self._config["windowLength"]
-        ovlap = self._config["windowOverlap"] / 100
-        avg = self._config["averages"]
-        return wL * (1 + (avg - 1) * (1 - ovlap)) / 1000
+    def _getInterval(self, config):
+        wL = config["windowLength"]
+        ovlap = config["windowOverlap"] / 100
+        avg = config["averages"]
+        interval = wL * (1 + (avg - 1) * (1 - ovlap))
+        print(
+            "Length: {}, Overlap: {}, Averages: {}, Interval: {}".format(
+                wL, ovlap, avg, interval
+            )
+        )
+        return interval
 
-    def _generateData(self):
+    def _generateData(self, config):
         frequency = 40 + 3 * np.random.randn()
         rms = 2 + 0.5 * np.random.randn()
         kurtosis = 3 + 0.2 * np.random.randn()
@@ -63,8 +97,8 @@ class DummyGenerator(metaclass=PySingleton):
 
         x = np.arange(
             order0,
-            self._config["maxOrder"] + self._config["dOrder"],
-            self._config["dOrder"],
+            config["maxOrder"] + config["dOrder"],
+            config["dOrder"],
         )
         xp = np.arange(0, 11, 0.25)
         fp_mu = 0.05 * np.ones(44)
@@ -89,7 +123,7 @@ class DummyGenerator(metaclass=PySingleton):
             "peakFactor": peak_factor,
             "orderSpectrum": {
                 "order0": order0,
-                "dOrder": self._config["dOrder"],
+                "dOrder": config["dOrder"],
                 "spectrum": spectrum,
             },
         }

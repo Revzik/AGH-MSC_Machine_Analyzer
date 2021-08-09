@@ -1,6 +1,8 @@
+from mqtt.dispatcher import Dispatcher
 import sys
 import os
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -16,5 +18,9 @@ else:
     print("Use: python main.py --dummy")
     exit(1)
 
+dispatcher = Dispatcher(dataGenerator)
+
 if __name__ == "__main__":
-    dataGenerator._sendData()
+    dispatcher.start_generator()
+    time.sleep(10)
+    dispatcher.stop_generator()
