@@ -9,7 +9,7 @@ function DataPanel(props) {
   }, [props]);
 
   useEffect(() => {
-    const interval = setInterval(refresh, 2000);
+    const interval = setInterval(refresh, 100);
     return () => {
       clearInterval(interval);
     };

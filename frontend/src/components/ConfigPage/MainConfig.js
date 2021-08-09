@@ -45,6 +45,14 @@ function MainConfig(props) {
     tachoPoints: true,
     averages: true,
   });
+  const types = {
+    dOrder: "float:positive:nonZero",
+    maxOrder: "float:positive:nonZero",
+    windowLength: "int:positive:nonZero",
+    windowOverlap: "float:between,0,100",
+    tachoPoints: "int:positive:nonZero",
+    averages: "int:positive:nonZero",
+  };
   const [isValid, setValid] = useState(true);
 
   function onChangeHandler(key, value, validity) {
@@ -82,13 +90,15 @@ function MainConfig(props) {
     event.preventDefault();
     setLoading(true);
 
+    const settingsJson = parseSettings();
+
     try {
       const response = await fetch("http://localhost:4200/config/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(settings),
+        body: settingsJson,
       });
 
       if (!response.ok) {
@@ -100,6 +110,21 @@ function MainConfig(props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function parseSettings() {
+    let fixedSettings = {};
+    for (const key in settings) {
+      if (!types[key]) {
+        continue;
+      }
+      if (types[key].includes("int")) {
+        fixedSettings[key] = parseInt(settings[key]);
+      } else if (types[key].includes("float")) {
+        fixedSettings[key] = parseFloat(settings[key]);
+      }
+    }
+    return JSON.stringify(fixedSettings);
   }
 
   useEffect(() => {
@@ -136,7 +161,7 @@ function MainConfig(props) {
         <Card className={classes.card} title="Order spectrum">
           <SimpleConfigParam
             name="dOrder"
-            type="float:positive:nonZero"
+            type={types.dOrder}
             description="Step"
             changeHandler={onChangeHandler}
             value={settings.dOrder}
@@ -144,7 +169,7 @@ function MainConfig(props) {
           />
           <SimpleConfigParam
             name="maxOrder"
-            type="float:positive:nonZero"
+            type={types.maxOrder}
             description="Maximum order"
             changeHandler={onChangeHandler}
             value={settings.maxOrder}
@@ -154,7 +179,7 @@ function MainConfig(props) {
         <Card className={classes.card} title="Windowing">
           <SimpleConfigParam
             name="windowLength"
-            type="int:positive:nonZero"
+            type={types.windowLength}
             description="Length [ms]"
             changeHandler={onChangeHandler}
             value={settings.windowLength}
@@ -162,7 +187,7 @@ function MainConfig(props) {
           />
           <SimpleConfigParam
             name="windowOverlap"
-            type="float:between,0,100"
+            type={types.windowOverlap}
             description="Overlap [%]"
             changeHandler={onChangeHandler}
             value={settings.windowOverlap}
@@ -172,7 +197,7 @@ function MainConfig(props) {
         <Card className={classes.card} title="Others">
           <SimpleConfigParam
             name="tachoPoints"
-            type="int:positive:nonZero"
+            type={types.tachoPoints}
             description="Tachometer points on the shaft"
             changeHandler={onChangeHandler}
             value={settings.tachoPoints}
@@ -180,7 +205,7 @@ function MainConfig(props) {
           />
           <SimpleConfigParam
             name="averages"
-            type="int:positive:nonZero"
+            type={types.averages}
             description="Number of averages"
             changeHandler={onChangeHandler}
             value={settings.averages}

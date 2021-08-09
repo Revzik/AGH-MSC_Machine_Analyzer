@@ -24,7 +24,7 @@ class DataService {
     };
   }
 
-  porocessData(data) {
+  processData(data) {
     log.debug("Sending data");
     let { order0, dOrder, spectrum } = data.orderSpectrum;
 

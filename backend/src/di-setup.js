@@ -25,20 +25,34 @@ function setup() {
   const MqttDispatcher = require("./mqtt/mqttDispatcher");
 
   container.register({
-    dataModel: awilix.asValue(DataModel),
-    configModel: awilix.asValue(ConfigModel),
+    dataModel: awilix.asValue(DataModel, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    configModel: awilix.asValue(ConfigModel, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
     configId: awilix.asValue(defaultId),
-    dataService: awilix.asClass(DataService),
-    configService: awilix.asClass(ConfigService),
-    acquisitionService: awilix.asClass(AcquisitionService),
+    dataService: awilix.asClass(DataService, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    configService: awilix.asClass(ConfigService, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    acquisitionService: awilix.asClass(AcquisitionService, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
     dataMqtt: awilix.asClass(DataMqtt, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     configMqtt: awilix.asClass(ConfigMqtt, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
-    acquisitionMqtt: awilix.asClass(AcquisitionMqtt),
-    mqttDispatcher: awilix.asClass(MqttDispatcher),
+    acquisitionMqtt: awilix.asClass(AcquisitionMqtt, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    mqttDispatcher: awilix.asClass(MqttDispatcher, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
   });
 }
 

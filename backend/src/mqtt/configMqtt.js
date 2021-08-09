@@ -19,7 +19,7 @@ class ConfigMqtt {
   }
 
   publish(message) {
-    this.publishCallback(this.topic, message, { retain: true, qos: 1 });
+    this.publishCallback(this.topic, message, { retain: true, qos: 2 });
   }
 
   process(message) {
