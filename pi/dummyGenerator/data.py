@@ -1,10 +1,9 @@
 import numpy as np
-from pysingleton import PySingleton
 from threading import Thread
 import time
 
 
-class DummyGenerator(metaclass=PySingleton):
+class DummyGenerator():
     def __init__(self):
         self._initialized = False
         self._delay = None
@@ -53,7 +52,6 @@ class DummyGenerator(metaclass=PySingleton):
             self._thread.join()
 
     def setConfig(self, config):
-        print(config)
         self._config = config
 
     def setState(self, state):
@@ -63,15 +61,14 @@ class DummyGenerator(metaclass=PySingleton):
         time.sleep(self._delay)
         while self.is_running:
             print("Generating data...")
-            startTime = time.time_ns()
+            startTime = time.time()
             config_snapshot = self._config
             interval = max(
                 0.0,
                 (
                     self._getInterval(config_snapshot)
-                    - (time.time_ns() - startTime) / 1e6
+                    - (time.time() - startTime)
                 )
-                / 1e3,
             )
             self._sendDataCallback(self._generateData(config_snapshot))
             print("Executing next in {}".format(interval))
@@ -81,7 +78,7 @@ class DummyGenerator(metaclass=PySingleton):
         wL = config["windowLength"]
         ovlap = config["windowOverlap"] / 100
         avg = config["averages"]
-        return wL * (1 + (avg - 1) * (1 - ovlap))
+        return wL * (1 + (avg - 1) * (1 - ovlap)) / 1000
 
     def _generateData(self, config):
         frequency = 40 + 3 * np.random.randn()

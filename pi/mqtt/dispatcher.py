@@ -1,6 +1,5 @@
 import os
 from paho.mqtt import client as mqtt
-from pysingleton import PySingleton
 import json
 
 TOPIC_SENSOR = "sensor"
@@ -9,7 +8,7 @@ TOPIC_CONFIG = TOPIC_SENSOR + "/config"
 TOPIC_DATA = TOPIC_SENSOR + "/data"
 
 
-class Dispatcher(metaclass=PySingleton):
+class Dispatcher():
     def __init__(self, generator):
         self._generator = generator
         self._generator.init(self.publish)
