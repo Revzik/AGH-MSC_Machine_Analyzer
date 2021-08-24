@@ -1,7 +1,6 @@
 import Header from "./components/Header/Header";
 import MainData from "./components/DataPage/MainData";
 import MainConfig from "./components/ConfigPage/MainConfig";
-import MainCapture from "./components/CapturePage/MainCapture";
 import React, { useState } from "react";
 
 function App() {
@@ -10,9 +9,6 @@ function App() {
   let content = <MainData />;
   if (currentPage === 'config') {
     content = <MainConfig />;
-  }
-  if (currentPage === 'capture') {
-    content = <MainCapture />;
   }
 
   function onNavigation(dest) {

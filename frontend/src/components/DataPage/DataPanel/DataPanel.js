@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 
 import SimpleParam from "./SimpleParam";
-import Chart from "../UI/Chart";
+import Chart from "../../UI/Chart";
 
 function DataPanel(props) {
   const refresh = useCallback(() => {

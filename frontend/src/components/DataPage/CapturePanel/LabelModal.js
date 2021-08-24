@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import Card from "../UI/Card";
-import Button from "../UI/Button";
-import ModalBackdrop from "../UI/ModalBackdrop";
+import Card from "../../UI/Card";
+import Button from "../../UI/Button";
+import ModalBackdrop from "../../UI/ModalBackdrop";
 
 import classes from "./LabelModal.module.css";
 
