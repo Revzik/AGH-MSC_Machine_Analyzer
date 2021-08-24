@@ -6,9 +6,9 @@ import Loader from "../UI/Loader";
 import Button from "../UI/Button";
 import MainContainer from "../UI/MainContainer";
 
-import classes from "./MainData.module.css";
+import classes from "./DataPage.module.css";
 
-function MainData(props) {
+function DataPage(props) {
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
@@ -74,4 +74,4 @@ function MainData(props) {
   );
 }
 
-export default MainData;
+export default DataPage;
