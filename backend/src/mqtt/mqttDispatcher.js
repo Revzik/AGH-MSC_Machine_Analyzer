@@ -5,10 +5,13 @@ log.info("Setting up MQTT dispatcher");
 const mqtt = require("mqtt");
 
 class MqttDispatcher {
-  constructor({ dataMqtt, configMqtt, acquisitionMqtt }) {
-    this.dataMqtt = dataMqtt;
-    this.configMqtt = configMqtt;
-    this.acquisitionMqtt = acquisitionMqtt;
+  constructor({ dataSubscriber, calibrationSubscriber, configPublisher, acquisitionPublisher, calibrationPublisher }) {
+    this.dataSubscriber = dataSubscriber;
+    this.calibrationSubscriber = calibrationSubscriber;
+
+    this.configPublisher = configPublisher;
+    this.acquisitionPublisher = acquisitionPublisher;
+    this.calibrationPublisher = calibrationPublisher;
 
     this.publish = this.internalPublish.bind(this);
     this.subscribe = this.internalSubscribe.bind(this);
@@ -27,9 +30,12 @@ class MqttDispatcher {
     this.client.on("connect", () => {
       log.info("Connected to the MQTT broker");
 
-      this.dataMqtt.init(this.publish, this.subscribe);
-      this.configMqtt.init(this.publish, this.subscribe);
-      this.acquisitionMqtt.init(this.publish, this.subscribe);
+      this.dataSubscriber.init(this.subscribe);
+      this.calibrationSubscriber.init(this.subscribe)
+
+      this.configPublisher.init(this.publish);
+      this.acquisitionPublisher.init(this.publish);
+      this.calibrationPublisher.init(this.publish);
 
       this.initialized = true;
     });
@@ -67,17 +73,14 @@ class MqttDispatcher {
 
   dispatch(topic, message, packet) {
     switch (topic) {
-      case this.dataMqtt.getTopic():
-        this.dataMqtt.process(message, packet);
+      case this.dataSubscriber.getTopic():
+        this.dataSubscriber.process(message, packet);
         break;
-      case this.configMqtt.getTopic():
-        this.configMqtt.process(message, packet);
-        break;
-      case this.acquisitionMqtt.getTopic():
-        this.acquisitionMqtt.process(message, packet);
+      case this.calibrationSubscriber.getTopic():
+        this.calibrationSubscriber.process(message, packet);
         break;
       default:
-        log.error(`Unknown topic ${topic}`);
+        log.error(`Unknown subscriber topic ${topic}`);
     }
   }
 }

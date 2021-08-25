@@ -7,12 +7,16 @@ function Button(props) {
     if (!props.onClick) {
       return;
     }
-    
+
     if (props.onClickArgs) {
-      props.onClick(...props.onClickArgs);
+      if (Array.isArray(props.onClickArgs)) {
+        props.onClick(...props.onClickArgs);
+      } else {
+        props.onClick(props.onClickArgs);
+      }
       return;
     }
-    
+
     props.onClick();
   }
 

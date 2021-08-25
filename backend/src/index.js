@@ -39,6 +39,7 @@ log.info("Setting up controllers...");
 app.use("/acquire", require("./controller/acquisitionController"));
 app.use("/data", require("./controller/dataController"));
 app.use("/config", require("./controller/configController"));
+app.use("/calibrate", require("./controller/calibrationController"));
 log.info("Controllers set!");
 
 log.info(`App listening on port ${port}`);
