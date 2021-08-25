@@ -19,11 +19,11 @@ router.post("/", (req, res) => {
 router.post("/start", (req, res) => {
   calibrationService.startCalibration();
   res.sendStatus(200);
-})
+});
 
 router.post("/stop", (req, res) => {
   calibrationService.stopCalibration();
   res.sendStatus(200);
-})
+});
 
 module.exports = router;

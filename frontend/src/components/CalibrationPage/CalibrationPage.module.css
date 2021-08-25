@@ -15,3 +15,8 @@
 .card_horizontal .bold {
     font-weight: bold;
 }
+
+.card_horizontal .param {
+    display: flex;
+    gap: 0.5rem;
+}

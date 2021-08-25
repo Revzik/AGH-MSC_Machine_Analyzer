@@ -7,6 +7,8 @@ class CalibrationService {
     this.calibrationPublisher = calibrationPublisher;
     this.acquisitionService = acquisitionService;
 
+    this.calibrating = false;
+
     this.data = {
       x: 0,
       y: 0,
@@ -23,11 +25,21 @@ class CalibrationService {
   }
 
   startCalibration() {
+    if (this.calibrating) {
+      log.info("Calibration already started!");
+      return;
+    }
+    this.calibrating = true;
     this.acquisitionService.stopAcquisition();
     this.calibrationPublisher.publish("start");
   }
 
   stopCalibration() {
+    if (!this.calibrating) {
+      log.info("Calibration already stopped!");
+      return;
+    }
+    this.calibrating = false;
     this.calibrationPublisher.publish("stop");
   }
 

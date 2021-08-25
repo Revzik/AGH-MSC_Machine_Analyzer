@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Button from "../UI/Button";
 import Card from "../UI/Card";
 import MainContainer from "../UI/MainContainer";
@@ -28,29 +28,80 @@ function CalibrationPage(props) {
     zNeg: 0,
   };
 
-  function fetchData() {
-    console.log("Fetching data from sensor");
+  const refresh = useCallback(() => {
+    get();
+  }, [get]);
+
+  useEffect(() => {
+    const interval = setInterval(refresh, 100);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refresh]);
+
+  async function get() {
+    try {
+      const response = await fetch(`http://localhost:4200/calibrate/`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+      const data = await response.json();
+      setData(data);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  function saveData() {
-    console.log("Saving current calibration factors");
+  async function post(path) {
+    try {
+      const response = await fetch(`http://localhost:4200/calibrate/${path}`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function postData() {
+    try {
+      const response = await fetch(`http://localhost:4200/calibrate/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(calibrationData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Could not fetch config! ${response}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function checkCalibration() {
     setState(STATE.CHECK);
+    post("start");
   }
 
   function apply() {
-    saveData();
     setState(STATE.IDLE);
+    post("stop");
+    postData();
   }
 
   function cancel() {
     setState(STATE.IDLE);
+    post("stop");
   }
 
   function nextCalibration(next) {
-    console.log(`Current state: ${state}, Next state: ${next}`);
     switch (state) {
       case STATE.AWAIT_X_POS:
         calibrationData.xPos = data.x;
@@ -83,15 +134,15 @@ function CalibrationPage(props) {
     <Card className={classes.card_horizontal}>
       <div className={classes.param}>
         <span className={classes.bold}>x:</span>
-        <span>{data.x}</span>
+        <span>{data.x} m/s^2</span>
       </div>
       <div className={classes.param}>
         <span className={classes.bold}>y:</span>
-        <span>{data.y}</span>
+        <span>{data.y} m/s^2</span>
       </div>
       <div className={classes.param}>
         <span className={classes.bold}>z:</span>
-        <span>{data.z}</span>
+        <span>{data.z} m/s^2</span>
       </div>
     </Card>
   );
@@ -105,6 +156,7 @@ function CalibrationPage(props) {
             Calibrate
           </Button>
           <Button onClick={apply}>Apply</Button>
+          <Button onClick={cancel}>Cancel</Button>
         </Card>
       </React.Fragment>
     );
@@ -113,9 +165,7 @@ function CalibrationPage(props) {
     content = (
       <React.Fragment>
         {dataCard}
-        <Card className={classes.card}>
-          Place the sensor facing X axis up
-        </Card>
+        <Card className={classes.card}>Place the sensor facing X axis up</Card>
         <Card className={classes.card_horizontal}>
           <Button onClick={nextCalibration} onClickArgs={STATE.AWAIT_Y_POS}>
             Next
@@ -129,9 +179,7 @@ function CalibrationPage(props) {
     content = (
       <React.Fragment>
         {dataCard}
-        <Card className={classes.card}>
-          Place the sensor facing Y axis up
-        </Card>
+        <Card className={classes.card}>Place the sensor facing Y axis up</Card>
         <Card className={classes.card_horizontal}>
           <Button onClick={nextCalibration} onClickArgs={STATE.AWAIT_X_NEG}>
             Next
@@ -177,9 +225,7 @@ function CalibrationPage(props) {
     content = (
       <React.Fragment>
         {dataCard}
-        <Card className={classes.card}>
-          Place the sensor facing Z axis up
-        </Card>
+        <Card className={classes.card}>Place the sensor facing Z axis up</Card>
         <Card className={classes.card_horizontal}>
           <Button onClick={nextCalibration} onClickArgs={STATE.AWAIT_Z_NEG}>
             Next

@@ -25,15 +25,27 @@ class AcquisitionService {
   }
 
   stopCapturing() {
+    if (!this.capturing) {
+      log.warn("Capturing already stopped!");
+      return;
+    }
     this.capturing = false;
   }
 
   startAcquisition() {
+    if (this.acquiring) {
+      log.warn("Acquisition already started!");
+      return;
+    }
     this.acquisitionPublisher.publish("start");
     this.acquiring = true;
   }
 
   stopAcquisition() {
+    if (!this.acquiring) {
+      log.warn("Acquisition already stopped!");
+      return;
+    }
     if (this.capturing) {
       this.capturing = false;
     }
