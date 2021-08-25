@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../UI/Button";
 import Card from "../UI/Card";
 import MainContainer from "../UI/MainContainer";
@@ -19,6 +19,7 @@ const STATE = {
 function CalibrationPage(props) {
   const [state, setState] = useState(STATE.IDLE);
   const [data, setData] = useState({ x: 0.01, y: 1.12, z: 0.0 });
+  const [intervalState, setIntervalState] = useState(null);
   const calibrationData = {
     xPos: 0,
     xNeg: 0,
@@ -28,18 +29,16 @@ function CalibrationPage(props) {
     zNeg: 0,
   };
 
-  const refresh = useCallback(() => {
-    get();
-  }, [get]);
-
   useEffect(() => {
-    const interval = setInterval(refresh, 100);
     return () => {
-      clearInterval(interval);
+      if (intervalState) {
+        clearInterval(intervalState);
+      }
     };
-  }, [refresh]);
+  }, [intervalState]);
 
   async function get() {
+    console.log("get");
     try {
       const response = await fetch(`http://localhost:4200/calibrate/`, {
         method: "GET",
@@ -87,17 +86,20 @@ function CalibrationPage(props) {
 
   function checkCalibration() {
     setState(STATE.CHECK);
+    setIntervalState(setInterval(get, 100));
     post("start");
   }
 
   function apply() {
     setState(STATE.IDLE);
+    clearInterval(intervalState);
     post("stop");
     postData();
   }
 
   function cancel() {
     setState(STATE.IDLE);
+    clearInterval(intervalState);
     post("stop");
   }
 
@@ -120,6 +122,8 @@ function CalibrationPage(props) {
         break;
       case STATE.AWAIT_Z_NEG:
         calibrationData.zNeg = data.z;
+        break;
+      default:
         break;
     }
     setState(next);
@@ -156,7 +160,6 @@ function CalibrationPage(props) {
             Calibrate
           </Button>
           <Button onClick={apply}>Apply</Button>
-          <Button onClick={cancel}>Cancel</Button>
         </Card>
       </React.Fragment>
     );
