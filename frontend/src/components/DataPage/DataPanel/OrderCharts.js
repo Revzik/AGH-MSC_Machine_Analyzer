@@ -1,14 +1,22 @@
 import React from "react";
 import Card from "../../UI/Card";
-import Chart from "../../UI/Card";
+import Chart from "../../UI/Chart";
+
+import classes from "./OrderCharts.module.css";
 
 function OrderCharts(props) {
+  const x = props.data.x.orderSpectrum;
+  const y = props.data.y.orderSpectrum;
+  const z = props.data.z.orderSpectrum;
+
   return (
-    <Card>
-      <span>Order spectra</span>
-      <Chart title="x" unit="m/s^2" data={props.data.x.orderSpectrum} />
-      <Chart title="y" unit="m/s^2" data={props.data.y.orderSpectrum} />
-      <Chart title="z" unit="m/s^2" data={props.data.z.orderSpectrum} />
+    <Card className={classes.card}>
+      <div className={classes.title}>Order spectra</div>
+      <div className={classes.charts}>
+        <Chart title="x" unit="m/s^2" data={x} />
+        <Chart title="y" unit="m/s^2" data={y} />
+        <Chart title="z" unit="m/s^2" data={z} />
+      </div>
     </Card>
   );
 }

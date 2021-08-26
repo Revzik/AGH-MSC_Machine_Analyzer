@@ -18,9 +18,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          order0: 0,
-          dOrder: 0,
-          spectrum: [],
+          x: [],
+          y: [],
         },
       },
       y: {
@@ -28,9 +27,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          order0: 0,
-          dOrder: 0,
-          spectrum: [],
+          x: [],
+          y: [],
         },
       },
       z: {
@@ -38,22 +36,21 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          order0: 0,
-          dOrder: 0,
-          spectrum: [],
+          x: [],
+          y: [],
         },
       },
     };
   }
 
   processData(data) {
-    log.debug("Sending data");
+    this.save(data);
+
     data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
     data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
     data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
 
     this.data = data;
-    this.save();
   }
 
   processSpectrum(orderSpectrum) {
