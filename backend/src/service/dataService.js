@@ -13,20 +13,51 @@ class DataService {
 
     this.data = {
       frequency: 0,
-      rms: 0,
-      kurtosis: 0,
-      peakFactor: 0,
-      orderSpectrum: {
-        order0: 0,
-        dOrder: 0,
-        spectrum: [],
+      x: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          order0: 0,
+          dOrder: 0,
+          spectrum: [],
+        },
+      },
+      y: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          order0: 0,
+          dOrder: 0,
+          spectrum: [],
+        },
+      },
+      z: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          order0: 0,
+          dOrder: 0,
+          spectrum: [],
+        },
       },
     };
   }
 
   processData(data) {
     log.debug("Sending data");
-    let { order0, dOrder, spectrum } = data.orderSpectrum;
+    data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
+    data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
+    data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
+
+    this.data = data;
+    this.save();
+  }
+
+  processSpectrum(orderSpectrum) {
+    let { order0, dOrder, spectrum } = orderSpectrum;
 
     let currentOrder = order0;
     let orders = [];
@@ -35,8 +66,7 @@ class DataService {
       currentOrder += dOrder;
     }
 
-    this.data = { ...data, orderSpectrum: { x: orders, y: spectrum } };
-    this.save();
+    return { x: orders, y: spectrum };
   }
 
   save() {
