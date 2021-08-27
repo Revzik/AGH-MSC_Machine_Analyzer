@@ -38,7 +38,6 @@ function CalibrationPage(props) {
   }, [intervalState]);
 
   async function get() {
-    console.log("get");
     try {
       const response = await fetch(`http://localhost:4200/calibrate/`, {
         method: "GET",

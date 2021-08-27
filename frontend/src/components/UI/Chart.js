@@ -53,7 +53,6 @@ function Chart(props) {
 
   useEffect(() => {
     setState((prevState) => {
-      console.log(JSON.stringify(props.data));
       let data = [];
       for (let i = 0; i < props.data.length; i++) {
         data[i] = prevState.data[i];

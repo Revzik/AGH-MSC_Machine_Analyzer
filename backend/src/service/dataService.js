@@ -11,6 +11,13 @@ class DataService {
     this.acquisitionService = acquisitionService;
     this.dataModel = dataModel;
 
+    this.rawData = {
+      t: [0, 0.1, 0.2, 0.3, 0.4],
+      x: [1, 0, -1, 0, 1],
+      y: [2, -1, 3, -1, 2],
+      z: [0, 3, -2, 3, -1],
+    };
+
     this.data = {
       frequency: 0,
       x: {
@@ -41,6 +48,10 @@ class DataService {
         },
       },
     };
+  }
+
+  processRawData(data) {
+    this.rawData = data;
   }
 
   processData(data) {
@@ -83,6 +94,10 @@ class DataService {
         log.info("Data saved");
       });
     }
+  }
+
+  getRawData() {
+    return this.rawData;
   }
 
   getData() {
