@@ -18,8 +18,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [],
-          y: [],
+          x: [0, 1, 2, 3],
+          y: [0, 1, 2, 3],
         },
       },
       y: {
@@ -27,8 +27,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [],
-          y: [],
+          x: [0, 1, 2, 3],
+          y: [2, 3, 2, 3],
         },
       },
       z: {
@@ -36,8 +36,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [],
-          y: [],
+          x: [0, 1, 2, 3],
+          y: [4, 3, 2, 1],
         },
       },
     };

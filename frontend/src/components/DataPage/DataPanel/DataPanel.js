@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 
 import StatisticalParams from "./StatisticalParams";
-import OrderCharts from "./OrderCharts";
+import Chart from "../../UI/Chart";
 
 function DataPanel(props) {
   const refresh = useCallback(() => {
@@ -15,10 +15,23 @@ function DataPanel(props) {
     };
   }, [refresh]);
 
+  function getDataArray() {
+    return [
+      { name: "x", x: props.data.x.orderSpectrum.x, y: props.data.x.orderSpectrum.y },
+      { name: "y", x: props.data.y.orderSpectrum.x, y: props.data.y.orderSpectrum.y },
+      { name: "z", x: props.data.z.orderSpectrum.x, y: props.data.z.orderSpectrum.y },
+    ];
+  }
+
   return (
     <React.Fragment>
       <StatisticalParams data={props.data}></StatisticalParams>
-      <OrderCharts data={props.data}></OrderCharts>
+      <Chart
+        data={getDataArray()}
+        title="Order spectrum"
+        xlabel="order"
+        ylabel="a [m/s^2]"
+      />
     </React.Fragment>
   );
 }
