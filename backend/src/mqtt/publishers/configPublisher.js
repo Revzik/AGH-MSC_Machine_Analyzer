@@ -1,15 +1,16 @@
-const { container } = require("../di-setup");
+const { container } = require("../../di-setup");
 const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up config MQTT publisher");
 
-class AcquisitionMqtt {
+class ConfigPublisher {
   constructor() {
     this.publishCallback = null;
     this.initialized = false;
-    this.topic = "sensor/acquisition";
+    
+    this.topic = "sensor/config";
   }
 
-  init(publishCallback, subscribeCallback) {
+  init(publishCallback) {
     this.publishCallback = publishCallback;
     this.initialized = true;
   }
@@ -21,10 +22,6 @@ class AcquisitionMqtt {
   publish(message) {
     this.publishCallback(this.topic, message, { retain: true, qos: 2 });
   }
-
-  process(message) {
-    log.warn("Acquisition MQTT currently cannot receive messages");
-  }
 }
 
-module.exports = AcquisitionMqtt;
+module.exports = ConfigPublisher;

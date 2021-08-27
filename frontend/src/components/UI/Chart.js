@@ -13,6 +13,18 @@ function Chart(props) {
           width: 1.5,
         },
       },
+      {
+        line: {
+          color: "#FFC200",
+          width: 1.5,
+        },
+      },
+      {
+        line: {
+          color: "#FF4F00",
+          width: 1.5,
+        },
+      },
     ],
     layout: {
       margin: {
@@ -24,12 +36,12 @@ function Chart(props) {
       },
       xaxis: {
         title: {
-          text: "order",
+          text: props.xlabel,
         },
       },
       yaxis: {
         title: {
-          text: `a [${props.unit}]`,
+          text: props.ylabel,
         },
       },
     },
@@ -41,10 +53,16 @@ function Chart(props) {
 
   useEffect(() => {
     setState((prevState) => {
-      let data = prevState.data[0];
-      data.x = props.data.x;
-      data.y = props.data.y;
-      return { ...prevState, data: [data] };
+      let data = [];
+      for (let i = 0; i < props.data.length; i++) {
+        data[i] = prevState.data[i];
+        if (props.data[i].name) {
+          data[i].name = props.data[i].name;
+        }
+        data[i].x = props.data[i].x;
+        data[i].y = props.data[i].y;
+      }
+      return { ...prevState, data: data };
     });
   }, [props.data]);
 

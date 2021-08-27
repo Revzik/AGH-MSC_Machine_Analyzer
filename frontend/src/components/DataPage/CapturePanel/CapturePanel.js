@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 
-import MainContainer from "../UI/MainContainer";
-import Button from "../UI/Button";
-import Card from "../UI/Card";
-import Loader from "../UI/Loader";
+import Button from "../../UI/Button";
+import Card from "../../UI/Card";
+import Loader from "../../UI/Loader";
 import LabelModal from "./LabelModal";
 
-import classes from "./MainCapture.module.css";
+import classes from "./CapturePanel.module.css";
 
-function MainCapture(props) {
+function CapturePanel(props) {
   const [isAcquiring, setAcquiring] = useState(false);
   const [isCapturing, setCapturing] = useState(false);
   const [label, setLabel] = useState("");
@@ -138,40 +137,44 @@ function MainCapture(props) {
     />
   );
 
-  const acquisitionCard = (
-    <Card className={classes.card}>
+  const acquisitionContent = (
+    <div className={classes.button_block}>
       <div className={classes.status}>
         {`Data acquisition: ${isAcquiring ? "on" : "off"}`}
       </div>
       <Button onClick={toggleAcquisition}>
         {isAcquiring ? "Stop acquisition" : "Start acquisition"}
       </Button>
-    </Card>
+    </div>
   );
 
-  let captureCard = null;
+  let captureContent = null;
   if (isAcquiring) {
-    captureCard = (
-      <Card className={classes.card}>
+    captureContent = (
+      <div className={classes.button_block}>
         <div className={classes.status}>
           {`Data capture: ${isCapturing ? "on" : "off"}`}
         </div>
-        {isCapturing && <div>Label: {label}</div>}
         <Button onClick={toggleCapture}>
           {isCapturing ? "Stop capture" : "Start capture"}
         </Button>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <MainContainer>
+    <React.Fragment>
       {showModal && labelModal}
-      {acquisitionCard}
-      {captureCard}
-      {isLoading && <Loader />}
-    </MainContainer>
+      <Card className={classes.card}>
+        {isCapturing && <div>Label: {label}</div>}
+        <div className={classes.button_space}>
+          {acquisitionContent}
+          {captureContent}
+        </div>
+        {isLoading && <Loader />}
+      </Card>
+    </React.Fragment>
   );
 }
 
-export default MainCapture;
+export default CapturePanel;

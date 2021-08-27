@@ -11,22 +11,61 @@ class DataService {
     this.acquisitionService = acquisitionService;
     this.dataModel = dataModel;
 
+    this.rawData = {
+      t: [0, 0.1, 0.2, 0.3, 0.4],
+      x: [1, 0, -1, 0, 1],
+      y: [2, -1, 3, -1, 2],
+      z: [0, 3, -2, 3, -1],
+    };
+
     this.data = {
       frequency: 0,
-      rms: 0,
-      kurtosis: 0,
-      peakFactor: 0,
-      orderSpectrum: {
-        order0: 0,
-        dOrder: 0,
-        spectrum: [],
+      x: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          x: [0, 1, 2, 3],
+          y: [0, 1, 2, 3],
+        },
+      },
+      y: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          x: [0, 1, 2, 3],
+          y: [2, 3, 2, 3],
+        },
+      },
+      z: {
+        rms: 0,
+        kurtosis: 0,
+        peakFactor: 0,
+        orderSpectrum: {
+          x: [0, 1, 2, 3],
+          y: [4, 3, 2, 1],
+        },
       },
     };
   }
 
+  processRawData(data) {
+    this.rawData = data;
+  }
+
   processData(data) {
-    log.debug("Sending data");
-    let { order0, dOrder, spectrum } = data.orderSpectrum;
+    this.save(data);
+
+    data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
+    data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
+    data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
+
+    this.data = data;
+  }
+
+  processSpectrum(orderSpectrum) {
+    let { order0, dOrder, spectrum } = orderSpectrum;
 
     let currentOrder = order0;
     let orders = [];
@@ -35,8 +74,7 @@ class DataService {
       currentOrder += dOrder;
     }
 
-    this.data = { ...data, orderSpectrum: { x: orders, y: spectrum } };
-    this.save();
+    return { x: orders, y: spectrum };
   }
 
   save() {
@@ -56,6 +94,10 @@ class DataService {
         log.info("Data saved");
       });
     }
+  }
+
+  getRawData() {
+    return this.rawData;
   }
 
   getData() {

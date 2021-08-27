@@ -6,7 +6,7 @@ import Button from "../UI/Button";
 import SimpleConfigParam from "./SimpleConfigParam";
 import SelectConfigParam from "./SelectConfigParam";
 
-import classes from "./MainConfig.module.css";
+import classes from "./ConfigPage.module.css";
 import Loader from "../UI/Loader";
 
 const lowpassOptions = [
@@ -24,7 +24,7 @@ const rangeOptions = [
   { value: 16, name: "16 g" },
 ];
 
-function MainConfig(props) {
+function ConfigPage(props) {
   const [error, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
@@ -228,4 +228,4 @@ function MainConfig(props) {
   return <MainContainer>{content}</MainContainer>;
 }
 
-export default MainConfig;
+export default ConfigPage;

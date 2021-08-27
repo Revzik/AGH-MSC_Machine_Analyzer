@@ -6,7 +6,8 @@ import classes from "./Navigation.module.css";
 function Navigation(props) {
   const pages = [
     { title: "Data", key: "data" },
-    { title: "Capture", key: "capture" },
+    { title: "Charts", key: "charts" },
+    { title: "Calibration", key: "calibrate" },
     { title: "Config", key: "config" },
   ];
 

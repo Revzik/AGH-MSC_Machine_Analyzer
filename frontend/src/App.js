@@ -1,27 +1,35 @@
 import Header from "./components/Header/Header";
-import MainData from "./components/DataPage/MainData";
-import MainConfig from "./components/ConfigPage/MainConfig";
-import MainCapture from "./components/CapturePage/MainCapture";
+import DataPage from "./components/DataPage/DataPage";
+import ConfigPage from "./components/ConfigPage/ConfigPage";
 import React, { useState } from "react";
+import CalibrationPage from "./components/CalibrationPage/CalibrationPage";
+import ChartsPage from "./components/ChartsPage/ChartsPage";
 
 function App() {
-  const [ currentPage, setCurrentPage ] = useState("data");
+  const [currentPage, setCurrentPage] = useState("data");
 
-  let content = <MainData />;
-  if (currentPage === 'config') {
-    content = <MainConfig />;
+  let content = <DataPage />;
+  if (currentPage === "config") {
+    content = <ConfigPage />;
   }
-  if (currentPage === 'capture') {
-    content = <MainCapture />;
+  if (currentPage === "calibrate") {
+    content = <CalibrationPage />;
   }
-
+  if (currentPage === "charts") {
+    content = <ChartsPage />;
+  }
+  
   function onNavigation(dest) {
     setCurrentPage(dest);
   }
 
   return (
     <React.Fragment>
-      <Header title="Machine diagnostics" onSelect={onNavigation} currentPage={currentPage}/>
+      <Header
+        title="Machine diagnostics"
+        onSelect={onNavigation}
+        currentPage={currentPage}
+      />
       {content}
     </React.Fragment>
   );

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import DataPanel from "./DataPanel";
+import DataPanel from "./DataPanel/DataPanel";
+import CapturePanel from "./CapturePanel/CapturePanel";
 import Card from "../UI/Card";
 import Loader from "../UI/Loader";
 import Button from "../UI/Button";
 import MainContainer from "../UI/MainContainer";
 
-import classes from "./MainData.module.css";
+import classes from "./DataPage.module.css";
 
-function MainData(props) {
+function DataPage(props) {
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
@@ -46,17 +47,17 @@ function MainData(props) {
     </Button>
   );
 
-  let content = (
+  let dataContent = (
     <React.Fragment>
       <Card>No data</Card>
       {button}
     </React.Fragment>
   );
   if (data) {
-    content = <DataPanel refreshAction={fetchDataHandler} data={data} />;
+    dataContent = <DataPanel refreshAction={fetchDataHandler} data={data} />;
   }
   if (error) {
-    content = (
+    dataContent = (
       <React.Fragment>
         <Card>Error: could not fetch data!</Card>
         {button}
@@ -66,10 +67,11 @@ function MainData(props) {
 
   return (
     <MainContainer>
-      {content}
+      <CapturePanel/>
+      {dataContent}
       {isLoading && <Loader />}
     </MainContainer>
   );
 }
 
-export default MainData;
+export default DataPage;

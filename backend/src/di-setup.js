@@ -17,10 +17,14 @@ function setup() {
   const DataService = require("./service/dataService");
   const ConfigService = require("./service/configService");
   const AcquisitionService = require("./service/acquisitionService");
+  const CalibrationService = require("./service/calibrationService");
 
-  const DataMqtt = require("./mqtt/dataMqtt");
-  const ConfigMqtt = require("./mqtt/configMqtt");
-  const AcquisitionMqtt = require("./mqtt/acquisitionMqtt");
+  const DataSubscriber = require("./mqtt/subscribers/dataSubscriber");
+  const CalibrationSubscriber = require("./mqtt/subscribers/calibrationSubscriber");
+
+  const ConfigPublisher = require("./mqtt/publishers/configPublisher");
+  const AcquisitionPublisher = require("./mqtt/publishers/acquisitionPublisher");
+  const CalibrationPublisher = require("./mqtt/publishers/calibrationPublisher");
 
   const MqttDispatcher = require("./mqtt/mqttDispatcher");
 
@@ -41,13 +45,22 @@ function setup() {
     acquisitionService: awilix.asClass(AcquisitionService, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
-    dataMqtt: awilix.asClass(DataMqtt, {
+    calibrationService: awilix.asClass(CalibrationService, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
-    configMqtt: awilix.asClass(ConfigMqtt, {
+    dataSubscriber: awilix.asClass(DataSubscriber, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
-    acquisitionMqtt: awilix.asClass(AcquisitionMqtt, {
+    calibrationSubscriber: awilix.asClass(CalibrationSubscriber, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    configPublisher: awilix.asClass(ConfigPublisher, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    acquisitionPublisher: awilix.asClass(AcquisitionPublisher, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    calibrationPublisher: awilix.asClass(CalibrationPublisher, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     mqttDispatcher: awilix.asClass(MqttDispatcher, {

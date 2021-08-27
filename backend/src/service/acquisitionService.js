@@ -3,8 +3,8 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up acquisition service");
 
 class AcquisitionService {
-  constructor({ acquisitionMqtt }) {
-    this.acquisitionMqtt = acquisitionMqtt;
+  constructor({ acquisitionPublisher }) {
+    this.acquisitionPublisher = acquisitionPublisher;
 
     this.acquiring = false;
     this.capturing = false;
@@ -25,19 +25,31 @@ class AcquisitionService {
   }
 
   stopCapturing() {
+    if (!this.capturing) {
+      log.warn("Capturing already stopped!");
+      return;
+    }
     this.capturing = false;
   }
 
   startAcquisition() {
-    this.acquisitionMqtt.publish("start");
+    if (this.acquiring) {
+      log.warn("Acquisition already started!");
+      return;
+    }
+    this.acquisitionPublisher.publish("start");
     this.acquiring = true;
   }
 
   stopAcquisition() {
+    if (!this.acquiring) {
+      log.warn("Acquisition already stopped!");
+      return;
+    }
     if (this.capturing) {
       this.capturing = false;
     }
-    this.acquisitionMqtt.publish("stop");
+    this.acquisitionPublisher.publish("stop");
     this.acquiring = false;
   }
 }
