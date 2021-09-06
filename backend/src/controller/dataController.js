@@ -15,4 +15,8 @@ router.get("/raw", (req, res) => {
   res.json(dataService.getRawData());
 });
 
+router.get("/debug", (req, res) => {
+  res.json(dataService.getDebugData());
+});
+
 module.exports = router;

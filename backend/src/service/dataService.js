@@ -18,6 +18,14 @@ class DataService {
       z: [0, 3, -2, 3, -1],
     };
 
+    this.debugData = {
+      t: [0, 0.1, 0.2, 0.3, 0.4],
+      f: [2, 2, 2, 2, 2],
+      x: [1, 0, -1, 0, 1],
+      y: [2, -1, 3, -1, 2],
+      z: [0, 3, -2, 3, -1],
+    };
+
     this.data = {
       frequency: 0,
       x: {
@@ -55,13 +63,19 @@ class DataService {
   }
 
   processData(data) {
-    this.save(data);
+    let t = [];
+    for (let i = 0; i < data.f.length; i++) {
+      t.push(i);
+    }
+    data["t"] = t;
+    this.debugData = data;
+    // this.save(data);
 
-    data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
-    data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
-    data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
+    // data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
+    // data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
+    // data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
 
-    this.data = data;
+    // this.data = data;
   }
 
   processSpectrum(orderSpectrum) {
@@ -98,6 +112,10 @@ class DataService {
 
   getRawData() {
     return this.rawData;
+  }
+
+  getDebugData() {
+    return this.debugData;
   }
 
   getData() {
