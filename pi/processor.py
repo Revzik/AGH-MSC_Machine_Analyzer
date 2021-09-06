@@ -26,11 +26,11 @@ class Processor(Process):
 
         self._main_buffer_idx = 0
         self._main_buffer_len = 1000
-        self._main_buffer = np.zeros((4, self._main_buffer_len))
+        self._main_buffer = np.zeros((4, self._main_buffer_len), dtype=np.float64)
 
         self._freq_buffer_idx = 0
-        time_x = np.ones(1000) * np.inf
-        time_y = np.zeros(1000)
+        time_x = np.ones(100, dtype=np.float64) * np.finfo(np.float64).min
+        time_y = np.zeros(100, dtype=np.float64)
         self._freq_buffer = np.stack([time_x, time_y])
 
     def __del__(self):
@@ -53,6 +53,8 @@ class Processor(Process):
         self._main_buffer_idx += 1
 
         if self._main_buffer_idx >= self._main_buffer_len:
+            self._timestamp = time.time()
+
             self._publish_raw_data()
             
             self._main_buffer[3, :] = np.interp(self._main_buffer[3, :], self._freq_buffer[1, :], self._freq_buffer[0, :])
@@ -66,18 +68,31 @@ class Processor(Process):
 
     def _publish_raw_data(self):
         print("Publishing raw data")
-        data = {"timestamp": self._timestamp,
-                "x": self._buffer[:, 0].tolist(), 
-                "y": self._buffer[:, 1].tolist(), 
-                "z": self._buffer[:, 2].tolist(), 
-                "t": self._buffer[:, 3].tolist()}
+        data = {
+            "timestamp": self._timestamp,
+            "x": self._main_buffer[0, :].tolist(),
+            "y": self._main_buffer[1, :].tolist(),
+            "z": self._main_buffer[2, :].tolist(),
+            "t": self._main_buffer[3, :].tolist()
+        }
         self._publish(PUB_RAW, json.dumps(data), qos=0)
 
     def _publish_processed_data(self):
         print("Publishing processed data")
-        data = {"timestamp": self._timestamp,
-                "x": self._buffer[:, 0].tolist(), 
-                "y": self._buffer[:, 1].tolist(), 
-                "z": self._buffer[:, 2].tolist(), 
-                "f": self._buffer[:, 3].tolist()}
+        data = {
+            "timestamp": self._timestamp,
+            "x": self._main_buffer[0, :].tolist(),
+            "y": self._main_buffer[1, :].tolist(),
+            "z": self._main_buffer[2, :].tolist(),
+            "f": self._main_buffer[3, :].tolist()
+        }
         self._publish(PUB_DATA, json.dumps(data), qos=0)
+
+    def _publish_calibration(self):
+        print("Publishing data for calibration")
+        data = {
+            "x": self._main_buffer[0, :].tolist(),
+            "y": self._main_buffer[1, :].tolist(),
+            "z": self._main_buffer[2, :].tolist()
+        }
+        self._publish(PUB_CALIBRATION, json.dumps(data), qos=0)

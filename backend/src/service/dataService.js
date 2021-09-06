@@ -17,7 +17,7 @@ class DataService {
       y: [2, -1, 3, -1, 2],
       z: [0, 3, -2, 3, -1],
     };
-    
+
     this.debugData = {
       t: [0, 0.1, 0.2, 0.3, 0.4],
       f: [2, 2, 2, 2, 2],
@@ -63,11 +63,11 @@ class DataService {
   }
 
   processData(data) {
-    t = []
-    for (let i = 0; i < data.f.length; i++){
+    let t = [];
+    for (let i = 0; i < data.f.length; i++) {
       t.push(i);
     }
-    data['t'] = t;
+    data["t"] = t;
     this.debugData = data;
     // this.save(data);
 

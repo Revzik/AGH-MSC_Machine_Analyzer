@@ -34,11 +34,11 @@ DATA_Z_REGISTER = 0x08
 
 
 class Sensor(Process):
-    def __init__(self, data_pipe):
+    def __init__(self, data_queue):
         print("Starting data acquisition")
         Process.__init__(self)
         
-        self._data_pipe = data_pipe
+        self._data_queue = data_queue
 
         self._acc_sensor_address = int(os.getenv("SENSOR_ADDRESS"), base=16)
         self._acc_sensor_bus = int(os.getenv("SENSOR_BUS"))
@@ -66,7 +66,7 @@ class Sensor(Process):
         rotation_freq = 1 / (current_time - self._tacho_prev_time)
         self._tacho_prev_time = current_time
 
-        self._data_pipe.send([rotation_freq, current_time, 'freq'])
+        self._data_queue.put([current_time, rotation_freq, 'freq'])
 
         
     def run(self):
@@ -75,7 +75,7 @@ class Sensor(Process):
             data = self._read_axes()
             data.append(start_time)
             data.append('acc')
-            self._data_pipe.send(data)
+            self._data_queue.put(data)
 
             sleep_time = 0.001 - time.time() - start_time
             if sleep_time > 0:

@@ -10,20 +10,38 @@ function Chart(props) {
       {
         line: {
           color: "#0064BE",
-          width: 1.5,
+          width: 1,
         },
+        marker: {
+          opacity: 0
+        }
       },
       {
         line: {
-          color: "#FFC200",
-          width: 1.5,
+          color: "#C8F800",
+          width: 1,
         },
+        marker: {
+          opacity: 0
+        }
+      },
+      {
+        line: {
+          color: "#C400B3",
+          width: 1,
+        },
+        marker: {
+          opacity: 0
+        }
       },
       {
         line: {
           color: "#FF4F00",
-          width: 1.5,
+          width: 1,
         },
+        marker: {
+          opacity: 0
+        }
       },
     ],
     layout: {

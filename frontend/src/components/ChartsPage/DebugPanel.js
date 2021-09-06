@@ -4,9 +4,9 @@ import Chart from "../UI/Chart";
 import Loader from "../UI/Loader";
 import Button from "../UI/Button";
 
-import classes from "./RawPanel.module.css";
+import classes from "./DebugPanel.module.css";
 
-function RawPanel(props) {
+function DebugPanel(props) {
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
@@ -92,4 +92,4 @@ function RawPanel(props) {
   return content;
 }
 
-export default RawPanel;
+export default DebugPanel;
