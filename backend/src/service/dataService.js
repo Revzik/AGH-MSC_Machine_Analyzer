@@ -12,18 +12,18 @@ class DataService {
     this.dataModel = dataModel;
 
     this.rawData = {
-      t: [0, 0.1, 0.2, 0.3, 0.4],
-      x: [1, 0, -1, 0, 1],
-      y: [2, -1, 3, -1, 2],
-      z: [0, 3, -2, 3, -1],
+      t: [],
+      x: [],
+      y: [],
+      z: [],
     };
 
     this.debugData = {
-      t: [0, 0.1, 0.2, 0.3, 0.4],
-      f: [2, 2, 2, 2, 2],
-      x: [1, 0, -1, 0, 1],
-      y: [2, -1, 3, -1, 2],
-      z: [0, 3, -2, 3, -1],
+      t: [],
+      f: [],
+      x: [],
+      y: [],
+      z: [],
     };
 
     this.data = {
@@ -33,8 +33,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [0, 1, 2, 3],
-          y: [0, 1, 2, 3],
+          x: [],
+          y: [],
         },
       },
       y: {
@@ -42,8 +42,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [0, 1, 2, 3],
-          y: [2, 3, 2, 3],
+          x: [],
+          y: [],
         },
       },
       z: {
@@ -51,8 +51,8 @@ class DataService {
         kurtosis: 0,
         peakFactor: 0,
         orderSpectrum: {
-          x: [0, 1, 2, 3],
-          y: [4, 3, 2, 1],
+          x: [],
+          y: [],
         },
       },
     };

@@ -86,7 +86,7 @@ function CalibrationPage(props) {
   function checkCalibration() {
     setState(STATE.CHECK);
     setIntervalState(setInterval(get, 100));
-    post("start");
+    post("start_simple");
   }
 
   function apply() {

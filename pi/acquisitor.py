@@ -35,19 +35,28 @@ DATA_Z_REGISTER = 0x08
 
 class Sensor(Process):
     def __init__(self, data_queue):
-        print("Starting data acquisition")
+        print("Initializing data acquisitor")
         Process.__init__(self)
         
         self._data_queue = data_queue
 
         self._acc_sensor_address = int(os.getenv("SENSOR_ADDRESS"), base=16)
         self._acc_sensor_bus = int(os.getenv("SENSOR_BUS"))
-        self._acc_sensor = SMBus(1)
+        self._acc_sensor = SMBus(self._acc_sensor_bus)
+
+        self._acc_range = RANGE_2G
+        self._acc_multiplier = RANGE_MULTIPLIER_2G
+        self._acc_filter = FILTER_1000HZ
+        self._set_settings()
 
         self._tacho_gpio = int(os.getenv("TACHO_GPIO"))
         self._tacho = Button(self._tacho_gpio)
         self._tacho_prev_time = -1
         self._tacho.when_activated = self._detect_marker
+
+    def _set_settings(self):
+        self._acc_sensor.write_byte_data(self._acc_sensor_address, RANGE_REGISTER, self._acc_range)
+        self._acc_sensor.write_byte_data(self._acc_sensor_address, FILTER_REGISTER, self._acc_filter)
 
     def _convert(self, num):
         if num >= 128:
@@ -58,6 +67,7 @@ class Sensor(Process):
         return [self._convert(x) for x in self._acc_sensor.read_i2c_block_data(self._acc_sensor_address, DATA_REGISTER_START, 3)]
 
     def _detect_marker(self):
+        print("acq running")
         if self._tacho_prev_time < 0:
             self._tacho_prev_time = time.time()
             return
@@ -68,7 +78,6 @@ class Sensor(Process):
 
         self._data_queue.put([current_time, rotation_freq, 'freq'])
 
-        
     def run(self):
         while True:
             start_time = time.time()

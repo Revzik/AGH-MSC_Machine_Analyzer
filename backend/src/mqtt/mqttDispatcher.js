@@ -50,6 +50,7 @@ class MqttDispatcher {
     });
 
     this.client.on("message", (topic, message, packet) => {
+      log.debug(`Received message on topic ${topic}`)
       this.dispatch(topic, message, packet);
     });
   }
