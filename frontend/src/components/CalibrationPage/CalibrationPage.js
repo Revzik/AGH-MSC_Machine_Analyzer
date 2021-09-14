@@ -86,7 +86,7 @@ function CalibrationPage(props) {
   function checkCalibration() {
     setState(STATE.CHECK);
     setIntervalState(setInterval(get, 100));
-    post("start");
+    post("start_simple");
   }
 
   function apply() {
@@ -137,15 +137,15 @@ function CalibrationPage(props) {
     <Card className={classes.card_horizontal}>
       <div className={classes.param}>
         <span className={classes.bold}>x:</span>
-        <span>{data.x} m/s^2</span>
+        <span>{+data.x.toFixed(2)} m/s^2</span>
       </div>
       <div className={classes.param}>
         <span className={classes.bold}>y:</span>
-        <span>{data.y} m/s^2</span>
+        <span>{+data.y.toFixed(2)} m/s^2</span>
       </div>
       <div className={classes.param}>
         <span className={classes.bold}>z:</span>
-        <span>{data.z} m/s^2</span>
+        <span>{+data.z.toFixed(2)} m/s^2</span>
       </div>
     </Card>
   );

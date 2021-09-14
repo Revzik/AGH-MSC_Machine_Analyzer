@@ -16,8 +16,8 @@ router.post("/", (req, res) => {
   res.sendStatus(200);
 });
 
-router.post("/start", (req, res) => {
-  calibrationService.startCalibration();
+router.post("/start_simple", (req, res) => {
+  calibrationService.startSimpleCalibration();
   res.sendStatus(200);
 });
 

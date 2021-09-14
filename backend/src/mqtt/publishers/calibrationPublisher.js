@@ -7,7 +7,7 @@ class CalibrationPublisher {
     this.publishCallback = null;
     this.initialized = false;
 
-    this.topic = "sensor/calibration/new";
+    this.topic = "sensor/calibration/control";
   }
 
   init(publishCallback) {
@@ -16,7 +16,7 @@ class CalibrationPublisher {
   }
 
   getTopic() {
-    return this.subscribeTopic;
+    return this.topic;
   }
 
   publish(message) {

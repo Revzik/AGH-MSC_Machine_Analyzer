@@ -24,14 +24,14 @@ class CalibrationService {
     this.data = data;
   }
 
-  startCalibration() {
+  startSimpleCalibration() {
     if (this.calibrating) {
       log.info("Calibration already started!");
       return;
     }
     this.calibrating = true;
     this.acquisitionService.stopAcquisition();
-    this.calibrationPublisher.publish("start");
+    this.calibrationPublisher.publish("start_simple");
   }
 
   stopCalibration() {
@@ -40,7 +40,7 @@ class CalibrationService {
       return;
     }
     this.calibrating = false;
-    this.calibrationPublisher.publish("stop");
+    this.calibrationPublisher.publish("stop_simple");
   }
 
   saveData(data) {

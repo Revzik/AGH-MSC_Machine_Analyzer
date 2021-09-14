@@ -36,7 +36,7 @@ function StatisticalParams(props) {
             <td>{props.data.z.kurtosis}</td>
           </tr>
           <tr>
-            <td className={classes.name}>Peak factor:</td>
+            <td className={classes.name}>Crest factor:</td>
             <td>{props.data.x.peakFactor}</td>
             <td>{props.data.y.peakFactor}</td>
             <td>{props.data.z.peakFactor}</td>
