@@ -18,7 +18,7 @@ class Calibrator(Thread):
         self.is_running = True
 
         self.buffer_idx = 0
-        self.buffer_len = 200
+        self.buffer_len = 320
         self.buffer = np.zeros((3, self.buffer_len), dtype=np.float64)
 
         self.cal = np.ones((3, 1))
@@ -35,7 +35,7 @@ class Calibrator(Thread):
         self.buffer_idx += 1
 
         if self.buffer_idx >= self.buffer_len:
-            self.cal = np.sqrt(np.mean(self.buffer * self.buffer, axis=1))
+            self.cal = np.mean(self.buffer, axis=1)
             self.publish_calibration()
             self.buffer_idx = 0
 

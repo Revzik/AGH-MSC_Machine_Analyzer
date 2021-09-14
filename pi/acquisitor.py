@@ -90,7 +90,6 @@ class Sensor(Thread):
         return [self.convert(x) for x in self.sensor.read_i2c_block_data(SENSOR_ADDRESS, DATA_REGISTER_START, 3)]
 
     def detect_marker(self):
-        print("acq running")
         if self.tacho_prev_time < 0:
             self.tacho_prev_time = time.time()
             return
