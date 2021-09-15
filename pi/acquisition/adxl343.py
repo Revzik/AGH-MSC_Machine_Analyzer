@@ -2,15 +2,12 @@ from utils.topics import ACC_TAG
 import time
 import os
 import spidev
-import gpiozero
-from threading import Thread
 
 
 # Sensor addresses and interrupt pin
 
 SPI_BUS = int(os.getenv("SENSOR_SPI_BUS"))
 SPI_CE = int(os.getenv("SENSOR_SPI_CE_PIN"))
-INT_GPIO = int(os.getenv("SENSOR_INT_GPIO"))
 
 
 # SPI CLK speed and transfer delay
@@ -44,48 +41,39 @@ POWER_CTL_ON  = 0b00001000
 POWER_CTL_OFF = 0b00000100
 
 INT_ENABLE_REG        = 0x2e
-INT_ENABLE_WATERMARK  = 0b00000010
-INT_ENABLE_DATA_READY = 0b10000000
 INT_ENABLE_ALL_OFF    = 0b00000000
 
-INT_MAP_REG = 0x2f
-INT_MAP_1   = 0b00000000
-
 FIFO_CTL_REG    = 0x38
-FIFO_CTL_FIFO   = 0b01011111
-FIFO_CTL_STREAM = 0b10011111
 FIFO_CTL_BYPASS = 0b00000000
 
 
-# Initialize the bus and interrupt pin statically for easier manipulation
+# Initialize the bus
 
 spi = spidev.SpiDev()
 spi.open(SPI_BUS, SPI_CE)
 spi.max_speed_hz = CLK_SPEED
 spi.mode = 3
 
-int_pin = gpiozero.DigitalInputDevice(INT_GPIO, pull_up=None, active_state=True)
-
 
 # Helper functions
 
 def get_bw_rate(fs):
     if fs <= 25:
-        return BW_RATE_25
+        return [BW_RATE_25, 25]
     elif fs <= 50:
-        return BW_RATE_50
+        return [BW_RATE_50, 50]
     elif fs <= 100:
-        return BW_RATE_100
+        return [BW_RATE_100, 100]
     elif fs <= 200:
-        return BW_RATE_200
+        return [BW_RATE_200, 200]
     elif fs <= 400:
-        return BW_RATE_400
+        return [BW_RATE_400, 400]
     elif fs <= 800:
-        return BW_RATE_800
+        return [BW_RATE_800, 800]
     elif fs <= 1600:
-        return BW_RATE_1600
+        return [BW_RATE_1600, 1600]
     else:
-        return BW_RATE_3200
+        return [BW_RATE_3200, 3200]
 
 def get_data_format(range):
     if range <= 2:
@@ -97,6 +85,34 @@ def get_data_format(range):
     else:
         return DATA_FORMAT_16G
 
+
+# Sensor setup
+
+def setup_sensor(bw_rate, data_format):
+    print("Setting up sensor registers...")
+
+    spi.writebytes([POWER_CTL_REG, POWER_CTL_OFF])
+    spi.writebytes([DATA_REG, data_format])
+    spi.writebytes([BW_RATE_REG, bw_rate])
+    spi.writebytes([INT_ENABLE_REG, INT_ENABLE_ALL_OFF])
+    spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
+    spi.writebytes([POWER_CTL_REG, POWER_CTL_ON])
+
+    print("Registers set!")
+    print("Starting sensor capture")
+
+def stop_sensor():
+    print("Stopping sensor capture")
+    print("Clearing up sensor registers...")
+
+    spi.writebytes([POWER_CTL_REG, POWER_CTL_OFF])
+    spi.writebytes([INT_ENABLE_REG, INT_ENABLE_ALL_OFF])
+    spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
+
+    print("Registers set!")
+
+
+# Acquisition
 
 def read_acc():
     addr = DATA_REG + 0x80 + 0x40
@@ -119,62 +135,28 @@ def read_acc():
 
 # Thread acquisition subclass
 
-class Sensor(Thread):
-    def __init__(self, queue, fs, range):
-        print("Initializing ADXL343 sensor...")
-        super(Sensor, self).__init__()
+def do_acquisition(stop_event, queue, fs, range):
+    print("Initializing ADXL343 sensor...")
 
-        self.running = False
-        self.queue = queue
+    bw_rate, fs = get_bw_rate(fs)
+    data_format = get_data_format(range)
 
-        self.bw_rate = get_bw_rate(fs)
-        self.data_format = get_data_format(range)
+    setup_sensor(bw_rate, data_format)
 
-        print("Sensor initialized!")
+    print("Sensor initialized!")
 
-    def run(self):
-        self.running = True
-        self._start_sensor()
-
-        while self.running:
-            self._get_data()
-
-        self._stop_sensor()
-
-    def stop(self):
-        self.running = False
-
-    def _start_sensor(self):
-        print("Setting up sensor registers...")
-
-        spi.writebytes([POWER_CTL_REG, POWER_CTL_OFF])
-        spi.writebytes([DATA_REG, self.data_format])
-        spi.writebytes([BW_RATE_REG, self.bw_rate])
-        spi.writebytes([INT_ENABLE_REG, INT_ENABLE_DATA_READY])
-        spi.writebytes([INT_MAP_REG, INT_MAP_1])
-        spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
-        spi.writebytes([POWER_CTL_REG, POWER_CTL_ON])
-
-        print("Registers set!")
-        print("Starting sensor capture")
-
-    def _stop_sensor(self):
-        print("Stopping sensor capture")
-        print("Clearing up sensor registers...")
-
-        spi.writebytes([POWER_CTL_REG, POWER_CTL_OFF])
-        spi.writebytes([INT_ENABLE_REG, INT_ENABLE_ALL_OFF])
-        spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
-
-        print("Registers set!")
-
-    def _get_data(self):
-        int_pin.wait_for_active()
-
+    while not stop_event.is_set():
         data_time = time.time()
         data = read_acc()
 
         data.append(data_time)
         data.append(ACC_TAG)
 
-        self.queue.put(data)
+        queue.put(data)
+        
+        sleep_time = time.time() - data_time
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+
+    print("Stopping ADXL343 sensor")
+    stop_sensor()

@@ -4,8 +4,10 @@ import json
 from utils.topics import SUB_CONFIG, SUB_ACQUISITION, SUB_CALIBRATION
 from processing.processor import Processor
 from processing.calibrator import Calibrator
-from acquisition.adxl343 import Sensor
 from acquisition.tacho import Tacho
+from acquisition.adxl343 import do_acquisition
+from threading import Thread, Event
+
 
 def create_action(topic, message):
     return {
@@ -32,9 +34,10 @@ class Manager():
         self.calibration = np.ones((3, 1))
 
         self.queue = Queue()
+        self.tacho = Tacho(self.queue)
         self.sensor = None
-        self.tacho = None
         self.processor = None
+        self.stop_event = None
 
         print("Manager initialized!")
 
@@ -59,59 +62,52 @@ class Manager():
             self.stop_processor()
         elif message.startswith("{"):
             self.stop_processor()
-            self.config = json.dumps(message)
+            self.config = json.loads(message)
 
     def process_config(self, message):
         self.stop_processor()
-        self.config = message
+        self.config = json.loads(message)
 
     def start_acquisition(self):
         self.stop_processor()
         print("Starting acquisition...")
 
-        print("zzz")
-        self.tacho = Tacho(self.queue)
-        print("aaa")
+        self.stop_event = Event()
+
         self.tacho.start()
-        print("bbb")
-        self.processor = Processor(self.publish_callback, self.queue, self.config, self.calibration)
-        print("bbc")
-        self.processor.start()
-        print("bcc")
-        # Why does it get stuck here? :C
-        # Maybe instead of classes use just functions with stop events? https://stackoverflow.com/questions/18018033/how-to-stop-a-looping-thread-in-python
-        self.sensor = Sensor(self.queue, self.config["fs"], self.config["range"])
-        print("ccc")
+        self.sensor = Thread(target=do_acquisition, args=(self.stop_event, self.queue, self.config["fs"], self.config["range"]))
         self.sensor.start()
-        print("ddd")
+
+        self.processor = Processor(self.stop_event, self.publish_callback, self.queue, self.config, self.calibration)
+        self.processor.start()
 
 
     def start_calibration(self):
         self.stop_processor()
         print("Starting acc calibration...")
 
-        self.tacho = Tacho(self.queue)
+        self.stop_event = Event()
+
         self.tacho.start()
-        self.sensor = Sensor(self.queue, self.config["fs"], self.config["range"])
+        self.sensor = Thread(target=do_acquisition, args=(self.stop_event, self.queue, self.config["fs"], self.config["range"]))
         self.sensor.start()
 
-        self.processor = Calibrator(self.publish_callback, self.queue, self.calibration)
+        self.processor = Calibrator(self.stop_event, self.publish_callback, self.queue, self.calibration)
         self.processor.start()
 
     def stop_processor(self):
         print("Stopping processing...")
 
+        if self.stop_event is not None:
+            self.stop_event.set()
+
         if self.processor is not None:
-            self.processor.stop()
-            self.processor = None
+            self.processor.join()
 
         if self.sensor is not None:
-            self.sensor.stop()
-            self.sensor = None
+            self.sensor.join()
 
-        if self.tacho is not None:
-            self.tacho.stop()
-            self.tacho = None
+        self.tacho.stop()
         
         print("Clearing queue")
         while True:

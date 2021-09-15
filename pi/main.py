@@ -1,3 +1,5 @@
+#!/home/pi/berryconda3/bin/python
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -5,7 +7,7 @@ load_dotenv()
 from paho.mqtt import client as mqtt
 import os
 from utils.topics import SUB_CALIBRATION, SUB_ACQUISITION, SUB_CONFIG
-from managing.manager import Manager
+from service.manager import Manager
 
 # Client functions
 

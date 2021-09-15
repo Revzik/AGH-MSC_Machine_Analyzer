@@ -5,11 +5,11 @@ from utils.topics import PUB_CALIBRATION
 
 
 class Calibrator(Thread):
-    def __init__(self, publish_callback, queue, calibration):
+    def __init__(self, stop_event, publish_callback, queue, calibration):
         print("Initializing calibrator...")
         super(Calibrator, self).__init__()
-
-        self.is_running = False
+        
+        self.stop_event = stop_event
 
         self.publish = publish_callback
         self.queue = queue
@@ -26,7 +26,7 @@ class Calibrator(Thread):
         self.buffer = np.zeros((3, self.buffer_len), dtype=np.float64)
 
         self.cal = np.ones((3, 1))
-        while self.is_running:
+        while not self.stop_event.is_set():
             data = self.queue.get()
             if data[-1] == 'acc':
                 self.process_acc(data[0:-2])

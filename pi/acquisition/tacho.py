@@ -2,35 +2,28 @@ import gpiozero
 import os
 import time
 from utils.topics import FREQ_TAG
-from threading import Thread
 
 
 TACHO_GPIO = int(os.getenv("TACHO_GPIO"))
-tacho_pin = gpiozero.DigitalInputDevice(TACHO_GPIO)
 
 
-class Tacho(Thread):
+class Tacho:
     def __init__(self, queue):
         print("Initializing tachometer...")
-        super(Tacho, self).__init__()
 
         self.running = False
         self.queue = queue
 
+        self.tacho = gpiozero.DigitalInputDevice(TACHO_GPIO)
         self.tacho_prev_time = -1
 
         print("Tachometer initialized!")
 
-    def run(self):
-        print("Starting tachometer")
-        self.running = True
-        while self.running:
-            tacho_pin.tacho.wait_for_active()
-            self._get_data()
-        print("Stopping tachometer")
+    def start(self):
+        self.tacho.when_activated = self._get_data
 
     def stop(self):
-        self.running = False
+        self.tacho.when_activated = None
 
     def _get_data(self):
         if self.tacho_prev_time < 0:
