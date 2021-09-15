@@ -1,13 +1,14 @@
+from utils.topics import ACC_TAG, FREQ_TAG
 from threading import Thread
 import numpy as np
 import time
 import json
-from topics import PUB_DATA, PUB_RAW
+from utils.topics import PUB_DATA, PUB_RAW
 
 
 class Processor(Thread):
     def __init__(self, publish_callback, queue, config, calibration):
-        print("Initializing data processor")
+        print("Initializing data processor...")
         super(Processor, self).__init__()
         
         self.is_running = False
@@ -19,6 +20,8 @@ class Processor(Thread):
 
         self.config = config
         self.cal = calibration
+
+        print("Processor initialized!")
 
     def run(self):
         self.is_running = True
@@ -34,9 +37,9 @@ class Processor(Thread):
 
         while self.is_running:
             data = self.queue.get()
-            if data[-1] == 'acc':
+            if data[-1] == ACC_TAG:
                 self.process_acc(data[0:-1])
-            elif data[-1] == 'freq':
+            elif data[-1] == FREQ_TAG:
                 self.process_freq(data[0:-1])
 
     def stop(self):

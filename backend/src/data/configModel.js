@@ -7,8 +7,8 @@ const { Schema } = mongoose;
 const defaultId = 1;
 const configSchema = new Schema({
   _id: { type: Number },
-  lowpass: { type: Number, default: 250 },
-  range: { type: Number, default: 4 },
+  fs: { type: Number, default: 3200 },
+  range: { type: Number, default: 16 },
   dOrder: { type: Number, default: 0.1 },
   maxOrder: { type: Number, default: 10 },
   windowLength: { type: Number, default: 200 },

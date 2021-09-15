@@ -1,18 +1,22 @@
 from threading import Thread
 import json
 import numpy as np
-from topics import PUB_CALIBRATION
+from utils.topics import PUB_CALIBRATION
 
 
 class Calibrator(Thread):
-    def __init__(self, publish_callback, queue):
-        print("Starting calibrator")
+    def __init__(self, publish_callback, queue, calibration):
+        print("Initializing calibrator...")
         super(Calibrator, self).__init__()
 
         self.is_running = False
 
         self.publish = publish_callback
         self.queue = queue
+        
+        self.calibration = calibration
+
+        print("Calibrator initialized!")
 
     def run(self):
         self.is_running = True

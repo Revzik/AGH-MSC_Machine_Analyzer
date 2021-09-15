@@ -40,7 +40,7 @@ class CalibrationService {
       return;
     }
     this.calibrating = false;
-    this.calibrationPublisher.publish("stop_simple");
+    this.calibrationPublisher.publish("stop");
   }
 
   saveData(data) {

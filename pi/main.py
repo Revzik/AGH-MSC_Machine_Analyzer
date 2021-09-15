@@ -4,8 +4,8 @@ load_dotenv()
 
 from paho.mqtt import client as mqtt
 import os
-from topics import SUB_CALIBRATION, SUB_ACQUISITION, SUB_CONFIG
-from manager import Manager
+from utils.topics import SUB_CALIBRATION, SUB_ACQUISITION, SUB_CONFIG
+from managing.manager import Manager
 
 # Client functions
 

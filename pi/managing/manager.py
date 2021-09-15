@@ -1,10 +1,11 @@
 from queue import Queue, Empty
 import numpy as np
 import json
-from topics import SUB_CONFIG, SUB_ACQUISITION, SUB_CALIBRATION
-from processor import Processor
-from calibrator import Calibrator
-from acquisitor import Sensor
+from utils.topics import SUB_CONFIG, SUB_ACQUISITION, SUB_CALIBRATION
+from processing.processor import Processor
+from processing.calibrator import Calibrator
+from acquisition.adxl343 import Sensor
+from acquisition.tacho import Tacho
 
 def create_action(topic, message):
     return {
@@ -14,13 +15,13 @@ def create_action(topic, message):
 
 class Manager():
     def __init__(self, publish_callback):
-        print("Initializing manager")
+        print("Initializing manager...")
 
         self.publish_callback = publish_callback
 
         self.config = {
-            "lowpass": 250,
-            "range": 4,
+            "fs": 3200,
+            "range": 16,
             "dOrder": 0.1,
             "maxOrder": 10,
             "windowLength": 200,
@@ -32,7 +33,10 @@ class Manager():
 
         self.queue = Queue()
         self.sensor = None
+        self.tacho = None
         self.processor = None
+
+        print("Manager initialized!")
 
     def process_action(self, topic, action):
         if topic == SUB_ACQUISITION:
@@ -58,51 +62,61 @@ class Manager():
             self.config = json.dumps(message)
 
     def process_config(self, message):
-        print(message)
+        self.stop_processor()
+        self.config = message
 
     def start_acquisition(self):
-        print("Stopping previous processes")
         self.stop_processor()
+        print("Starting acquisition...")
 
-        print("Creating processes")
-        print("Creating sensor")
-        self.sensor = Sensor(self.queue)
-        print("Creating processor")
+        print("zzz")
+        self.tacho = Tacho(self.queue)
+        print("aaa")
+        self.tacho.start()
+        print("bbb")
         self.processor = Processor(self.publish_callback, self.queue, self.config, self.calibration)
-
-        print("Starting processes")
-        self.sensor.start()
+        print("bbc")
         self.processor.start()
+        print("bcc")
+        # Why does it get stuck here? :C
+        # Maybe instead of classes use just functions with stop events? https://stackoverflow.com/questions/18018033/how-to-stop-a-looping-thread-in-python
+        self.sensor = Sensor(self.queue, self.config["fs"], self.config["range"])
+        print("ccc")
+        self.sensor.start()
+        print("ddd")
+
 
     def start_calibration(self):
-        print("Stopping previous processes")
         self.stop_processor()
+        print("Starting acc calibration...")
 
-        print("Creating processes")
-        print("Creating sensor")
-        self.sensor = Sensor(self.queue)
-        print("Creating calibrator")
-        self.processor = Calibrator(self.publish_callback, self.queue)
-        
-        print("Starting processes")
+        self.tacho = Tacho(self.queue)
+        self.tacho.start()
+        self.sensor = Sensor(self.queue, self.config["fs"], self.config["range"])
         self.sensor.start()
+
+        self.processor = Calibrator(self.publish_callback, self.queue, self.calibration)
         self.processor.start()
 
     def stop_processor(self):
-        if self.sensor is not None and self.sensor.is_running:
-            self.sensor.stop()
-        if self.processor is not None and self.processor.is_running:
+        print("Stopping processing...")
+
+        if self.processor is not None:
             self.processor.stop()
+            self.processor = None
+
+        if self.sensor is not None:
+            self.sensor.stop()
+            self.sensor = None
+
+        if self.tacho is not None:
+            self.tacho.stop()
+            self.tacho = None
         
+        print("Clearing queue")
         while True:
             try:
-                print("Clearing queue")
                 self.queue.get(block=False)
             except Empty:
                 print("Queue empty")
                 break
-
-        if self.sensor is not None:
-            self.sensor.join()
-        if self.processor is not None:
-            self.processor.join()
