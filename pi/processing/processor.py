@@ -1,16 +1,17 @@
+from utils.topics import ACC_TAG, FREQ_TAG
 from threading import Thread
 import numpy as np
 import time
 import json
-from topics import PUB_DATA, PUB_RAW
+from utils.topics import PUB_DATA, PUB_RAW
 
 
 class Processor(Thread):
-    def __init__(self, publish_callback, queue, config, calibration):
-        print("Initializing data processor")
+    def __init__(self, stop_event, publish_callback, queue, config, calibration):
+        print("Initializing data processor...")
         super(Processor, self).__init__()
         
-        self.is_running = False
+        self.stop_event = stop_event
 
         self.publish = publish_callback
         self.queue = queue
@@ -20,11 +21,11 @@ class Processor(Thread):
         self.config = config
         self.cal = calibration
 
-    def run(self):
-        self.is_running = True
+        print("Processor initialized!")
 
+    def run(self):
         self.main_buffer_idx = 0
-        self.main_buffer_len = 1000
+        self.main_buffer_len = 3200
         self.main_buffer = np.zeros((4, self.main_buffer_len), dtype=np.float64)
 
         self.freq_buffer_idx = 0
@@ -32,15 +33,12 @@ class Processor(Thread):
         time_y = np.zeros(100, dtype=np.float64)
         self.freq_buffer = np.stack([time_x, time_y])
 
-        while self.is_running:
+        while not self.stop_event.is_set():
             data = self.queue.get()
-            if data[-1] == 'acc':
+            if data[-1] == ACC_TAG:
                 self.process_acc(data[0:-1])
-            elif data[-1] == 'freq':
+            elif data[-1] == FREQ_TAG:
                 self.process_freq(data[0:-1])
-
-    def stop(self):
-        self.is_running = False
     
     def process_acc(self, data):
         self.main_buffer[:, self.main_buffer_idx] = np.array(data)

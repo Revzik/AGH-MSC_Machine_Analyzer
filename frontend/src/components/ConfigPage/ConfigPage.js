@@ -9,13 +9,15 @@ import SelectConfigParam from "./SelectConfigParam";
 import classes from "./ConfigPage.module.css";
 import Loader from "../UI/Loader";
 
-const lowpassOptions = [
-  { value: 32, name: "32 Hz" },
-  { value: 64, name: "64 Hz" },
-  { value: 125, name: "125 Hz" },
-  { value: 250, name: "250 Hz" },
-  { value: 500, name: "500 Hz" },
-  { value: 1000, name: "1000 Hz" },
+const fsOptions = [
+  { value: 25, name: "25 Hz" },
+  { value: 50, name: "50 Hz" },
+  { value: 100, name: "100 Hz" },
+  { value: 200, name: "200 Hz" },
+  { value: 400, name: "400 Hz" },
+  { value: 800, name: "800 Hz" },
+  { value: 1600, name: "1600 Hz" },
+  { value: 3200, name: "3200 Hz" },
 ];
 const rangeOptions = [
   { value: 2, name: "2 g" },
@@ -28,7 +30,7 @@ function ConfigPage(props) {
   const [error, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
-    lowpass: "",
+    fs: "",
     range: "",
     dOrder: "",
     maxOrder: "",
@@ -116,9 +118,8 @@ function ConfigPage(props) {
     let fixedSettings = {};
     for (const key in settings) {
       if (!types[key]) {
-        continue;
-      }
-      if (types[key].includes("int")) {
+        fixedSettings[key] = parseInt(settings[key]);
+      } else if (types[key].includes("int")) {
         fixedSettings[key] = parseInt(settings[key]);
       } else if (types[key].includes("float")) {
         fixedSettings[key] = parseFloat(settings[key]);
@@ -144,11 +145,11 @@ function ConfigPage(props) {
       <form className={classes.form} onSubmit={applyConfigHandler}>
         <Card className={classes.card} title="Sensor">
           <SelectConfigParam
-            name="lowpass"
-            description="Lowpass filter cutoff"
-            options={lowpassOptions}
+            name="fs"
+            description="Sampling frequency"
+            options={fsOptions}
             changeHandler={onChangeHandler}
-            value={settings.lowpass}
+            value={settings.fs}
           />
           <SelectConfigParam
             name="range"
