@@ -10,6 +10,13 @@ from utils import *
 from manager import Manager
 from multiprocessing import Pipe
 
+    
+# Process manager
+
+publish_out, publish_in = Pipe()
+manager = Manager(publish_in)
+
+
 # Client functions
 
 def on_connect(client, userdata, flags, rc):
@@ -24,6 +31,7 @@ def on_message(client, userdata, msg):
     message = msg.payload.decode("ascii")
     print("Message received. Topic: {}, Payload: {}".format(topic, message))
     manager.process_action(topic, message)
+    
 
 # Configuring the client
 
@@ -39,11 +47,6 @@ client.connect(
     os.getenv("MQTT_URL"), port=int(os.getenv("MQTT_PORT")), keepalive=60
 )
 client.loop_start()
-    
-# Process manager
-
-publish_out, publish_in = Pipe()
-manager = Manager(publish_in)
 
 try:
     while True:

@@ -20,6 +20,7 @@ function setup() {
   const CalibrationService = require("./service/calibrationService");
 
   const RawDataSubscriber = require('./mqtt/subscribers/rawDataSubscriber');
+  const DebugDataSubscriber = require('./mqtt/subscribers/debugDataSubscriber');
   const DataSubscriber = require("./mqtt/subscribers/dataSubscriber");
   const CalibrationSubscriber = require("./mqtt/subscribers/calibrationSubscriber");
 
@@ -50,6 +51,9 @@ function setup() {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     rawDataSubscriber: awilix.asClass(RawDataSubscriber, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
+    debugDataSubscriber: awilix.asClass(DebugDataSubscriber, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
     dataSubscriber: awilix.asClass(DataSubscriber, {

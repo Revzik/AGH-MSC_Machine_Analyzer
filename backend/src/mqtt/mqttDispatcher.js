@@ -5,8 +5,9 @@ log.info("Setting up MQTT dispatcher");
 const mqtt = require("mqtt");
 
 class MqttDispatcher {
-  constructor({ rawDataSubscriber, dataSubscriber, calibrationSubscriber, configPublisher, acquisitionPublisher, calibrationPublisher }) {
+  constructor({ rawDataSubscriber, debugDataSubscriber, dataSubscriber, calibrationSubscriber, configPublisher, acquisitionPublisher, calibrationPublisher }) {
     this.rawDataSubscriber = rawDataSubscriber;
+    this.debugDataSubscriber = debugDataSubscriber;
     this.dataSubscriber = dataSubscriber;
     this.calibrationSubscriber = calibrationSubscriber;
 
@@ -32,6 +33,7 @@ class MqttDispatcher {
       log.info("Connected to the MQTT broker");
 
       this.rawDataSubscriber.init(this.subscribe);
+      this.debugDataSubscriber.init(this.subscribe);
       this.dataSubscriber.init(this.subscribe);
       this.calibrationSubscriber.init(this.subscribe);
 
@@ -79,6 +81,9 @@ class MqttDispatcher {
     switch (topic) {
       case this.rawDataSubscriber.getTopic():
         this.rawDataSubscriber.process(message);
+        break;
+      case this.debugDataSubscriber.getTopic():
+        this.debugDataSubscriber.process(message);
         break;
       case this.dataSubscriber.getTopic():
         this.dataSubscriber.process(message);

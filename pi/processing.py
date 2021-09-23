@@ -103,7 +103,7 @@ class Analyzer(Process):
             self.analyze(timestamp, data, freq)
         print("Stopping analyzer")
 
-    def send_raw_data(self, timestamp: float, data: np.ndarray) -> dict:
+    def send_raw_data(self, timestamp: float, data: np.ndarray) -> None:
         print("Publishing raw data")
         data = {
             "timestamp": timestamp,
@@ -114,8 +114,19 @@ class Analyzer(Process):
         }
         self.publish_pipe.send(pack(PUB_RAW, data, 0))
 
+    def send_debug_data(self, timestamp: float, data: np.ndarray) -> None:
+        print("Publishing debug data")
+        data = {
+            "timestamp": timestamp,
+            "x": data[0, :].tolist(),
+            "y": data[1, :].tolist(),
+            "z": data[2, :].tolist(),
+            "f": data[3, :].tolist()
+        }
+        self.publish_pipe.send(pack(PUB_DEBUG, data, 0))
+
     def analyze(self, timestamp: float, data: np.ndarray, freq):
         self.send_raw_data(timestamp, data)
         data[3, :] = np.interp(data[3, :], freq[0, :], freq[1, :])
         data[0:3, :] = data[0:3, :] * 9.81 * 32 / 8192
-        # publish_processed_data(publish, timestamp, data)
+        self.send_debug_data(timestamp, data)

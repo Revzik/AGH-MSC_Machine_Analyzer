@@ -3,6 +3,7 @@ import json
 
 
 PUB_RAW = "sensor/data/raw"
+PUB_DEBUG = "sensor/data/debug"
 PUB_DATA = "sensor/data/processed"
 PUB_CALIBRATION = "sensor/calibration/data"
 
