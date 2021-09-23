@@ -4,6 +4,7 @@ from multiprocessing import Event, Process, Queue
 from multiprocessing.connection import Connection
 from arrayqueues import ArrayQueue
 import numpy as np
+import scipy.signal as sig
 import time
 
 
@@ -83,11 +84,14 @@ class Analyzer(Process):
         self.data_queue: ArrayQueue = data_queue
         self.freq_queue: ArrayQueue = freq_queue
 
+        self.fs: int = fs
         self.win_len: int = win_len
         self.win_step: int = win_step
         self.n_averages: int = n_averages
         self.d_order: float = d_order
         self.max_order: float = max_order
+
+        self.b, self.a = sig.butter(27, 0.8, btype='low', analog=False)
         
         print("Analyzer initialized!")
 
@@ -100,8 +104,48 @@ class Analyzer(Process):
             freq = self.freq_queue.get()
             print("Got data!")
 
-            self.analyze(timestamp, data, freq)
+            self.analyze_and_send(timestamp, data, freq)
         print("Stopping analyzer")
+
+    def analyze_and_send(self, timestamp: float, data: np.ndarray, shaft_freq: np.ndarray) -> None:
+        self.send_raw_data(timestamp, data)
+        x, y, z, f = self.preprocess(data, shaft_freq)
+        spec_x, spec_y, spec_z = self.order_spectrum(x, y, z, f)
+        self.send_debug_data(timestamp, spec_x, spec_y, spec_z)
+
+    def preprocess(self, data: np.ndarray, shaft_freq: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        # Get shaft frequency for every data sample
+        freq = np.interp(data[3, :], shaft_freq[0, :], shaft_freq[1, :])
+        data = data[0:3, :] * 9.81 * 32 / 8192
+
+        # Remove DC offset
+        means = np.mean(data, axis=1)
+        data = data - means.reshape(3, 1)
+
+        # Lowpass filter at 0.4 fs
+        data = sig.lfilter(self.b, self.a, data, axis=1)
+
+        return (data[0, :], data[1, :], data[2, :], freq)
+
+    def order_spectrum(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, f: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        X, Y, Z, F = self.window(x, y, z, f)
+        return (np.mean(X, axis=0), np.mean(Y, axis=0), np.mean(Z, axis=0))
+
+    def window(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, f: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        X = np.zeros((self.n_averages, self.win_len))
+        Y = np.zeros((self.n_averages, self.win_len))
+        Z = np.zeros((self.n_averages, self.win_len))
+        F = np.zeros((self.n_averages, self.win_len))
+
+        j = 0
+        for i in range(self.n_averages):
+            X[i, :] = x[j:j + self.win_len]
+            Y[i, :] = y[j:j + self.win_len]
+            Z[i, :] = z[j:j + self.win_len]
+            F[i, :] = f[j:j + self.win_len]
+            j += self.win_step
+
+        return (X, Y, Z, F)
 
     def send_raw_data(self, timestamp: float, data: np.ndarray) -> None:
         print("Publishing raw data")
@@ -114,19 +158,15 @@ class Analyzer(Process):
         }
         self.publish_pipe.send(pack(PUB_RAW, data, 0))
 
-    def send_debug_data(self, timestamp: float, data: np.ndarray) -> None:
+    def send_debug_data(self, timestamp: float, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> None:
         print("Publishing debug data")
         data = {
             "timestamp": timestamp,
-            "x": data[0, :].tolist(),
-            "y": data[1, :].tolist(),
-            "z": data[2, :].tolist(),
-            "f": data[3, :].tolist()
+            "x": x.tolist(),
+            "y": y.tolist(),
+            "z": z.tolist(),
+            "t0": 0,
+            "dt": 1 / self.fs,
+            "nt": x.size
         }
         self.publish_pipe.send(pack(PUB_DEBUG, data, 0))
-
-    def analyze(self, timestamp: float, data: np.ndarray, freq):
-        self.send_raw_data(timestamp, data)
-        data[3, :] = np.interp(data[3, :], freq[0, :], freq[1, :])
-        data[0:3, :] = data[0:3, :] * 9.81 * 32 / 8192
-        self.send_debug_data(timestamp, data)

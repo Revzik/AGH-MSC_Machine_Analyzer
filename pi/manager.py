@@ -92,6 +92,8 @@ class Manager():
         self.stop_processing()
         print("Starting acquisition...")
 
+        self.stop_event.clear()
+
         self.tacho.start()
         self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
         self.sensor.start()
@@ -109,6 +111,8 @@ class Manager():
     def start_calibration(self) -> None:
         self.stop_processing()
         print("Starting acc calibration...")
+
+        self.stop_event.clear()
 
         self.sensor = Sensor(self.data_queue, self.stop_event, self.config["fs"], self.config["range"])
         self.sensor.start()
@@ -131,5 +135,3 @@ class Manager():
         self.data_queue.clear()
         self.freq_queue.clear()
         print("Queues empty")
-
-        self.stop_event.clear()

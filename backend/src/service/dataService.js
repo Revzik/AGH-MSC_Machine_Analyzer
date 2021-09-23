@@ -64,8 +64,10 @@ class DataService {
 
   processDebugData(data) {
     let t = [];
-    for (let i = 0; i < data.f.length; i++) {
-      t.push(i);
+    let ti = data.t0;
+    for (let i = 0; i < data.nt; i++) {
+      t.push(ti);
+      ti += data.dt;
     }
     data["t"] = t;
     this.debugData = data;

@@ -51,7 +51,6 @@ function DebugPanel(props) {
       { name: "x", x: data.t, y: data.x },
       { name: "y", x: data.t, y: data.y },
       { name: "z", x: data.t, y: data.z },
-      { name: "freq", x: data.t, y: data.f },
     ];
   }
 
