@@ -90,32 +90,25 @@ class Manager():
 
     def start_acquisition(self) -> None:
         self.stop_processing()
-        print("Starting acquisition...")      
-        
-        try:
-            self.stop_event.clear()
+        print("Starting acquisition...")
 
-            self.tacho.start()
-            self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
-            self.sensor.start()
+        self.tacho.start()
+        self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
+        self.sensor.start()
 
-            data_buffer_length, freq_buffer_length = self.get_analyzer_buffer_length()
-            self.buffer = Buffer(self.stop_event, self.queue_in, self.data_queue, self.freq_queue,
-                                data_buffer_length, freq_buffer_length)
-            self.buffer.start()
+        data_buffer_length, freq_buffer_length = self.get_analyzer_buffer_length()
+        self.buffer = Buffer(self.stop_event, self.queue_in, self.data_queue, self.freq_queue,
+                            data_buffer_length, freq_buffer_length)
+        self.buffer.start()
 
-            win_len, win_step, n_averages, d_order, max_order = self.get_analyzer_params()
-            self.analyzer = Analyzer(self.publish_pipe, self.stop_event, self.data_queue, self.freq_queue,
-                                     win_len, win_step, n_averages, d_order, max_order)
-            self.analyzer.start()
-        except Exception as e:
-            print(e)
+        win_len, win_step, n_averages, d_order, max_order = self.get_analyzer_params()
+        self.analyzer = Analyzer(self.publish_pipe, self.stop_event, self.data_queue, self.freq_queue,
+                                 self.config["fs"], win_len, win_step, n_averages, d_order, max_order)
+        self.analyzer.start()
 
     def start_calibration(self) -> None:
         self.stop_processing()
         print("Starting acc calibration...")
-        
-        self.stop_event.clear()
 
         self.sensor = Sensor(self.data_queue, self.stop_event, self.config["fs"], self.config["range"])
         self.sensor.start()
@@ -128,17 +121,6 @@ class Manager():
         print("Stopping processing...")
 
         self.stop_event.set()
-
-        if self.analyzer is not None:
-            self.analyzer.join()
-        if self.calibrator is not None:
-            self.calibrator.join()
-        if self.buffer is not None:
-            self.buffer.join()
-        if self.sensor is not None:
-            self.sensor.join()
-        if self.tacho.is_running():
-            self.tacho.stop()
         
         print("Clearing queues")
         while True:
@@ -149,3 +131,5 @@ class Manager():
         self.data_queue.clear()
         self.freq_queue.clear()
         print("Queues empty")
+
+        self.stop_event.clear()

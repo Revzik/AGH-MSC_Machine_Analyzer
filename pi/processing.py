@@ -11,6 +11,8 @@ class Buffer(Process):
     def __init__(self, stop_event: Event, input_queue: Queue, data_queue: ArrayQueue, freq_queue: ArrayQueue,
                  data_buffer_length:int = 3200, freq_buffer_length:int = 200) -> None:
         print("Initializing data buffer...")
+        print("Data buffer length: {}".format(data_buffer_length))
+        print("Frequency buffer length: {}".format(freq_buffer_length))
         super(Buffer, self).__init__()
         
         self.stop_event: Event = stop_event
@@ -30,12 +32,14 @@ class Buffer(Process):
         print("Buffer initialized!")
 
     def run(self) -> None:
+        print("Starting buffering")
         while not self.stop_event.is_set():
             data = self.input_queue.get()
             if len(data) == 4:
                 self.process_acc(data)
             elif len(data) == 2:
                 self.process_freq(data)
+        print("Stopping buffering")
     
     def process_acc(self, data: List[float]) -> None:
         self.data_buffer[:, self.data_buffer_idx] = np.array(data)
@@ -62,8 +66,14 @@ class Calibrator(Process):
 
 class Analyzer(Process):
     def __init__(self, publish_pipe: Connection, stop_event: Event, data_queue: ArrayQueue, freq_queue: ArrayQueue, 
-                 win_len: int, win_step: int, n_averages: int, d_order: float, max_order: float) -> None:
+                 fs: int, win_len: int, win_step: int, n_averages: int, d_order: float, max_order: float) -> None:
         print("Initializing analyzer process...")
+        print("Sampling frequency: {} Hz".format(fs))
+        print("Window length: {} samples".format(win_len))
+        print("Window step: {} samples".format(win_step))
+        print("Number of averages: {}".format(n_averages))
+        print("Order delta: {} rev".format(d_order))
+        print("Max order: {} rev".format(max_order))
         super(Analyzer, self).__init__()
 
         self.publish_pipe: Connection = publish_pipe
@@ -83,17 +93,15 @@ class Analyzer(Process):
 
     def run(self) -> None:
         print("starting analyzer")
-        try:
-            while not self.stop_event.is_set():
-                print("Awaiting data!")
-                timestamp = time.time()
-                data = self.data_queue.get()
-                freq = self.freq_queue.get()
-                print("Got data!")
+        while not self.stop_event.is_set():
+            print("Awaiting data!")
+            timestamp = time.time()
+            data = self.data_queue.get()
+            freq = self.freq_queue.get()
+            print("Got data!")
 
-                self.analyze(timestamp, data, freq)
-        except Exception as e:
-            print(e)
+            self.analyze(timestamp, data, freq)
+        print("Stopping analyzer")
 
     def send_raw_data(self, timestamp: float, data: np.ndarray) -> dict:
         print("Publishing raw data")

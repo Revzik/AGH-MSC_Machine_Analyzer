@@ -174,9 +174,11 @@ class Tacho:
         print("Tachometer initialized!")
 
     def start(self) -> None:
+        print("Starting tachometer")
         self.tacho.when_activated = self.get_data
 
     def stop(self) -> None:
+        print("Stopping tachometer")
         self.tacho.when_activated = None
 
     def is_running(self) -> bool:
