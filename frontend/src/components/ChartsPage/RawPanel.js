@@ -54,6 +54,12 @@ function RawPanel(props) {
     ];
   }
 
+  function getFreqArray() {
+    return [
+      { name: "f", x: data.t, y: data.f },
+    ];
+  }
+
   const button = (
     <Button onClick={fetchDataHandler} onClickArgs={[false]}>
       Refresh
@@ -68,12 +74,20 @@ function RawPanel(props) {
   );
   if (data) {
     content = (
+      <React.Fragment>
       <Chart
         data={getDataArray()}
         title="Raw data"
         xlabel="t [s]"
         ylabel="a [m/s^2]"
       />
+      <Chart
+        data={getFreqArray()}
+        title="Frequency"
+        xlabel="t [s]"
+        ylabel="f [Hz]"
+      />
+      </React.Fragment>
     );
   }
   if (isLoading) {

@@ -46,11 +46,19 @@ function DebugPanel(props) {
     };
   }, [refresh]);
 
-  function getDataArray() {
+  function getFftDataArray() {
     return [
-      { name: "x", x: data.t, y: data.x },
-      { name: "y", x: data.t, y: data.y },
-      { name: "z", x: data.t, y: data.z },
+      { name: "x", x: data.fft.t, y: data.fft.x },
+      { name: "y", x: data.fft.t, y: data.fft.y },
+      { name: "z", x: data.fft.t, y: data.fft.z },
+    ];
+  }
+
+  function getOrderDataArray() {
+    return [
+      { name: "x", x: data.order.t, y: data.order.x },
+      { name: "y", x: data.order.t, y: data.order.y },
+      { name: "z", x: data.order.t, y: data.order.z },
     ];
   }
 
@@ -68,12 +76,20 @@ function DebugPanel(props) {
   );
   if (data) {
     content = (
-      <Chart
-        data={getDataArray()}
-        title="Debug data"
-        xlabel="t [s]"
-        ylabel="a [m/s^2]"
-      />
+      <React.Fragment>
+        <Chart
+          data={getFftDataArray()}
+          title="FFT data"
+          xlabel="f [Hz]"
+          ylabel="a [m/s^2]"
+        />
+        <Chart
+          data={getOrderDataArray()}
+          title="Order data"
+          xlabel="order"
+          ylabel="a [m/s^2]"
+        />
+      </React.Fragment>
     );
   }
   if (isLoading) {
