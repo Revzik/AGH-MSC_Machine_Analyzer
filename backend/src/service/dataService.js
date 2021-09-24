@@ -19,11 +19,23 @@ class DataService {
     };
 
     this.debugData = {
-      t: [],
-      f: [],
-      x: [],
-      y: [],
-      z: [],
+      timestamp: 0,
+      fft: {
+        x: [],
+        y: [],
+        z: [],
+        t0: 0,
+        dt: 1,
+        nt: 0,
+      },
+      order: {
+        x: [],
+        y: [],
+        z: [],
+        t0: 0,
+        dt: 1,
+        nt: 0,
+      },
     };
 
     this.data = {
@@ -63,11 +75,22 @@ class DataService {
   }
 
   processDebugData(data) {
-    let t = [];
-    for (let i = 0; i < data.f.length; i++) {
-      t.push(i);
+    let orderT = [];
+    let orderTi = data.order.t0;
+    for (let i = 0; i < data.order.nt; i++) {
+      orderT.push(orderTi);
+      orderTi += data.order.dt;
     }
-    data["t"] = t;
+    data.order["t"] = orderT;
+
+    let fftT = [];
+    let fftTi = data.fft.t0;
+    for (let i = 0; i < data.fft.nt; i++) {
+      fftT.push(fftTi);
+      fftTi += data.fft.dt;
+    }
+    data.fft["t"] = fftT;
+
     this.debugData = data;
   }
 

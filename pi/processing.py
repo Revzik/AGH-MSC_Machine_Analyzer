@@ -4,7 +4,9 @@ from multiprocessing import Event, Process, Queue
 from multiprocessing.connection import Connection
 from arrayqueues import ArrayQueue
 import numpy as np
+import scipy.signal as sig
 import time
+import traceback
 
 
 class Buffer(Process):
@@ -83,11 +85,15 @@ class Analyzer(Process):
         self.data_queue: ArrayQueue = data_queue
         self.freq_queue: ArrayQueue = freq_queue
 
+        self.fs: int = fs
         self.win_len: int = win_len
         self.win_step: int = win_step
         self.n_averages: int = n_averages
         self.d_order: float = d_order
         self.max_order: float = max_order
+        self.n_orders = int(self.max_order / self.d_order + 1)
+
+        self.b, self.a = sig.butter(27, 0.8, btype='low', analog=False)
         
         print("Analyzer initialized!")
 
@@ -100,33 +106,99 @@ class Analyzer(Process):
             freq = self.freq_queue.get()
             print("Got data!")
 
-            self.analyze(timestamp, data, freq)
+            self.analyze_and_send(timestamp, data, freq)
         print("Stopping analyzer")
 
-    def send_raw_data(self, timestamp: float, data: np.ndarray) -> None:
+    def analyze_and_send(self, timestamp: float, data: np.ndarray, shaft_freq: np.ndarray) -> None:
+        try:
+            cal_data, f = self.preprocess(data, shaft_freq)
+            self.send_raw_data(timestamp, data, f)
+            fft_spec = self.fft_spectrum(cal_data)
+            ord_spec = self.order_spectrum(cal_data, f)
+            self.send_debug_data(timestamp, fft_spec, ord_spec)
+        except Exception:
+            print(traceback.format_exc())
+
+    def preprocess(self, data: np.ndarray, shaft_freq: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        # Get shaft frequency for every data sample
+        freq = np.interp(data[3, :], shaft_freq[0, :], shaft_freq[1, :])
+        data = data[0:3, :] * 9.81 * 32 / 8192
+
+        # Remove DC offset
+        data = data - np.mean(data, axis=1).reshape(3, 1)
+
+        # Lowpass filter at 0.4 fs
+        data = sig.lfilter(self.b, self.a, data, axis=1)
+
+        return (data, freq)
+
+    def order_spectrum(self, data: np.ndarray, f: np.ndarray) -> np.ndarray:
+        orders = np.linspace(0, self.max_order, self.n_orders)
+        t = np.linspace(0, self.win_len / self.fs, self.win_len)
+        
+        spec = np.zeros((3, self.n_orders))
+        
+        j = 0
+        for i in range(self.n_averages):
+            kernel = np.exp(2j * np.pi * np.outer(orders, f[j:j + self.win_len] * t))
+
+            spec[0, :] += np.abs(kernel.dot(data[0, j:j + self.win_len])) / self.n_orders
+            spec[1, :] += np.abs(kernel.dot(data[1, j:j + self.win_len])) / self.n_orders
+            spec[2, :] += np.abs(kernel.dot(data[2, j:j + self.win_len])) / self.n_orders
+            
+            j += self.win_step
+
+        spec = spec / self.n_averages
+        
+        return spec
+        
+    def fft_spectrum(self, data: np.ndarray):
+        spec = np.zeros((3, self.win_len))
+        
+        j = 0
+        for i in range(self.n_averages):
+            spec[0, :] += np.abs(np.fft.fft(data[0, j:j + self.win_len]))
+            spec[1, :] += np.abs(np.fft.fft(data[1, j:j + self.win_len]))
+            spec[2, :] += np.abs(np.fft.fft(data[2, j:j + self.win_len]))
+            
+            j += self.win_step
+
+        spec = spec / self.n_averages
+        
+        return spec[:, 0:self.win_len // 20]
+        
+
+    def send_raw_data(self, timestamp: float, data: np.ndarray, f: np.ndarray) -> None:
         print("Publishing raw data")
         data = {
             "timestamp": timestamp,
             "x": data[0, :].tolist(),
             "y": data[1, :].tolist(),
             "z": data[2, :].tolist(),
-            "t": data[3, :].tolist()
+            "t": data[3, :].tolist(),
+            "f": f.tolist()
         }
         self.publish_pipe.send(pack(PUB_RAW, data, 0))
 
-    def send_debug_data(self, timestamp: float, data: np.ndarray) -> None:
+    def send_debug_data(self, timestamp: float, fft_data: np.ndarray, order_data: np.ndarray) -> None:
         print("Publishing debug data")
         data = {
             "timestamp": timestamp,
-            "x": data[0, :].tolist(),
-            "y": data[1, :].tolist(),
-            "z": data[2, :].tolist(),
-            "f": data[3, :].tolist()
+            "fft": {
+                "x": fft_data[0, :].tolist(),
+                "y": fft_data[1, :].tolist(),
+                "z": fft_data[2, :].tolist(),
+                "t0": 0,
+                "dt": self.fs / self.win_len,
+                "nt": fft_data.shape[1]
+            },
+            "order": {
+                "x": order_data[0, :].tolist(),
+                "y": order_data[1, :].tolist(),
+                "z": order_data[2, :].tolist(),
+                "t0": 0,
+                "dt": self.d_order,
+                "nt": order_data.shape[1]
+            }
         }
         self.publish_pipe.send(pack(PUB_DEBUG, data, 0))
-
-    def analyze(self, timestamp: float, data: np.ndarray, freq):
-        self.send_raw_data(timestamp, data)
-        data[3, :] = np.interp(data[3, :], freq[0, :], freq[1, :])
-        data[0:3, :] = data[0:3, :] * 9.81 * 32 / 8192
-        self.send_debug_data(timestamp, data)
