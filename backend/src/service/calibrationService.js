@@ -7,7 +7,7 @@ class CalibrationService {
     this.calibrationPublisher = calibrationPublisher;
     this.acquisitionService = acquisitionService;
 
-    this.calibrating = false;
+    this.running = false;
 
     this.data = {
       x: 0,
@@ -24,26 +24,45 @@ class CalibrationService {
     this.data = data;
   }
 
-  startSimpleCalibration() {
-    if (this.calibrating) {
+  startCheck() {
+    if (this.running) {
       log.info("Calibration already started!");
       return;
     }
-    this.calibrating = true;
+    this.running = true;
     this.acquisitionService.stopAcquisition();
-    this.calibrationPublisher.publish("start_simple");
+    this.calibrationPublisher.publish("start_check");
+  }
+
+  stopCheck() {
+    if (!this.running) {
+      log.info("Calibration already started!");
+      return;
+    }
+    this.running = false;
+    this.calibrationPublisher.publish("stop_check");
+  }
+
+  startCalibration() {
+    if (this.running) {
+      log.info("Calibration already started!");
+      return;
+    }
+    this.running = true;
+    this.acquisitionService.stopAcquisition();
+    this.calibrationPublisher.publish("start_cal");
   }
 
   stopCalibration() {
-    if (!this.calibrating) {
+    if (!this.running) {
       log.info("Calibration already stopped!");
       return;
     }
-    this.calibrating = false;
-    this.calibrationPublisher.publish("stop");
+    this.running = false;
+    this.calibrationPublisher.publish("stop_cal");
   }
 
-  saveData(data) {
+  sendCalibration(data) {
     return this.calibrationPublisher.publish(JSON.stringify(data));
   }
 }
