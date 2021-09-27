@@ -9,6 +9,7 @@ const STEP = {
   X: 1,
   Y: 2,
   Z: 3,
+  FINAL: 4,
 };
 
 function CalibrationPanel(props) {
@@ -103,6 +104,10 @@ function CalibrationPanel(props) {
         z1: +props.data.z,
       };
     });
+    setCurrentStep(STEP.FINAL);
+  }
+
+  function apply() {
     setCurrentStep(STEP.IDLE);
     props.stateHandler(false);
     post("stop");
@@ -110,11 +115,16 @@ function CalibrationPanel(props) {
   }
 
   function cancel() {
+    setCurrentStep(STEP.IDLE);
     props.stateHandler(false);
     post("stop");
   }
 
-  let content = <Button onClick={start} disabled={props.disabled}>Start</Button>;
+  let content = (
+    <Button onClick={start} disabled={props.disabled}>
+      Start
+    </Button>
+  );
   if (currentStep === STEP.X) {
     content = (
       <React.Fragment>
@@ -137,7 +147,16 @@ function CalibrationPanel(props) {
     content = (
       <React.Fragment>
         <div>Place the sensor z axis up</div>
-        <Button onClick={setZ}>Apply</Button>
+        <Button onClick={setZ}>Next</Button>
+        <Button onClick={cancel}>Cancel</Button>
+      </React.Fragment>
+    );
+  }
+  if (currentStep === STEP.FINAL) {
+    content = (
+      <React.Fragment>
+        <div>Press apply to finish calibration</div>
+        <Button onClick={apply}>Apply</Button>
         <Button onClick={cancel}>Cancel</Button>
       </React.Fragment>
     );

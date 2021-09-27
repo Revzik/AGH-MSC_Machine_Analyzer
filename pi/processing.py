@@ -59,15 +59,48 @@ class Buffer(Process):
 
 
 class Calibrator(Process):
-    def __init__(self):
+    def __init__(self, publish_pipe: Connection, stop_event: Event, data_queue: ArrayQueue, check: bool, cal_a: np.ndarray, cal_b: np.ndarray):
         print("Initializing calibrator...")
         super(Calibrator, self).__init__()
 
+        self.publish_pipe: Connection = publish_pipe
+
+        self.stop_event: Event = stop_event
+
+        self.data_queue: ArrayQueue = data_queue
+
+        self.check: bool = check
+        self.cal_a: np.ndarray = cal_a
+        self.cal_b: np.ndarray = cal_b
+
         print("Calibrator initialized!")
+
+    def run(self):
+        mode = "cal"
+        if self.check:
+            mode = "check"
+        print("Starting calibrator - mode: {}".format(mode))
+        while not self.stop_event.is_set():
+            data = self.data_queue.get()
+            self.send_data(data)
+        print("Stopping calibrator")
+
+    def send_data(self, data: np.ndarray):
+        print("Publishing data")
+        data = np.mean(data, axis=1)
+        if self.check:
+            data = data[0:3] * self.cal_a.reshape(3) + self.cal_b.reshape(3)
+        msg_data = {
+            "x": data[0],
+            "y": data[1],
+            "z": data[2]
+        }
+        self.publish_pipe.send(pack(PUB_CALIBRATION, msg_data, 0))
 
 
 class Analyzer(Process):
     def __init__(self, publish_pipe: Connection, stop_event: Event, data_queue: ArrayQueue, freq_queue: ArrayQueue, 
+                 cal_a: np.ndarray, cal_b: np.ndarray,
                  fs: int, win_len: int, win_step: int, n_averages: int, d_order: float, max_order: float) -> None:
         print("Initializing analyzer process...")
         print("Sampling frequency: {} Hz".format(fs))
@@ -84,6 +117,9 @@ class Analyzer(Process):
 
         self.data_queue: ArrayQueue = data_queue
         self.freq_queue: ArrayQueue = freq_queue
+
+        self.cal_a = cal_a
+        self.cal_b = cal_b
 
         self.fs: int = fs
         self.win_len: int = win_len
@@ -122,7 +158,7 @@ class Analyzer(Process):
     def preprocess(self, data: np.ndarray, shaft_freq: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         # Get shaft frequency for every data sample
         freq = np.interp(data[3, :], shaft_freq[0, :], shaft_freq[1, :])
-        data = data[0:3, :] * 9.81 * 32 / 8192
+        data = data[0:3, :] * self.cal_a + self.cal_b
 
         # Remove DC offset
         data = data - np.mean(data, axis=1).reshape(3, 1)

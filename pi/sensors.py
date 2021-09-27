@@ -159,6 +159,7 @@ class Sensor(Process):
         self.spi.writebytes([POWER_CTL_REG, POWER_CTL_OFF])
         self.spi.writebytes([INT_ENABLE_REG, INT_ENABLE_ALL_OFF])
         self.spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
+        self.spi.close()
 
         print("Registers set!")
 

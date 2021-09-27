@@ -26,7 +26,8 @@ class Manager():
             "tachoPoints": 1,
             "averages": 10
         }
-        self.calibration: np.ndarray = np.ones((3, 1))
+        self.cal_a: np.ndarray = np.ones((3, 1))
+        self.cal_b: np.ndarray = np.zeros((3, 1))
 
         self.queue_in: Queue = Queue()
         self.data_queue: ArrayQueue = ArrayQueue(32)
@@ -57,13 +58,28 @@ class Manager():
             self.stop_processing()
 
     def process_calibration(self, message: str) -> None:
-        if message == "start_simple":
-            self.start_calibration()
-        elif message == "stop":
+        if message == "start_check":
+            self.start_calibration(True)
+        elif message == "start_cal":
+            self.start_calibration(False)
+        elif message.startswith("stop"):
             self.stop_processing()
         elif message.startswith("{"):
             self.stop_processing()
-            self.config = json.loads(message)
+            self.update_calibration(json.loads(message))
+
+    def update_calibration(self, values: dict) -> None:
+        x0 = (values["x0y"] + values["x0z"]) / 2
+        y0 = (values["y0x"] + values["y0z"]) / 2
+        z0 = (values["z0x"] + values["z0y"]) / 2
+
+        self.cal_a[0] = 9.81 / (values["x1"] - x0)
+        self.cal_a[1] = 9.81 / (values["y1"] - y0)
+        self.cal_a[2] = 9.81 / (values["z1"] - z0)
+
+        self.cal_b[0] = -self.cal_a[0] * x0
+        self.cal_b[1] = -self.cal_a[1] * y0
+        self.cal_b[2] = -self.cal_a[2] * z0
 
     def process_config(self, message: str) -> None:
         self.stop_processing()
@@ -80,7 +96,7 @@ class Manager():
         return (data_buffer_length, freq_buffer_length)
 
     def get_calibrator_buffer_length(self) -> int:
-        return int(self.config["fs"] / 5)
+        return int(self.config["fs"] / 10)
 
     def get_analyzer_params(self) -> Tuple[int, int, int, float, float]:
         win_len = int(self.config["fs"] * self.config["windowLength"] / 1000)
@@ -91,40 +107,55 @@ class Manager():
     def start_acquisition(self) -> None:
         self.stop_processing()
         print("Starting acquisition...")
+        try:
 
-        self.stop_event.clear()
+            self.stop_event.clear()
 
-        self.tacho.start()
-        self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
-        self.sensor.start()
+            self.tacho.start()
+            self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
+            self.sensor.start()
 
-        data_buffer_length, freq_buffer_length = self.get_analyzer_buffer_length()
-        self.buffer = Buffer(self.stop_event, self.queue_in, self.data_queue, self.freq_queue,
-                            data_buffer_length, freq_buffer_length)
-        self.buffer.start()
+            data_buffer_length, freq_buffer_length = self.get_analyzer_buffer_length()
+            self.buffer = Buffer(self.stop_event, self.queue_in, self.data_queue, self.freq_queue,
+                                data_buffer_length, freq_buffer_length)
+            self.buffer.start()
 
-        win_len, win_step, n_averages, d_order, max_order = self.get_analyzer_params()
-        self.analyzer = Analyzer(self.publish_pipe, self.stop_event, self.data_queue, self.freq_queue,
-                                 self.config["fs"], win_len, win_step, n_averages, d_order, max_order)
-        self.analyzer.start()
+            win_len, win_step, n_averages, d_order, max_order = self.get_analyzer_params()
+            self.analyzer = Analyzer(self.publish_pipe, self.stop_event, self.data_queue, self.freq_queue,
+                                    self.cal_a, self.cal_b,
+                                    self.config["fs"], win_len, win_step, n_averages, d_order, max_order)
+            self.analyzer.start()
+        except Exception as e:
+            print(e)
 
-    def start_calibration(self) -> None:
+    def start_calibration(self, check: bool) -> None:
         self.stop_processing()
         print("Starting acc calibration...")
 
         self.stop_event.clear()
 
-        self.sensor = Sensor(self.data_queue, self.stop_event, self.config["fs"], self.config["range"])
+        self.sensor = Sensor(self.queue_in, self.stop_event, self.config["fs"], self.config["range"])
         self.sensor.start()
 
         self.buffer = Buffer(self.stop_event, self.queue_in, self.data_queue, self.freq_queue,
                              self.get_calibrator_buffer_length())
         self.buffer.start()
 
+        self.calibrator = Calibrator(self.publish_pipe, self.stop_event, self.data_queue, check, self.cal_a, self.cal_b)
+        self.calibrator.start()
+
     def stop_processing(self) -> None:
         print("Stopping processing...")
 
         self.stop_event.set()
+        # if self.sensor is not None:
+        #     self.sensor.terminate()
+        # if self.buffer is not None:
+        #     self.buffer.terminate()
+        # if self.calibrator is not None:
+        #     self.calibrator.terminate()
+        # if self.analyzer is not None:
+        #     self.analyzer.terminate()
         
         print("Clearing queues")
         while True:

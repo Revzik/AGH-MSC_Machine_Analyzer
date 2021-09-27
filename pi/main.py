@@ -24,7 +24,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(SUB_ACQUISITION, qos=2)
     client.subscribe(SUB_CALIBRATION, qos=2)
     client.subscribe(SUB_CONFIG, qos=2)
-    print("Subscribed to topics: {}".format(['sensor/acquisition', 'sensor/calibration/control', 'sensor/config']))
+    print("Subscribed to topics: {}".format([SUB_ACQUISITION, SUB_CALIBRATION, SUB_CONFIG]))
 
 def on_message(client, userdata, msg):
     topic = msg.topic
