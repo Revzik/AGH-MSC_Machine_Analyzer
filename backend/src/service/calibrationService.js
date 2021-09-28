@@ -3,8 +3,7 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up calibration service");
 
 class CalibrationService {
-  constructor({ calibrationPublisher, acquisitionService }) {
-    this.calibrationPublisher = calibrationPublisher;
+  constructor({ acquisitionService }) {
     this.acquisitionService = acquisitionService;
 
     this.running = false;
@@ -31,7 +30,6 @@ class CalibrationService {
     }
     this.running = true;
     this.acquisitionService.stopAcquisition();
-    this.calibrationPublisher.publish("start_check");
   }
 
   stopCheck() {
@@ -40,7 +38,6 @@ class CalibrationService {
       return;
     }
     this.running = false;
-    this.calibrationPublisher.publish("stop_check");
   }
 
   startCalibration() {
@@ -50,7 +47,6 @@ class CalibrationService {
     }
     this.running = true;
     this.acquisitionService.stopAcquisition();
-    this.calibrationPublisher.publish("start_cal");
   }
 
   stopCalibration() {
@@ -59,11 +55,6 @@ class CalibrationService {
       return;
     }
     this.running = false;
-    this.calibrationPublisher.publish("stop_cal");
-  }
-
-  sendCalibration(data) {
-    return this.calibrationPublisher.publish(JSON.stringify(data));
   }
 }
 

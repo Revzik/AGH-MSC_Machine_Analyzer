@@ -1,4 +1,4 @@
-#!/home/pi/berryconda3/bin/python
+#!/usr/bin/python
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -6,32 +6,41 @@ load_dotenv()
 
 from paho.mqtt import client as mqtt
 import os
-from utils import *
-from manager import Manager
-from multiprocessing import Pipe
+import json
+from topics import *
+from sensors import Sensor
+from threading import Event
 
-    
-# Process manager
 
-publish_out, publish_in = Pipe()
-manager = Manager(publish_in)
+# Sensor config
+stop_event: Event = Event()
+sensor: Sensor = None
 
 
 # Client functions
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
-    client.subscribe(SUB_ACQUISITION, qos=2)
-    client.subscribe(SUB_CALIBRATION, qos=2)
     client.subscribe(SUB_CONFIG, qos=2)
-    print("Subscribed to topics: {}".format([SUB_ACQUISITION, SUB_CALIBRATION, SUB_CONFIG]))
+    print("Subscribed to topics: {}".format([SUB_CONFIG]))
 
 def on_message(client, userdata, msg):
     topic = msg.topic
     message = msg.payload.decode("ascii")
     print("Message received. Topic: {}, Payload: {}".format(topic, message))
-    manager.process_action(topic, message)
     
+    if topic == SUB_CONFIG:
+        global sensor, stop_event
+
+        config = json.loads(message)
+
+        stop_event.set()
+        if sensor is not None:
+            sensor.join()
+        stop_event.clear()
+        sensor = Sensor(client.publish, stop_event, config["fs"], config["range"], config["windowLength"], config["windowOverlap"], config["averages"])
+        sensor.start()
+
 
 # Configuring the client
 
@@ -46,12 +55,10 @@ print("Connecting MQTT client")
 client.connect(
     os.getenv("MQTT_URL"), port=int(os.getenv("MQTT_PORT")), keepalive=60
 )
-client.loop_start()
 
 try:
-    while True:
-        topic, data, qos = unpack(publish_out.recv())
-        client.publish(topic, data, qos)
+    client.loop_forever()
 except KeyboardInterrupt:
-    client.loop_stop()
-    manager.stop_processing()
+    stop_event.set()
+    if sensor is not None:
+        sensor.join()

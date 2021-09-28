@@ -3,9 +3,7 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up acquisition service");
 
 class AcquisitionService {
-  constructor({ acquisitionPublisher }) {
-    this.acquisitionPublisher = acquisitionPublisher;
-
+  constructor() {
     this.acquiring = false;
     this.capturing = false;
     this.label = null;
@@ -37,7 +35,6 @@ class AcquisitionService {
       log.warn("Acquisition already started!");
       return;
     }
-    this.acquisitionPublisher.publish("start");
     this.acquiring = true;
   }
 
@@ -49,7 +46,6 @@ class AcquisitionService {
     if (this.capturing) {
       this.capturing = false;
     }
-    this.acquisitionPublisher.publish("stop");
     this.acquiring = false;
   }
 }

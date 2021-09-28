@@ -5,15 +5,9 @@ log.info("Setting up MQTT dispatcher");
 const mqtt = require("mqtt");
 
 class MqttDispatcher {
-  constructor({ rawDataSubscriber, debugDataSubscriber, dataSubscriber, calibrationSubscriber, configPublisher, acquisitionPublisher, calibrationPublisher }) {
-    this.rawDataSubscriber = rawDataSubscriber;
-    this.debugDataSubscriber = debugDataSubscriber;
+  constructor({ dataSubscriber, configPublisher }) {
     this.dataSubscriber = dataSubscriber;
-    this.calibrationSubscriber = calibrationSubscriber;
-
     this.configPublisher = configPublisher;
-    this.acquisitionPublisher = acquisitionPublisher;
-    this.calibrationPublisher = calibrationPublisher;
 
     this.publish = this.internalPublish.bind(this);
     this.subscribe = this.internalSubscribe.bind(this);
@@ -32,14 +26,8 @@ class MqttDispatcher {
     this.client.on("connect", () => {
       log.info("Connected to the MQTT broker");
 
-      this.rawDataSubscriber.init(this.subscribe);
-      this.debugDataSubscriber.init(this.subscribe);
       this.dataSubscriber.init(this.subscribe);
-      this.calibrationSubscriber.init(this.subscribe);
-
       this.configPublisher.init(this.publish);
-      this.acquisitionPublisher.init(this.publish);
-      this.calibrationPublisher.init(this.publish);
 
       this.initialized = true;
     });
@@ -79,17 +67,8 @@ class MqttDispatcher {
 
   dispatch(topic, message, packet) {
     switch (topic) {
-      case this.rawDataSubscriber.getTopic():
-        this.rawDataSubscriber.process(message);
-        break;
-      case this.debugDataSubscriber.getTopic():
-        this.debugDataSubscriber.process(message);
-        break;
       case this.dataSubscriber.getTopic():
         this.dataSubscriber.process(message);
-        break;
-      case this.calibrationSubscriber.getTopic():
-        this.calibrationSubscriber.process(message);
         break;
       default:
         log.error(`Unknown subscriber topic ${topic}`);
