@@ -20,7 +20,7 @@ class DataSubscriber {
   }
 
   process(message) {
-    this.dataService.processRawData(JSON.parse(message.toString()));
+    this.dataService.processData(JSON.parse(message.toString()));
   }
 }
 

@@ -5,13 +5,11 @@ log.info("Setting up acquisition service");
 class AcquisitionService {
   constructor() {
     this.acquiring = false;
-    this.capturing = false;
     this.label = null;
   }
 
   getStatus() {
     return {
-      acquiring: this.acquiring,
       capturing: this.capturing,
       label: this.label,
     };
@@ -28,25 +26,6 @@ class AcquisitionService {
       return;
     }
     this.capturing = false;
-  }
-
-  startAcquisition() {
-    if (this.acquiring) {
-      log.warn("Acquisition already started!");
-      return;
-    }
-    this.acquiring = true;
-  }
-
-  stopAcquisition() {
-    if (!this.acquiring) {
-      log.warn("Acquisition already stopped!");
-      return;
-    }
-    if (this.capturing) {
-      this.capturing = false;
-    }
-    this.acquiring = false;
   }
 }
 
