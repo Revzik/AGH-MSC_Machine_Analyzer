@@ -146,7 +146,6 @@ class Sensor(Thread):
         self.setup_sensor()
 
         while not self.stop_event.is_set():
-            # Does it not wait? Why does this send more than 1 per second when configured for 1 1000ms window?
             int_pin.wait_for_active()
             if self.t0 < 0:
                 self.t0 = time.time()
