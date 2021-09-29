@@ -22,7 +22,7 @@ SPI_INT_GPIO = int(os.getenv("SENSOR_INT_GPIO"))
 
 # SPI CLK speed and transfer delay
 
-CLK_SPEED = 5000000     # 3200 Hz sampling frequency requires 2-5 MHz 
+CLK_SPEED = 2500000     # 3200 Hz sampling frequency requires 2-5 MHz 
 XFER_DELAY = 5          # For correct readings ADXL343 requires 5 us breaks
 
 
@@ -53,6 +53,9 @@ POWER_CTL_OFF = 0b00000100
 INT_ENABLE_REG        = 0x2e
 INT_ENABLE_ALL_OFF    = 0b00000000
 INT_ENABLE_DATA_READY = 0b10000000
+INT_MAP_REGISTER = 0x2f
+INT_MAP_1 = 0b00000000
+
 
 FIFO_CTL_REG    = 0x38
 FIFO_CTL_BYPASS = 0b00000000
@@ -60,23 +63,23 @@ FIFO_CTL_BYPASS = 0b00000000
 
 # Helper functions
 
-def get_bw_rate(fs: int) -> Tuple[int, int]:
+def get_bw_rate(fs: int) -> int:
     if fs == 25:
-        return (BW_RATE_25, 25)
+        return BW_RATE_25
     elif fs == 50:
-        return (BW_RATE_50, 50)
+        return BW_RATE_50
     elif fs == 100:
-        return (BW_RATE_100, 100)
+        return BW_RATE_100
     elif fs == 200:
-        return (BW_RATE_200, 200)
+        return BW_RATE_200
     elif fs == 400:
-        return (BW_RATE_400, 400)
+        return BW_RATE_400
     elif fs == 800:
-        return (BW_RATE_800, 800)
+        return BW_RATE_800
     elif fs == 1600:
-        return (BW_RATE_1600, 1600)
+        return BW_RATE_1600
     elif fs == 3200:
-        return (BW_RATE_3200, 3200)
+        return BW_RATE_3200
     else:
         raise ValueError("fs must be 25, 50, 100, 200, 400, 800, 1600 or 3200")
 
@@ -109,21 +112,26 @@ int_pin = DigitalInputDevice(SPI_INT_GPIO, pull_up=None, active_state=True)
 
 tacho_pin = DigitalInputDevice(TACHO_GPIO)
 
-
+ 
 class Sensor(Thread):
     def __init__(self, publish, stop_event: Event, fs: int, range: int, win_len: int, win_ovlap: int, n_averages: int) -> None:
         super(Sensor, self).__init__()
         print("Initializing sensor")
 
-        bw_rate, fs = get_bw_rate(fs)
-        self.bw_rate: int = bw_rate
         self.fs: int = fs
+        self.bw_rate: int = get_bw_rate(fs)
         self.data_format: int = get_data_format(range)
-
+        self.buffer_len: int = get_buffer_length(fs, win_len, win_ovlap, n_averages)
+        self.buffer_idx: int = 0
         self.tacho_prev_time = -1
 
-        self.buffer_len: int = fs
-        self.buffer_idx: int= 0
+        print("Sampling frequency: {}Hz".format(fs))
+        print("Sensor range: {}".format(range))
+        print("Window length: {}ms".format(win_len))
+        print("Window overlap: {}%".format(win_ovlap))
+        print("Number of windows: {}".format(n_averages))
+        print("Buffer length: {} samples".format(self.buffer_len))
+
         self.t0 = -1.0
         self.x = [0] * self.buffer_len
         self.y = [0] * self.buffer_len
@@ -138,16 +146,24 @@ class Sensor(Thread):
         self.setup_sensor()
 
         while not self.stop_event.is_set():
+            # Does it not wait? Why does this send more than 1 per second when configured for 1 1000ms window?
             int_pin.wait_for_active()
             if self.t0 < 0:
-                self.t0 = time.time_ns()
+                self.t0 = time.time()
             
             self.read_acc()
 
             self.buffer_idx += 1
-            if self.buffer_idx == self.buffer_len:
+            if self.buffer_idx >= self.buffer_len:
+                t1 = time.time()
+                t = t1 - self.t0
+                print("Publishing data, buffer time: {0}ms, result fs: {1:.3f}Hz, average rps: {2:.3f}Hz".format(
+                    int(t * 1000),
+                    self.buffer_len / t,
+                    sum(self.f) / len(self.f) if len(self.f) > 0 else 0))
                 data = {
                     "t0": self.t0,
+                    "dt": 1 / self.fs,
                     "x": self.x,
                     "y": self.y,
                     "z": self.z,
@@ -156,7 +172,6 @@ class Sensor(Thread):
                 }
                 self.publish(PUB_DATA, json.dumps(data), 0)
 
-                self.buffer_idx = 0
                 self.reset_buffers()
                 
         self.stop_sensor()
@@ -176,7 +191,7 @@ class Sensor(Thread):
     def read_acc(self) -> None:
         addr = DATA_REG + 0x80 + 0x40
         msg = [addr, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
-        data = spi.xfer(msg, CLK_SPEED, XFER_DELAY)
+        data = spi.xfer2(msg, CLK_SPEED, XFER_DELAY)
 
         x = ((data[2] & 31) << 8) | data[1]
         y = ((data[4] & 31) << 8) | data[3]
@@ -200,6 +215,7 @@ class Sensor(Thread):
         spi.writebytes([DATA_REG, self.data_format])
         spi.writebytes([BW_RATE_REG, self.bw_rate])
         spi.writebytes([INT_ENABLE_REG, INT_ENABLE_DATA_READY])
+        spi.writebytes([INT_MAP_REGISTER, INT_MAP_1])
         spi.writebytes([FIFO_CTL_REG, FIFO_CTL_BYPASS])
         spi.writebytes([POWER_CTL_REG, POWER_CTL_ON])
 
@@ -221,6 +237,7 @@ class Sensor(Thread):
         print("Registers set!")
 
     def reset_buffers(self):
+        self.buffer_idx = 0
         self.t0 = -1
         self.x = [0] * self.buffer_len
         self.y = [0] * self.buffer_len

@@ -12,10 +12,14 @@ class DataService {
     this.dataModel = dataModel;
 
     this.rawData = {
+      t0: 0,
+      dt: 0,
       t: [],
       x: [],
       y: [],
       z: [],
+      f: [],
+      ft: [],
     };
 
     this.debugData = {
@@ -71,6 +75,13 @@ class DataService {
   }
 
   processRawData(data) {
+    let t = [];
+    let curT = 0;
+    for (let i = 0; i < data.x.length; i++) {
+      t.push(curT);
+      curT += data.dt;
+    }
+    data["t"] = t;
     this.rawData = data;
   }
 

@@ -7,7 +7,7 @@ class DataSubscriber {
     this.dataService = dataService;
     this.initialized = false;
 
-    this.topic = "sensor/data/processed";
+    this.topic = "sensor/data";
   }
 
   init(subscribeCallback) {
@@ -20,7 +20,7 @@ class DataSubscriber {
   }
 
   process(message) {
-    this.dataService.processData(JSON.parse(message.toString()));
+    this.dataService.processRawData(JSON.parse(message.toString()));
   }
 }
 
