@@ -3,17 +3,27 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up calibration service");
 
 class CalibrationService {
-  constructor({ calibrationPublisher, acquisitionService }) {
-    this.calibrationPublisher = calibrationPublisher;
+  constructor({ acquisitionService }) {
     this.acquisitionService = acquisitionService;
 
-    this.calibrating = false;
+    this.running = false;
 
     this.data = {
       x: 0,
       y: 0,
       z: 0,
+    }
+
+    this.calA = {
+      x: 1,
+      y: 1,
+      z: 1,
     };
+    this.calB = {
+      x: 0,
+      y: 0,
+      z: 0,
+    }
   }
 
   getData() {
@@ -24,27 +34,48 @@ class CalibrationService {
     this.data = data;
   }
 
-  startSimpleCalibration() {
-    if (this.calibrating) {
+  getCalibration() {
+    return {
+      a: this.calA,
+      b: this.calB,
+    }
+  }
+
+  setCalibration(calA, calB) {
+    this.calA = calA;
+    this.calB = calB;
+  }
+
+  startCheck() {
+    if (this.running) {
       log.info("Calibration already started!");
       return;
     }
-    this.calibrating = true;
-    this.acquisitionService.stopAcquisition();
-    this.calibrationPublisher.publish("start_simple");
+    this.running = true;
+  }
+
+  stopCheck() {
+    if (!this.running) {
+      log.info("Calibration already started!");
+      return;
+    }
+    this.running = false;
+  }
+
+  startCalibration() {
+    if (this.running) {
+      log.info("Calibration already started!");
+      return;
+    }
+    this.running = true;
   }
 
   stopCalibration() {
-    if (!this.calibrating) {
+    if (!this.running) {
       log.info("Calibration already stopped!");
       return;
     }
-    this.calibrating = false;
-    this.calibrationPublisher.publish("stop");
-  }
-
-  saveData(data) {
-    return this.calibrationPublisher.publish(JSON.stringify(data));
+    this.running = false;
   }
 }
 

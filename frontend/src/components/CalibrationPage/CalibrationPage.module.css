@@ -5,18 +5,22 @@
     gap: 0.5rem;
 }
 
-.card_horizontal {
+.horizontal {
     display: flex;
     justify-content: center;
     gap: 2rem;
     flex-basis: 100%;
 }
 
-.card_horizontal .bold {
+.horizontal .bold {
     font-weight: bold;
 }
 
-.card_horizontal .param {
+.horizontal .param {
     display: flex;
     gap: 0.5rem;
+}
+
+.title {
+    font-weight: bold;
 }

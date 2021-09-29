@@ -12,30 +12,14 @@ class DataService {
     this.dataModel = dataModel;
 
     this.rawData = {
+      t0: 0,
+      dt: 0,
       t: [],
       x: [],
       y: [],
       z: [],
-    };
-
-    this.debugData = {
-      timestamp: 0,
-      fft: {
-        x: [],
-        y: [],
-        z: [],
-        t0: 0,
-        dt: 1,
-        nt: 0,
-      },
-      order: {
-        x: [],
-        y: [],
-        z: [],
-        t0: 0,
-        dt: 1,
-        nt: 0,
-      },
+      f: [],
+      ft: [],
     };
 
     this.data = {
@@ -70,51 +54,15 @@ class DataService {
     };
   }
 
-  processRawData(data) {
-    this.rawData = data;
-  }
-
-  processDebugData(data) {
-    let orderT = [];
-    let orderTi = data.order.t0;
-    for (let i = 0; i < data.order.nt; i++) {
-      orderT.push(orderTi);
-      orderTi += data.order.dt;
-    }
-    data.order["t"] = orderT;
-
-    let fftT = [];
-    let fftTi = data.fft.t0;
-    for (let i = 0; i < data.fft.nt; i++) {
-      fftT.push(fftTi);
-      fftTi += data.fft.dt;
-    }
-    data.fft["t"] = fftT;
-
-    this.debugData = data;
-  }
-
   processData(data) {
-    this.save(data);
-
-    data.x.orderSpectrum = this.processSpectrum(data.x.orderSpectrum);
-    data.y.orderSpectrum = this.processSpectrum(data.y.orderSpectrum);
-    data.z.orderSpectrum = this.processSpectrum(data.z.orderSpectrum);
-
-    this.data = data;
-  }
-
-  processSpectrum(orderSpectrum) {
-    let { order0, dOrder, spectrum } = orderSpectrum;
-
-    let currentOrder = order0;
-    let orders = [];
-    for (let i = 0; i < spectrum.length; i++) {
-      orders.push(strip(currentOrder));
-      currentOrder += dOrder;
+    let t = [];
+    let curT = 0;
+    for (let i = 0; i < data.x.length; i++) {
+      t.push(curT);
+      curT += data.dt;
     }
-
-    return { x: orders, y: spectrum };
+    data["t"] = t;
+    this.rawData = data;
   }
 
   save() {
@@ -138,10 +86,6 @@ class DataService {
 
   getRawData() {
     return this.rawData;
-  }
-
-  getDebugData() {
-    return this.debugData;
   }
 
   getData() {

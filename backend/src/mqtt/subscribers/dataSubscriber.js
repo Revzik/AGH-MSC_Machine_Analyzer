@@ -7,7 +7,7 @@ class DataSubscriber {
     this.dataService = dataService;
     this.initialized = false;
 
-    this.topic = "sensor/data/processed";
+    this.topic = "sensor/data";
   }
 
   init(subscribeCallback) {

@@ -7,7 +7,7 @@ function ChartsPage(props) {
   return (
     <MainContainer>
       <RawPanel />
-      <DebugPanel />
+      {/*<DebugPanel />*/}
     </MainContainer>
   );
 }

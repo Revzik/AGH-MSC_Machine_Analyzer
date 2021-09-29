@@ -56,7 +56,7 @@ function RawPanel(props) {
 
   function getFreqArray() {
     return [
-      { name: "f", x: data.t, y: data.f },
+      { name: "f", x: data.ft, y: data.f },
     ];
   }
 

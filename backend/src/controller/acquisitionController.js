@@ -12,18 +12,6 @@ router.get("/", (req, res) => {
 })
 
 router.post("/start", (req, res) => {
-  log.info("Starting acquisition")
-  acquisitionService.startAcquisition();
-  res.sendStatus(200);
-});
-
-router.post("/stop", (req, res) => {
-  log.info("Stopping acquisition")
-  acquisitionService.stopAcquisition();
-  res.sendStatus(200);
-});
-
-router.post("/capture/start", (req, res) => {
   if (!req.body.label) {
     log.error("No label found!");
     res.sendStatus(400);
@@ -35,7 +23,7 @@ router.post("/capture/start", (req, res) => {
   res.sendStatus(200);
 });
 
-router.post("/capture/stop", (req, res) => {
+router.post("/stop", (req, res) => {
   log.info("Stopping capture");
   acquisitionService.stopCapturing();
   res.sendStatus(200);
