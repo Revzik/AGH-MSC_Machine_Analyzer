@@ -7,11 +7,19 @@ class ConfigService {
     this.configModel = configModel;
     this.configId = configId;
     this.configPublisher = configPublisher;
+    this.config = {};
+
+    this.loadConfig();
+  }
+
+  getConfig() {
+    return this.config;
   }
 
   saveConfig(config) {
     log.info("Saving config to the database");
     this.configPublisher.publish(JSON.stringify(config));
+    this.config = config;
 
     return new Promise((resolve, reject) => {
       this.configModel.updateOne(
@@ -40,6 +48,7 @@ class ConfigService {
           return;
         }
         log.info("Fetched config from the database");
+        this.config = res;
         resolve(res);
       });
     });

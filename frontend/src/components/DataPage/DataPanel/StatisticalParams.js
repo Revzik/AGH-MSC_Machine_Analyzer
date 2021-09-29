@@ -8,7 +8,7 @@ function StatisticalParams(props) {
     <Card className={classes.card}>
       <div>
         <span className={classes.name}>Frequency: </span>
-        <span>{props.data.frequency}</span>
+        <span>{+props.data.f.toFixed(2)}</span>
         <span>Hz</span>
       </div>
       <table className={classes.table}>
@@ -25,21 +25,29 @@ function StatisticalParams(props) {
             <td className={`${classes.name} ${classes.namecol}`}>
               RMS [m/s^2]:
             </td>
-            <td>{props.data.x.rms}</td>
-            <td>{props.data.y.rms}</td>
-            <td>{props.data.z.rms}</td>
+            <td>{+props.data.x.rms.toFixed(2)}</td>
+            <td>{+props.data.y.rms.toFixed(2)}</td>
+            <td>{+props.data.z.rms.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td className={`${classes.name} ${classes.namecol}`}>
+              Peak [m/s^2]:
+            </td>
+            <td>{+props.data.x.peak.toFixed(2)}</td>
+            <td>{+props.data.y.peak.toFixed(2)}</td>
+            <td>{+props.data.z.peak.toFixed(2)}</td>
           </tr>
           <tr>
             <td className={classes.name}>Kurtosis:</td>
-            <td>{props.data.x.kurtosis}</td>
-            <td>{props.data.y.kurtosis}</td>
-            <td>{props.data.z.kurtosis}</td>
+            <td>{+props.data.x.kurtosis.toFixed(2)}</td>
+            <td>{+props.data.y.kurtosis.toFixed(2)}</td>
+            <td>{+props.data.z.kurtosis.toFixed(2)}</td>
           </tr>
           <tr>
             <td className={classes.name}>Crest factor:</td>
-            <td>{props.data.x.peakFactor}</td>
-            <td>{props.data.y.peakFactor}</td>
-            <td>{props.data.z.peakFactor}</td>
+            <td>{+props.data.x.crestFactor.toFixed(2)}</td>
+            <td>{+props.data.y.crestFactor.toFixed(2)}</td>
+            <td>{+props.data.z.crestFactor.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>

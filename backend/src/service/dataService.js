@@ -2,14 +2,17 @@ const { container } = require("../di-setup");
 const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up data service");
 
+const { PythonShell } = require("python-shell");
+
 function strip(number) {
   return parseFloat(parseFloat(number).toPrecision(7));
 }
 
 class DataService {
-  constructor({ acquisitionService, dataModel }) {
+  constructor({ acquisitionService, dataModel, configService }) {
     this.acquisitionService = acquisitionService;
     this.dataModel = dataModel;
+    this.configService = configService;
 
     this.rawData = {
       t0: 0,
@@ -23,38 +26,38 @@ class DataService {
     };
 
     this.data = {
-      frequency: 0,
+      f: 0,
       x: {
         rms: 0,
+        peak: 0,
         kurtosis: 0,
-        peakFactor: 0,
-        orderSpectrum: {
-          x: [],
-          y: [],
-        },
+        crestFactor: 0,
+        orderSpectrum: [],
       },
       y: {
         rms: 0,
+        peak: 0,
         kurtosis: 0,
-        peakFactor: 0,
-        orderSpectrum: {
-          x: [],
-          y: [],
-        },
+        crestFactor: 0,
+        orderSpectrum: [],
       },
       z: {
         rms: 0,
+        peak: 0,
         kurtosis: 0,
-        peakFactor: 0,
-        orderSpectrum: {
-          x: [],
-          y: [],
-        },
+        crestFactor: 0,
+        orderSpectrum: [],
       },
+      orders: []
     };
   }
 
   processData(data) {
+    this.setRawData(data);
+    this.analyzeData(data);
+  }
+
+  setRawData(data) {
     let t = [];
     let curT = 0;
     for (let i = 0; i < data.x.length; i++) {
@@ -63,6 +66,26 @@ class DataService {
     }
     data["t"] = t;
     this.rawData = data;
+  }
+
+  analyzeData(data) {
+    const pyshell = new PythonShell(__dirname + "/../scripts/analyze.py");
+
+    let msg = {
+      data: data,
+      config: this.configService.getConfig(),      
+    }
+
+    pyshell.send(JSON.stringify(msg));
+    pyshell.on("message", (message) => {
+      this.data = JSON.parse(message);
+    });
+    pyshell.end((err) => {
+      if (err) {
+        throw err;
+      }
+      log.info("Data processed!");
+    });
   }
 
   save() {

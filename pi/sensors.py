@@ -160,9 +160,12 @@ class Sensor(Thread):
                     int(t * 1000),
                     self.buffer_len / t,
                     sum(self.f) / len(self.f) if len(self.f) > 0 else 0))
+
+                self.stop_tacho()
                 data = {
                     "t0": self.t0,
                     "dt": 1 / self.fs,
+                    "nt": self.buffer_len,
                     "x": self.x,
                     "y": self.y,
                     "z": self.z,
@@ -172,6 +175,7 @@ class Sensor(Thread):
                 self.publish(PUB_DATA, json.dumps(data), 0)
 
                 self.reset_buffers()
+                self.start_tacho()
                 
         self.stop_sensor()
 
@@ -206,6 +210,12 @@ class Sensor(Thread):
         self.x[self.buffer_idx] = x
         self.y[self.buffer_idx] = y
         self.z[self.buffer_idx] = z
+
+    def start_tacho(self) -> None:
+        tacho_pin.when_activated = self.read_freq
+
+    def stop_tacho(self) -> None:
+        tacho_pin.when_activated = None
         
     def setup_sensor(self) -> None:
         print("Setting up sensor registers...")
@@ -219,13 +229,12 @@ class Sensor(Thread):
         spi.writebytes([POWER_CTL_REG, POWER_CTL_ON])
 
         print("Registers set!")
-
         print("Starting sensor capture")
-        tacho_pin.when_activated = self.read_freq
+        self.start_tacho()
 
     def stop_sensor(self) -> None:
         print("Stopping sensor capture")
-        tacho_pin.when_activated = None
+        self.stop_tacho()
 
         print("Clearing up sensor registers...")
 

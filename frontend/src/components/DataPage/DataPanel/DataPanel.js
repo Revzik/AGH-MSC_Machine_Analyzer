@@ -17,9 +17,9 @@ function DataPanel(props) {
 
   function getDataArray() {
     return [
-      { name: "x", x: props.data.x.orderSpectrum.x, y: props.data.x.orderSpectrum.y },
-      { name: "y", x: props.data.y.orderSpectrum.x, y: props.data.y.orderSpectrum.y },
-      { name: "z", x: props.data.z.orderSpectrum.x, y: props.data.z.orderSpectrum.y },
+      { name: "x", x: props.data.orders, y: props.data.x.orderSpectrum },
+      { name: "y", x: props.data.orders, y: props.data.y.orderSpectrum },
+      { name: "z", x: props.data.orders, y: props.data.z.orderSpectrum },
     ];
   }
 
