@@ -3,17 +3,36 @@ const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up config service");
 
 class ConfigService {
-  constructor({ configModel, configId, configPublisher }) {
+  constructor({ configModel, configPublisher }) {
     this.configModel = configModel;
-    this.configId = configId;
+    this.configId = 1;
     this.configPublisher = configPublisher;
-    this.config = {};
+    this.config = {
+      fs: 3200,
+      range: 16,
+      dOrder: 0.1,
+      maxOrder: 10,
+      windowLength: 1000,
+      windowOverlap: 50,
+      tachoPoints: 1,
+      averages: 5,
+    };
 
     this.loadConfig();
   }
 
   getConfig() {
     return this.config;
+  }
+
+  sendConfig(config) {
+    log.info("Sending temporary config to the sensor");
+    this.configPublisher.publish(JSON.stringify(config));
+  }
+
+  restoreConfig() {
+    log.info("Restoring temporary sensor config");
+    this.configPublisher.publish(JSON.stringify(this.config));
   }
 
   saveConfig(config) {

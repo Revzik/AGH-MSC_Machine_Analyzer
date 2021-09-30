@@ -11,14 +11,15 @@ input_data = sys.stdin.readlines()
 input_data = json.loads(input_data[0])
 config = input_data["config"]
 data = input_data["data"]
+cal = input_data["cal"]
 
 win_len_s = config["windowLength"] / 1000
 win_len = int(config["fs"] * win_len_s)
 win_step = int(win_len * (100 - config["windowOverlap"]) / 100)
 
-x = np.array(data["x"])
-y = np.array(data["y"])
-z = np.array(data["z"])
+x = np.array(data["x"]) * cal["a"]["x"] + cal["b"]["x"]
+y = np.array(data["y"]) * cal["a"]["y"] + cal["b"]["y"]
+z = np.array(data["z"]) * cal["a"]["z"] + cal["b"]["z"]
 t = np.linspace(data["t0"], data["t0"] + data["dt"] * data["nt"], data["nt"], endpoint=False)
 acc = np.vstack((x, y, z))
 f = np.array(data["f"])

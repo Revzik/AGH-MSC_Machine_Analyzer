@@ -30,7 +30,7 @@ function CalibrationPanel(props) {
   async function post(path) {
     try {
       const response = await fetch(
-        `http://localhost:4200/calibrate/cal/${path}`,
+        `http://localhost:4200/calibrate/${path}`,
         {
           method: "POST",
         }

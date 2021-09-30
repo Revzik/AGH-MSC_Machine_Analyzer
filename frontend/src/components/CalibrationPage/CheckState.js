@@ -11,7 +11,7 @@ function CheckState(props) {
   async function post(path) {
     try {
       const response = await fetch(
-        `http://localhost:4200/calibrate/check/${path}`,
+        `http://localhost:4200/calibrate/${path}`,
         {
           method: "POST",
         }

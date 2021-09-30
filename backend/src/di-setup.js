@@ -12,7 +12,8 @@ function setup() {
   container.register({ logging: awilix.asClass(Logging) });
 
   const DataModel = require("./data/dataModel");
-  const { ConfigModel, defaultId } = require("./data/configModel");
+  const ConfigModel = require("./data/configModel");
+  const CalibrationModel = require("./data/calibrationModel");
 
   const DataService = require("./service/dataService");
   const ConfigService = require("./service/configService");
@@ -31,7 +32,9 @@ function setup() {
     configModel: awilix.asValue(ConfigModel, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),
-    configId: awilix.asValue(defaultId),
+    calibrationModel: awilix.asValue(CalibrationModel, {
+      lifetime: awilix.Lifetime.SINGLETON,
+    }),
     dataService: awilix.asClass(DataService, {
       lifetime: awilix.Lifetime.SINGLETON,
     }),

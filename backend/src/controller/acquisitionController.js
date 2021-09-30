@@ -1,5 +1,5 @@
 const { container } = require("../di-setup");
-const log = container.resolve('logging').createLogger(__filename);
+const log = container.resolve("logging").createLogger(__filename);
 log.info("Setting up capture controller");
 
 const express = require("express");
@@ -9,9 +9,21 @@ const acquisitionService = container.resolve("acquisitionService");
 
 router.get("/", (req, res) => {
   res.json(acquisitionService.getStatus());
-})
+});
 
 router.post("/start", (req, res) => {
+  log.info("Starting analysis");
+  acquisitionService.startAnalysis();
+  res.sendStatus(200);
+});
+
+router.post("/stop", (req, res) => {
+  log.info("Stopping analysis");
+  acquisitionService.stopAnalysis();
+  res.sendStatus(200);
+});
+
+router.post("/capture/start", (req, res) => {
   if (!req.body.label) {
     log.error("No label found!");
     res.sendStatus(400);
@@ -23,7 +35,7 @@ router.post("/start", (req, res) => {
   res.sendStatus(200);
 });
 
-router.post("/stop", (req, res) => {
+router.post("/capture/stop", (req, res) => {
   log.info("Stopping capture");
   acquisitionService.stopCapturing();
   res.sendStatus(200);
