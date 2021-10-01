@@ -16,8 +16,13 @@ router.post("/cal", (req, res) => {
   res.sendStatus(200);
 });
 
-router.post("/start", (req, res) => {
-  calibrationService.start();
+router.post("/startCheck", (req, res) => {
+  calibrationService.startCheck();
+  res.sendStatus(200);
+});
+
+router.post("/startCal", (req, res) => {
+  calibrationService.startCalibration();
   res.sendStatus(200);
 });
 

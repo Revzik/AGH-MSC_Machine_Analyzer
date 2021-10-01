@@ -5,7 +5,7 @@ import CalibrationPanel from "./CalibrationPanel";
 import CheckState from "./CheckState";
 
 function CalibrationPage(props) {
-  const [data, setData] = useState({ x: 0.01, y: 1.12, z: 0.0 });
+  const [data, setData] = useState({ x: 0, y: 0, z: 0 });
   const [action, setAction] = useState({
     check: false,
     cal: false,

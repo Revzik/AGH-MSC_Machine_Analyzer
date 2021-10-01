@@ -17,9 +17,9 @@ win_len_s = config["windowLength"] / 1000
 win_len = int(config["fs"] * win_len_s)
 win_step = int(win_len * (100 - config["windowOverlap"]) / 100)
 
-x = np.array(data["x"]) * cal["a"]["x"] + cal["b"]["x"]
-y = np.array(data["y"]) * cal["a"]["y"] + cal["b"]["y"]
-z = np.array(data["z"]) * cal["a"]["z"] + cal["b"]["z"]
+x = (np.array(data["x"]) + cal["offset"]["x"]) * cal["sensitivity"]["x"]
+y = (np.array(data["y"]) + cal["offset"]["y"]) * cal["sensitivity"]["y"]
+z = (np.array(data["z"]) + cal["offset"]["z"]) * cal["sensitivity"]["z"]
 t = np.linspace(data["t0"], data["t0"] + data["dt"] * data["nt"], data["nt"], endpoint=False)
 acc = np.vstack((x, y, z))
 f = np.array(data["f"])

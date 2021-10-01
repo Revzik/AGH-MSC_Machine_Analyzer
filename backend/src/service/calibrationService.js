@@ -10,7 +10,8 @@ class CalibrationService {
     this.acquisitionService = acquisitionService;
     this.configService = configService;
 
-    this.running = false;
+    this.isChecking = false;
+    this.isCalibrating = false;
 
     this.data = {
       x: 0,
@@ -19,12 +20,12 @@ class CalibrationService {
     };
 
     this.cal = {
-      a: {
+      sensitivity: {
         x: 1,
         y: 1,
         z: 1,
       },
-      b: {
+      offset: {
         x: 0,
         y: 0,
         z: 0,
@@ -47,9 +48,12 @@ class CalibrationService {
   }
 
   checkCalibration(data) {
-    const pyshell = new PythonShell(
-      __dirname + "/../scripts/calibration_check.py"
-    );
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("calibration_check.py", options);
 
     const msg = {
       x: data.x,
@@ -65,24 +69,50 @@ class CalibrationService {
       if (err) {
         throw err;
       }
-      log.info("Data processed!");
+      log.info("Calibration check data processed!");
     });
   }
 
   calibrate(data) {
-    const pyshell = new PythonShell(__dirname + "/../scripts/calibrate.py");
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("calibrate.py", options);
 
     pyshell.send(JSON.stringify(data));
     pyshell.on("message", (message) => {
-      this.cal = JSON.parse(message);
-      this.saveCalibration(this.cal);
+      this.saveCalibration(JSON.parse(message));
     });
     pyshell.end((err) => {
       if (err) {
         throw err;
       }
-      log.info("Data processed!");
+      log.info("Calibration data processed!");
     });
+  }
+
+  startCheck() {
+    this.isChecking = true;
+    this.start();
+  }
+
+  startCalibration() {
+    this.isCalibrating = true;
+    this.cal = {
+      sensitivity: {
+        x: 1,
+        y: 1,
+        z: 1,
+      },
+      offset: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+    };
+    this.start();
   }
 
   start() {
@@ -91,20 +121,25 @@ class CalibrationService {
     config["windowLength"] = 100;
     config["averages"] = 1;
     this.configService.sendConfig(config);
-    this.running = true;
   }
 
   stop() {
     this.configService.restoreConfig();
-    this.running = false;
+    if (this.isCalibrating) {
+      this.loadCalibration();
+    }
+
+    this.isChecking = false;
+    this.isCalibrating = false;
   }
 
   isRunning() {
-    return this.running;
+    return this.isChecking || this.isCalibrating;
   }
 
   saveCalibration(cal) {
     log.info("Saving calibration to the database");
+    this.cal = cal;
 
     return new Promise((resolve, reject) => {
       this.calibrationModel.updateOne({ _id: 1 }, { ...cal }, (err) => {

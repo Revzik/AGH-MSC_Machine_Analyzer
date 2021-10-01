@@ -9,9 +9,9 @@ input_data = json.loads(input_data[0])
 data = input_data["data"]
 cal = input_data["cal"]
 
-x = np.array(data["x"]) * cal["a"]["x"] + cal["b"]["x"]
-y = np.array(data["y"]) * cal["a"]["y"] + cal["b"]["y"]
-z = np.array(data["z"]) * cal["a"]["z"] + cal["b"]["z"]
+x = (np.array(data["x"]) + cal["offset"]["x"]) * cal["sensitivity"]["x"]
+y = (np.array(data["y"]) + cal["offset"]["y"]) * cal["sensitivity"]["y"]
+z = (np.array(data["z"]) + cal["offset"]["z"]) * cal["sensitivity"]["z"]
 t = np.linspace(data["t0"], data["t0"] + data["nt"] * data["dt"], data["nt"])
 
 processedData = {

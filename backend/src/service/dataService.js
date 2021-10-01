@@ -75,7 +75,12 @@ class DataService {
   }
 
   processRawData(data) {
-    const pyshell = new PythonShell(__dirname + "/../scripts/process_raw.py");
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("process_raw.py", options);
 
     const msg = {
       data: data,
@@ -95,7 +100,12 @@ class DataService {
   }
 
   analyzeData(data) {
-    const pyshell = new PythonShell(__dirname + "/../scripts/analyze.py");
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("analyze.py", options);
 
     const msg = {
       data: data,

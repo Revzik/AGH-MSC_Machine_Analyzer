@@ -29,7 +29,7 @@ function CheckState(props) {
   function start() {
     setRunning(true);
     props.stateHandler(true);
-    post("start");
+    post("startCheck");
   }
 
   function stop() {

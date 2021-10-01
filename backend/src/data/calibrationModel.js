@@ -7,12 +7,12 @@ const { Schema } = mongoose;
 const defaultId = 1;
 const calibrationSchema = new Schema({
   _id: { type: Number },
-  a: {
+  sensitivity: {
     x: { type: Number, default: 1 },
     y: { type: Number, default: 1 },
     z: { type: Number, default: 1 },
   },
-  b: {
+  offset: {
     x: { type: Number, default: 0 },
     y: { type: Number, default: 0 },
     z: { type: Number, default: 0 },
