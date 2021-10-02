@@ -45,7 +45,4 @@ ConfigModel.exists({ _id: defaultId }, (err, exists) => {
   createDefaultConfig();
 });
 
-module.exports = {
-  ConfigModel,
-  defaultId,
-};
+module.exports = ConfigModel;

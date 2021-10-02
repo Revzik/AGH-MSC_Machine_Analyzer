@@ -3,6 +3,8 @@ import json
 import numpy as np
 import scipy.signal as sig
 import scipy.stats as stat
+import time
+import os
 
 
 # Loading and parsing data
@@ -11,14 +13,15 @@ input_data = sys.stdin.readlines()
 input_data = json.loads(input_data[0])
 config = input_data["config"]
 data = input_data["data"]
+cal = input_data["cal"]
 
 win_len_s = config["windowLength"] / 1000
 win_len = int(config["fs"] * win_len_s)
 win_step = int(win_len * (100 - config["windowOverlap"]) / 100)
 
-x = np.array(data["x"])
-y = np.array(data["y"])
-z = np.array(data["z"])
+x = (np.array(data["x"]) + cal["offset"]["x"]) * cal["sensitivity"]["x"]
+y = (np.array(data["y"]) + cal["offset"]["y"]) * cal["sensitivity"]["y"]
+z = (np.array(data["z"]) + cal["offset"]["z"]) * cal["sensitivity"]["z"]
 t = np.linspace(data["t0"], data["t0"] + data["dt"] * data["nt"], data["nt"], endpoint=False)
 acc = np.vstack((x, y, z))
 f = np.array(data["f"])
@@ -45,20 +48,38 @@ crest = peak / rms
 
 # Order analysis
 
-n_orders = int(config["maxOrder"] / config["dOrder"])
+n_orders = int(config["maxOrder"] / config["dOrder"]) + 1
 orders = np.linspace(0, config["maxOrder"], n_orders, endpoint=False)
 t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
 f_interp = np.interp(t, ft, f)
+window = np.hanning(win_len).reshape(win_len)
+window = window / np.mean(window)
 
 spec = np.zeros((3, n_orders))
 
 j = 0
 for i in range(config["averages"]):
-    kernel = np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern))
+    kernel = np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern)) * window
     spec += np.abs(kernel.dot(acc[:, j : j + win_len].T)).T / win_len
     j += win_step
 
 spec = spec / config["averages"]
+
+
+# Backup data to a file if capturing
+
+if input_data["capture"]:
+    dir = input_data["base_dir"] + os.path.sep + input_data["label"]
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+
+    fn_base = dir + os.path.sep + input_data["label"] + "_" + str(config["fs"]) + "Hz_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+    fn = fn_base
+    counter = 1
+    while os.path.isfile(fn + ".npz"):
+        fn = fn_base + "_" + str(counter)
+        counter += 1
+    np.savez_compressed(fn, x=x, y=y, z=z, f=f_interp, spec=spec)
 
 
 # Parsing and sending output data

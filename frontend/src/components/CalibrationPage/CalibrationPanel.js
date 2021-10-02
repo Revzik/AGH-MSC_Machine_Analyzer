@@ -29,12 +29,9 @@ function CalibrationPanel(props) {
 
   async function post(path) {
     try {
-      const response = await fetch(
-        `http://localhost:4200/calibrate/cal/${path}`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch(`http://localhost:4200/calibrate/${path}`, {
+        method: "POST",
+      });
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }
@@ -68,7 +65,7 @@ function CalibrationPanel(props) {
   function start() {
     props.stateHandler(true);
     setCurrentStep(STEP.X);
-    post("start");
+    post("startCal");
   }
 
   function setX() {
@@ -125,6 +122,25 @@ function CalibrationPanel(props) {
       Start
     </Button>
   );
+  let dataContent = null;
+  if (currentStep !== STEP.IDLE) {
+    dataContent = (
+      <div className={classes.horizontal}>
+        <div className={classes.param}>
+          <span className={classes.bold}>x:</span>
+          <span>{+props.data.x.toFixed(2)} lsb</span>
+        </div>
+        <div className={classes.param}>
+          <span className={classes.bold}>y:</span>
+          <span>{+props.data.y.toFixed(2)} lsb</span>
+        </div>
+        <div className={classes.param}>
+          <span className={classes.bold}>z:</span>
+          <span>{+props.data.z.toFixed(2)} lsb</span>
+        </div>
+      </div>
+    );
+  }
   if (currentStep === STEP.X) {
     content = (
       <React.Fragment>
@@ -168,6 +184,7 @@ function CalibrationPanel(props) {
   return (
     <Card className={classes.card}>
       <div className={classes.title}>Start calibration</div>
+      {dataContent}
       {content}
     </Card>
   );

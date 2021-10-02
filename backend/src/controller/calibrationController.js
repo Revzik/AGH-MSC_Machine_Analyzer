@@ -11,28 +11,23 @@ router.get("/", (req, res) => {
   res.json(calibrationService.getData());
 });
 
-router.post("/check/start", (req, res) => {
+router.post("/cal", (req, res) => {
+  calibrationService.calibrate(req.body);
+  res.sendStatus(200);
+});
+
+router.post("/startCheck", (req, res) => {
   calibrationService.startCheck();
   res.sendStatus(200);
 });
 
-router.post("/check/stop", (req, res) => {
-  calibrationService.stopCheck();
-  res.sendStatus(200);
-});
-
-router.post("/cal", (req, res) => {
-  calibrationService.sendCalibration(req.body);
-  res.sendStatus(200);
-});
-
-router.post("/cal/start", (req, res) => {
+router.post("/startCal", (req, res) => {
   calibrationService.startCalibration();
   res.sendStatus(200);
 });
 
-router.post("/cal/stop", (req, res) => {
-  calibrationService.stopCalibration();
+router.post("/stop", (req, res) => {
+  calibrationService.stop();
   res.sendStatus(200);
 });
 

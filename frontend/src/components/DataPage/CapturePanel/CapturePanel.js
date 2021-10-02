@@ -8,6 +8,7 @@ import LabelModal from "./LabelModal";
 import classes from "./CapturePanel.module.css";
 
 function CapturePanel(props) {
+  const [isAnalyzing, setAnalyzing] = useState(false);
   const [isCapturing, setCapturing] = useState(false);
   const [label, setLabel] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -23,12 +24,55 @@ function CapturePanel(props) {
     fetchData();
   }
 
+  function toggleAnalyze() {
+    if (isAnalyzing) {
+      stopAnalyze();
+    } else {
+      startAnalyze();
+    }
+    fetchData();
+  }
+
+  async function startAnalyze() {
+    setLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:4200/acquire/start`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function stopAnalyze() {
+    setLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:4200/acquire/stop`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function startCapture() {
     setLoading(true);
 
     try {
       const response = await fetch(
-        `http://localhost:4200/acquire/start`,
+        `http://localhost:4200/acquire/capture/start`,
         {
           method: "POST",
           headers: {
@@ -44,7 +88,6 @@ function CapturePanel(props) {
       console.error(err);
     } finally {
       setLoading(false);
-      fetchData();
     }
   }
 
@@ -52,9 +95,12 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:4200/acquire/stop`, {
-        method: "POST",
-      });
+      const response = await fetch(
+        `http://localhost:4200/acquire/capture/stop`,
+        {
+          method: "POST",
+        }
+      );
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }
@@ -75,6 +121,7 @@ function CapturePanel(props) {
       }
 
       const statuses = await response.json();
+      setAnalyzing(statuses.analyzing);
       setCapturing(statuses.capturing);
       setLabel(statuses.label);
     } catch (err) {
@@ -126,23 +173,40 @@ function CapturePanel(props) {
     />
   );
 
-  const captureContent = (
+  const acquisitionContent = (
     <div className={classes.button_block}>
       <div className={classes.status}>
-        {`Data capture: ${isCapturing ? "on" : "off"}`}
+        {`Data analysis: ${isAnalyzing ? "on" : "off"}`}
       </div>
-      <Button onClick={toggleCapture}>
-        {isCapturing ? "Stop capture" : "Start capture"}
+      <Button onClick={toggleAnalyze}>
+        {isAnalyzing ? "Stop analysis" : "Start analysis"}
       </Button>
     </div>
   );
+
+  let captureContent = null;
+  if (isAnalyzing) {
+    captureContent = (
+      <div className={classes.button_block}>
+        <div className={classes.status}>
+          {`Data capture: ${isCapturing ? "on" : "off"}`}
+        </div>
+        <Button onClick={toggleCapture}>
+          {isCapturing ? "Stop capture" : "Start capture"}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <React.Fragment>
       {showModal && labelModal}
       <Card className={classes.card}>
         {isCapturing && <div>Label: {label}</div>}
-        <div className={classes.button_space}>{captureContent}</div>
+        <div className={classes.button_space}>
+          {acquisitionContent}
+          {captureContent}
+        </div>
         {isLoading && <Loader />}
       </Card>
     </React.Fragment>

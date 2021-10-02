@@ -4,19 +4,23 @@ log.info("Setting up data service");
 
 const { PythonShell } = require("python-shell");
 
-function strip(number) {
-  return parseFloat(parseFloat(number).toPrecision(7));
-}
-
 class DataService {
-  constructor({ acquisitionService, dataModel, configService }) {
+  constructor({
+    acquisitionService,
+    configService,
+    calibrationService,
+    dataModel,
+  }) {
     this.acquisitionService = acquisitionService;
-    this.dataModel = dataModel;
     this.configService = configService;
+    this.calibrationService = calibrationService;
+
+    this.dataModel = dataModel;
 
     this.rawData = {
       t0: 0,
       dt: 0,
+      nt: 0,
       t: [],
       x: [],
       y: [],
@@ -48,33 +52,70 @@ class DataService {
         crestFactor: 0,
         orderSpectrum: [],
       },
-      orders: []
+      orders: [],
     };
   }
 
   processData(data) {
-    this.setRawData(data);
-    this.analyzeData(data);
+    this.processRawData(data);
+
+    if (this.calibrationService.isRunning()) {
+      this.calibrationService.checkCalibration(this.rawData);
+      return;
+    }
+
+    const acquisitionStatus = this.acquisitionService.getStatus();
+    if (acquisitionStatus.analyzing) {
+      this.analyzeData(data);
+
+      // if (acquisitionStatus.capturing) {
+      //   this.save(acquisitionStatus.label);
+      // }
+    }
   }
 
-  setRawData(data) {
-    let t = [];
-    let curT = 0;
-    for (let i = 0; i < data.x.length; i++) {
-      t.push(curT);
-      curT += data.dt;
-    }
-    data["t"] = t;
-    this.rawData = data;
+  processRawData(data) {
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("process_raw.py", options);
+
+    const msg = {
+      data: data,
+      cal: this.calibrationService.getCalibration(),
+    };
+
+    pyshell.send(JSON.stringify(msg));
+    pyshell.on("message", (message) => {
+      this.rawData = JSON.parse(message);
+    });
+    pyshell.end((err) => {
+      if (err) {
+        throw err;
+      }
+      log.info("Raw data processed!");
+    });
   }
 
   analyzeData(data) {
-    const pyshell = new PythonShell(__dirname + "/../scripts/analyze.py");
+    const options = {
+      mode: "text",
+      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+      scriptPath: __dirname + "/../scripts",
+    };
+    const pyshell = new PythonShell("analyze.py", options);
 
-    let msg = {
+    const acqData = this.acquisitionService.getStatus();
+    const msg = {
       data: data,
-      config: this.configService.getConfig(),      
-    }
+      cal: this.calibrationService.getCalibration(),
+      config: this.configService.getConfig(),
+      base_dir: process.env.DATA_DIR,
+      capture: acqData.capturing,
+      label: acqData.label,
+    };
 
     pyshell.send(JSON.stringify(msg));
     pyshell.on("message", (message) => {
@@ -88,23 +129,19 @@ class DataService {
     });
   }
 
-  save() {
-    const acquisitionStatus = this.acquisitionService.getStatus();
-
-    if (acquisitionStatus.capturing) {
-      const newDataModel = new this.dataModel({
-        label: acquisitionStatus.label,
-        ...this.data,
-      });
-      newDataModel.save((err) => {
-        if (err) {
-          log.error("Error while saving data!");
-          log.error(err);
-          return;
-        }
-        log.info("Data saved");
-      });
-    }
+  save(label) {
+    const newDataModel = new this.dataModel({
+      label: label,
+      ...this.data,
+    });
+    newDataModel.save((err) => {
+      if (err) {
+        log.error("Error while saving data!");
+        log.error(err);
+        return;
+      }
+      log.info("Data saved");
+    });
   }
 
   getRawData() {
