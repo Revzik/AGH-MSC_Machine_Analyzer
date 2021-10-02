@@ -48,7 +48,7 @@ crest = peak / rms
 
 # Order analysis
 
-n_orders = int(config["maxOrder"] / config["dOrder"])
+n_orders = int(config["maxOrder"] / config["dOrder"]) + 1
 orders = np.linspace(0, config["maxOrder"], n_orders, endpoint=False)
 t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
 f_interp = np.interp(t, ft, f)
@@ -68,19 +68,18 @@ spec = spec / config["averages"]
 
 # Backup data to a file if capturing
 
-
 if input_data["capture"]:
     dir = input_data["base_dir"] + os.path.sep + input_data["label"]
     if not os.path.isdir(dir):
         os.mkdir(dir)
 
-    fn_base = dir + os.path.sep + input_data["label"] + "_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+    fn_base = dir + os.path.sep + input_data["label"] + "_" + str(config["fs"]) + "Hz_" + time.strftime("%Y-%m-%d_%H-%M-%S")
     fn = fn_base
     counter = 1
     while os.path.isfile(fn + ".npz"):
         fn = fn_base + "_" + str(counter)
         counter += 1
-    np.savez(fn, x=x, y=y, z=z, f=f_interp, spec=spec)
+    np.savez_compressed(fn, x=x, y=y, z=z, f=f_interp, spec=spec)
 
 
 # Parsing and sending output data
