@@ -68,9 +68,9 @@ class DataService {
     if (acquisitionStatus.analyzing) {
       this.analyzeData(data);
 
-      if (acquisitionStatus.capturing) {
-        this.save(acquisitionStatus.label);
-      }
+      // if (acquisitionStatus.capturing) {
+      //   this.save(acquisitionStatus.label);
+      // }
     }
   }
 
@@ -107,10 +107,14 @@ class DataService {
     };
     const pyshell = new PythonShell("analyze.py", options);
 
+    const acqData = this.acquisitionService.getStatus();
     const msg = {
       data: data,
       cal: this.calibrationService.getCalibration(),
       config: this.configService.getConfig(),
+      base_dir: process.env.DATA_DIR,
+      capture: acqData.capturing,
+      label: acqData.label,
     };
 
     pyshell.send(JSON.stringify(msg));

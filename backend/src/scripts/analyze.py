@@ -3,6 +3,8 @@ import json
 import numpy as np
 import scipy.signal as sig
 import scipy.stats as stat
+import time
+import os
 
 
 # Loading and parsing data
@@ -50,16 +52,35 @@ n_orders = int(config["maxOrder"] / config["dOrder"])
 orders = np.linspace(0, config["maxOrder"], n_orders, endpoint=False)
 t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
 f_interp = np.interp(t, ft, f)
+window = np.hanning(win_len).reshape(win_len)
+window = window / np.mean(window)
 
 spec = np.zeros((3, n_orders))
 
 j = 0
 for i in range(config["averages"]):
-    kernel = np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern))
+    kernel = np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern)) * window
     spec += np.abs(kernel.dot(acc[:, j : j + win_len].T)).T / win_len
     j += win_step
 
 spec = spec / config["averages"]
+
+
+# Backup data to a file if capturing
+
+
+if input_data["capture"]:
+    dir = input_data["base_dir"] + os.path.sep + input_data["label"]
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+
+    fn_base = dir + os.path.sep + input_data["label"] + "_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+    fn = fn_base
+    counter = 1
+    while os.path.isfile(fn + ".npz"):
+        fn = fn_base + "_" + str(counter)
+        counter += 1
+    np.savez(fn, x=x, y=y, z=z, f=f_interp, spec=spec)
 
 
 # Parsing and sending output data
