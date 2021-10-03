@@ -6,8 +6,7 @@ app.use(express.json());
 
 // const { container, setup } = require("./di-setup");
 // setup();
-const Logger = require("./log/logger");
-const log = new Logger().createLogger(__filename);
+const log = require('./log/logger')(__filename);
 
 log.info("Connecting to database...");
 const MongoClient = require("mongoose");

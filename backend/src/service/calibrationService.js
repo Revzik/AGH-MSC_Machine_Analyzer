@@ -1,5 +1,4 @@
-const Logger = require("../log/logger");
-const log = new Logger().createLogger(__filename);
+const log = require('../log/logger')(__filename);
 log.info("Setting up calibration service");
 
 // Imports
@@ -124,7 +123,7 @@ const stopCalibration = () => {
   isCalibrating = false;
 };
 
-const isRunning = () => {
+const isCalibrationRunning = () => {
   return isChecking || isCalibrating;
 };
 
@@ -143,7 +142,7 @@ loadCalibration()
 module.exports = {
   calibration,
   calibrationData,
-  isRunning,
+  isCalibrationRunning,
   startCalibration,
   startCalibrationCheck,
   stopCalibration,

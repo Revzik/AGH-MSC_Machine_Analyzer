@@ -2,36 +2,31 @@
 const winston = require("winston");
 const path = require("path");
 
-class Logging {
-  constructor() {
-    const TZ = process.env.TZ;
-    this.timezoned = () => {
-      return new Date().toLocaleString("en-US", {
-        timeZone: TZ,
-      });
-    };
-  }
+const timezoned = () => {
+  return new Date().toLocaleString("en-US", {
+    timeZone: process.env.TZ,
+  });
+};
 
-  createLogger(filename) {
-    const loggerConfig = {
-      transports: [
-        new winston.transports.Console({
-          level: "debug",
-        }),
-      ],
-      format: winston.format.combine(
-        winston.format.label({
-          label: path.basename(filename),
-        }),
-        winston.format.timestamp({ format: this.timezoned }),
-        winston.format.printf((info) => {
-          return `${info.timestamp} - [${info.level}]:${info.label}: ${info.message}`;
-        })
-      ),
-    };
+const createLogger = (filename) => {
+  const loggerConfig = {
+    transports: [
+      new winston.transports.Console({
+        level: "debug",
+      }),
+    ],
+    format: winston.format.combine(
+      winston.format.label({
+        label: path.basename(filename),
+      }),
+      winston.format.timestamp({ format: timezoned }),
+      winston.format.printf((info) => {
+        return `${info.timestamp} - [${info.level}]:${info.label}: ${info.message}`;
+      })
+    ),
+  };
 
-    return winston.createLogger(loggerConfig);
-  }
+  return winston.createLogger(loggerConfig);
 }
 
-module.exports = Logging;
+module.exports = createLogger;
