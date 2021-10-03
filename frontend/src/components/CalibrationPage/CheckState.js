@@ -5,7 +5,6 @@ import Card from "../UI/Card";
 import classes from "./CalibrationPage.module.css";
 
 function CheckState(props) {
-  const [isRunning, setRunning] = useState(false);
   const [isError, setError] = useState(false);
 
   async function post(path) {
@@ -27,19 +26,17 @@ function CheckState(props) {
   }
 
   function start() {
-    setRunning(true);
     props.stateHandler(true);
     post("startCheck");
   }
 
   function stop() {
-    setRunning(false);
     props.stateHandler(false);
     post("stop");
   }
 
   let content = <Button onClick={start} disabled={props.disabled}>Start</Button>;
-  if (isRunning) {
+  if (props.isRunning) {
     content = (
       <React.Fragment>
         <div className={classes.horizontal}>

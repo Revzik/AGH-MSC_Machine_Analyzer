@@ -13,6 +13,7 @@ function CalibrationPage(props) {
 
   useEffect(() => {
     const interval = setInterval(get, 100);
+    getStatus();
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -47,10 +48,39 @@ function CalibrationPage(props) {
     }
   }
 
+  async function getStatus() {
+    try {
+      const response = await fetch(`http://localhost:4200/calibrate/status`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not post command ${response}`);
+      }
+      const check = await response.json();
+      setAction((prevState) => {
+        return {
+          ...prevState,
+          check: check.status,
+        };
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <MainContainer>
-      <CheckState data={data} stateHandler={updateCheck} disabled={!action.check && action.cal}/>
-      <CalibrationPanel data={data} stateHandler={updateCal} disabled={!action.cal && action.check}/>
+      <CheckState
+        isRunning={action.check}
+        data={data}
+        stateHandler={updateCheck}
+        disabled={!action.check && action.cal}
+      />
+      <CalibrationPanel
+        data={data}
+        stateHandler={updateCal}
+        disabled={!action.cal && action.check}
+      />
     </MainContainer>
   );
 }
