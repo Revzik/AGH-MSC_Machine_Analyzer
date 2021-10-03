@@ -47,4 +47,35 @@ CalibrationModel.exists({ _id: defaultId }, (err, exists) => {
   createDefaultCalibration();
 });
 
-module.exports = CalibrationModel;
+const saveCalibration = (calibration) => {
+  log.info("Saving calibration to the database");
+  return new Promise((resolve, reject) => {
+    this.calibrationModel.updateOne({ _id: defaultId }, { ...calibration }, (err) => {
+      if (err) {
+        log.error(`Could not update calibration with id ${defaultId}`);
+        reject(err);
+        return;
+      }
+      log.info("Calibration updated");
+      resolve();
+    });
+  });
+}
+
+const loadCalibration = () => {
+  log.info("Loading calibration from the database");
+  return new Promise((resolve, reject) => {
+    this.calibrationModel.findById(defaultId, (err, res) => {
+      if (err) {
+        log.error(`Could not fetch calibration with id ${defaultId}`);
+        reject(err);
+        return;
+      }
+      log.info("Fetched calibration from the database");
+      this.cal = res;
+      resolve(res);
+    });
+  });
+}
+
+module.exports = { saveCalibration, loadCalibration };

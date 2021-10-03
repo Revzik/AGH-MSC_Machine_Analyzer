@@ -4,9 +4,10 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const { container, setup } = require("./di-setup");
-setup();
-const log = container.resolve("logging").createLogger(__filename);
+// const { container, setup } = require("./di-setup");
+// setup();
+const Logger = require("./log/logger");
+const log = new Logger().createLogger(__filename);
 
 log.info("Connecting to database...");
 const MongoClient = require("mongoose");
