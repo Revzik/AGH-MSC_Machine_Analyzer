@@ -18,6 +18,7 @@ class AcquisitionService {
   }
 
   startAnalysis() {
+    // Add calibration stop when removing classes
     this.analyzing = true;
   }
 

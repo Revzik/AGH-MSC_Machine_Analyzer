@@ -11,6 +11,10 @@ router.get("/", (req, res) => {
   res.json(calibrationService.getData());
 });
 
+router.get("/status", (req, res) => {
+  res.json({ status: calibrationService.isRunning() });
+});
+
 router.post("/cal", (req, res) => {
   calibrationService.calibrate(req.body);
   res.sendStatus(200);

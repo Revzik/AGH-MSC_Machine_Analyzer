@@ -49,7 +49,7 @@ crest = peak / rms
 # Order analysis
 
 n_orders = int(config["maxOrder"] / config["dOrder"]) + 1
-orders = np.linspace(0, config["maxOrder"], n_orders, endpoint=False)
+orders = np.linspace(0, config["maxOrder"], n_orders)
 t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
 f_interp = np.interp(t, ft, f)
 window = np.hanning(win_len).reshape(win_len)
