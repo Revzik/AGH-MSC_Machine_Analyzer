@@ -1,17 +1,15 @@
-const log = require('../log/logger')(__filename);
+const log = require("../log/logger")(__filename);
 log.info("Setting up calibration service");
 
 // Imports
 
 const { PythonShell } = require("python-shell");
-const {
-  loadCalibration,
-  saveCalibration,
-} = require("../calibrationData/calibrationModel");
+const calibrationModel = require("../data/calibrationModel");
+const configService = require("./configService");
 
 // Data
 
-let calibration = {
+let currentCalibration = {
   sensitivity: {
     x: 1,
     y: 1,
@@ -24,7 +22,7 @@ let calibration = {
   },
 };
 
-let calibrationData = {
+let acceleration = {
   x: 0,
   y: 0,
   z: 0,
@@ -35,7 +33,7 @@ let isCalibrating = false;
 
 // Analysis functions
 
-const checkCalibration = (calibrationData) => {
+const checkCalibration = (data) => {
   const options = {
     mode: "text",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
@@ -44,14 +42,14 @@ const checkCalibration = (calibrationData) => {
   const pyshell = new PythonShell("calibration_check.py", options);
 
   const msg = {
-    x: calibrationData.x,
-    y: calibrationData.y,
-    z: calibrationData.z,
+    x: data.x,
+    y: data.y,
+    z: data.z,
   };
 
   pyshell.send(JSON.stringify(msg));
   pyshell.on("message", (message) => {
-    calibrationData = JSON.parse(message);
+    acceleration = JSON.parse(message);
   });
   pyshell.end((err) => {
     if (err) {
@@ -61,7 +59,7 @@ const checkCalibration = (calibrationData) => {
   });
 };
 
-const calibrate = (calibrationData) => {
+const calibrate = (data) => {
   const options = {
     mode: "text",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
@@ -69,9 +67,10 @@ const calibrate = (calibrationData) => {
   };
   const pyshell = new PythonShell("calibrate.py", options);
 
-  pyshell.send(JSON.stringify(calibrationData));
+  pyshell.send(JSON.stringify(data));
   pyshell.on("message", (message) => {
-    saveCalibration(JSON.parse(message));
+    currentCalibration = JSON.parse(message);
+    calibrationModel.saveCalibration(currentCalibration);
   });
   pyshell.end((err) => {
     if (err) {
@@ -88,7 +87,7 @@ const start = () => {
   const config = JSON.parse(JSON.stringify(this.configService.getConfig())); // TODO: Update getConfig
   config["windowLength"] = 100;
   config["averages"] = 1;
-  configService.sendConfig(config); // TODO: Update sendConfig
+  configService.sendConfig(config);
 };
 
 const startCalibrationCheck = () => {
@@ -98,7 +97,7 @@ const startCalibrationCheck = () => {
 
 const startCalibration = () => {
   isCalibrating = true;
-  cal = {
+  currentCalibration = {
     sensitivity: {
       x: 1,
       y: 1,
@@ -114,10 +113,7 @@ const startCalibration = () => {
 };
 
 const stopCalibration = () => {
-  configService.restoreConfig(); // TODO: Update restoreConfig
-  if (isCalibrating) {
-    loadCalibration();
-  }
+  configService.restoreConfig();
 
   isChecking = false;
   isCalibrating = false;
@@ -129,9 +125,10 @@ const isCalibrationRunning = () => {
 
 // Setting up calibration
 
-loadCalibration()
-  .then((cal) => {
-    calibration = cal;
+calibrationModel
+  .loadCalibration()
+  .then((calibration) => {
+    currentCalibration = calibration;
   })
   .catch(
     log.error("Failed to load calibration from the database, using default")
@@ -140,8 +137,8 @@ loadCalibration()
 // Exports
 
 module.exports = {
-  calibration,
-  calibrationData,
+  currentCalibration,
+  acceleration,
   isCalibrationRunning,
   startCalibration,
   startCalibrationCheck,

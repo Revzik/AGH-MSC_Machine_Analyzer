@@ -1,13 +1,11 @@
-const log = require('../log/logger')(__filename);
+const log = require("../log/logger")(__filename);
 
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-
 // Schema, model and its id
 
 const defaultId = 1;
-
 const calibrationSchema = new Schema({
   _id: { type: Number },
   sensitivity: {
@@ -24,42 +22,43 @@ const calibrationSchema = new Schema({
 
 const CalibrationModel = mongoose.model("Calibration", calibrationSchema);
 
-
 // Save and load functions
 
 const saveCalibration = (calibration) => {
   log.info("Saving calibration to the database");
   return new Promise((resolve, reject) => {
-    this.calibrationModel.updateOne({ _id: defaultId }, { ...calibration }, (err) => {
-      if (err) {
-        log.error(`Could not update calibration with id ${defaultId}`);
-        reject(err);
-        return;
+    CalibrationModel.updateOne(
+      { _id: defaultId },
+      { ...calibration },
+      (err) => {
+        if (err) {
+          log.error(`Could not update calibration with id ${defaultId}`);
+          reject(err);
+          return;
+        }
+        log.info("Calibration updated");
+        resolve();
       }
-      log.info("Calibration updated");
-      resolve();
-    });
+    );
   });
-}
+};
 
 const loadCalibration = () => {
   log.info("Loading calibration from the database");
   return new Promise((resolve, reject) => {
-    this.calibrationModel.findById(defaultId, (err, res) => {
+    CalibrationModel.findById(defaultId, (err, res) => {
       if (err) {
         log.error(`Could not fetch calibration with id ${defaultId}`);
         reject(err);
         return;
       }
       log.info("Fetched calibration from the database");
-      this.cal = res;
       resolve(res);
     });
   });
-}
+};
 
-
-// Setting up default configuration if it doesn't exist
+// Setting up default calibration if it doesn't exist
 
 const createDefaultCalibration = () => {
   const defaultConfig = new CalibrationModel({ _id: defaultId });
@@ -71,7 +70,7 @@ const createDefaultCalibration = () => {
     }
     log.info("Generated default calibration");
   });
-}
+};
 
 CalibrationModel.exists({ _id: defaultId }, (err, exists) => {
   if (err) {
@@ -86,7 +85,6 @@ CalibrationModel.exists({ _id: defaultId }, (err, exists) => {
 
   createDefaultCalibration();
 });
-
 
 // Exports
 

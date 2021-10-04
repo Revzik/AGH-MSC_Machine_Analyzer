@@ -4,40 +4,33 @@ log.info("Setting up calibration controller");
 const express = require("express");
 const router = express.Router();
 
-const {
-  calibrationData,
-  isCalibrationRunning,
-  calibrate,
-  startCalibrationCheck,
-  startCalibration,
-  stopCalibration,
-} = require("../service/calibrationService");
+const calibrationService = require("../service/calibrationService");
 
 router.get("/", (req, res) => {
-  res.json(calibrationData);
+  res.json(calibrationService.acceleration);
 });
 
 router.get("/status", (req, res) => {
-  res.json({ status: isCalibrationRunning });
+  res.json({ status: calibrationService.isCalibrationRunning() });
 });
 
 router.post("/cal", (req, res) => {
-  calibrate(req.body);
+  calibrationService.calibrate(req.body);
   res.sendStatus(200);
 });
 
 router.post("/startCheck", (req, res) => {
-  startCalibrationCheck();
+  calibrationService.startCalibrationCheck();
   res.sendStatus(200);
 });
 
 router.post("/startCal", (req, res) => {
-  startCalibration();
+  calibrationService.startCalibration();
   res.sendStatus(200);
 });
 
 router.post("/stop", (req, res) => {
-  stopCalibration();
+  calibrationService.stopCalibration();
   res.sendStatus(200);
 });
 
