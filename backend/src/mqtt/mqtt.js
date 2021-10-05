@@ -42,6 +42,8 @@ const dispatch = (topic, message, packet) => {
 };
 
 const publishConfig = (config) => {
+  log.info(`Publishing message to topic ${PUB_CONFIG}`);
+  log.debug(JSON.stringify(config));
   client.publish(PUB_CONFIG, JSON.stringify(config), { retain: true, qos: 2 });
 };
 

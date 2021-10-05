@@ -5,24 +5,36 @@ const calibrationService = require("./calibrationService");
 
 // Data
 
-let isAnalyzing = false;
-let isCapturing = false;
+let analyzing = false;
+let capturing = false;
 let currentLabel = "";
 
 // Functions
 
+const isAnalyzing = () => {
+  return analyzing;
+};
+
+const isCapturing = () => {
+  return capturing;
+};
+
+const getLabel = () => {
+  return currentLabel;
+};
+
 const startAnalysis = () => {
   calibrationService.stopCalibration();
-  isAnalyzing = true;
+  analyzing = true;
 };
 
 const stopAnalysis = () => {
   stopCapturing();
-  isAnalyzing = false;
+  analyzing = false;
 };
 
 const startCapturing = (newLabel) => {
-  isCapturing = true;
+  capturing = true;
   currentLabel = newLabel;
 };
 
@@ -36,7 +48,7 @@ const stopCapturing = () => {
 module.exports = {
   isAnalyzing,
   isCapturing,
-  currentLabel,
+  getLabel,
   startAnalysis,
   stopAnalysis,
   startCapturing,

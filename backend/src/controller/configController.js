@@ -7,7 +7,7 @@ const router = express.Router();
 const configService = require("../service/configService");
 
 router.get("/", (req, res) => {
-  res.json(configService.currentConfig);
+  res.json(configService.getConfig());
 });
 
 router.post("/", (req, res) => {

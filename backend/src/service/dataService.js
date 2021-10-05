@@ -48,6 +48,16 @@ let data = {
   orders: [],
 };
 
+// Getters
+
+const getData = () => {
+  return data;
+};
+
+const getRawData = () => {
+  return rawData;
+};
+
 // Analysis functions
 
 const processData = (data) => {
@@ -58,11 +68,11 @@ const processData = (data) => {
     return;
   }
 
-  if (acquisitionService.isAnalyzing) {
+  if (acquisitionService.isAnalyzing()) {
     analyzeData(data);
 
-    if (acquisitionService.isCapturing) {
-      save(acquisitionService.currentLabel);
+    if (acquisitionService.isCapturing()) {
+      save(acquisitionService.getLabel());
     }
   }
 };
@@ -77,7 +87,7 @@ const analyzeRawData = (data) => {
 
   const msg = {
     data: data,
-    cal: calibrationService.currentCalibration,
+    cal: calibrationService.getCalibration(),
   };
 
   pyshell.send(JSON.stringify(msg));
@@ -102,11 +112,11 @@ const analyzeData = (data) => {
 
   const msg = {
     data: data,
-    cal: calibrationService.currentCalibration,
-    config: configService.currentConfig,
+    cal: calibrationService.getCalibration(),
+    config: configService.getConfig(),
     base_dir: process.env.DATA_DIR,
-    capture: acquisitionService.isCapturing,
-    label: acquisitionService.currentLabel,
+    capture: acquisitionService.isCapturing(),
+    label: acquisitionService.getLabel(),
   };
 
   pyshell.send(JSON.stringify(msg));
@@ -123,4 +133,4 @@ const analyzeData = (data) => {
 
 // Exports
 
-module.exports = { dara, rawData, processData };
+module.exports = { getData, getRawData, processData };

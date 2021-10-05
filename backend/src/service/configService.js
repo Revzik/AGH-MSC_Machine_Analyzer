@@ -21,6 +21,10 @@ let currentConfig = {
 
 // Functions
 
+const getConfig = () => {
+  return currentConfig;
+}
+
 const saveConfig = (config) => {
   currentConfig = config;
   sendConfig(config);
@@ -37,8 +41,15 @@ const sendConfig = (config) => {
 
 // Setup
 
-currentConfig = await configModel.loadConfig();
+configModel
+  .loadConfig()
+  .then((newConfig) => {
+    currentConfig = newConfig;
+  })
+  .catch(() => {
+    log.error("Could not load calibration from the database, using default");
+  });
 
 // Exports
 
-module.exports = { currentConfig, saveConfig, restoreConfig, sendConfig };
+module.exports = { getConfig, saveConfig, restoreConfig, sendConfig };

@@ -7,7 +7,7 @@ const router = express.Router();
 const calibrationService = require("../service/calibrationService");
 
 router.get("/", (req, res) => {
-  res.json(calibrationService.acceleration);
+  res.json(calibrationService.getAcceleration());
 });
 
 router.get("/status", (req, res) => {

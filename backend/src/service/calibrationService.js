@@ -28,8 +28,22 @@ let acceleration = {
   z: 0,
 };
 
-let isChecking = false;
-let isCalibrating = false;
+let checking = false;
+let calibrating = false;
+
+// Getters
+
+const isCalibrationRunning = () => {
+  return checking || calibrating;
+};
+
+const getCalibration = () => {
+  return currentCalibration;
+};
+
+const getAcceleration = () => {
+  return acceleration;
+};
 
 // Analysis functions
 
@@ -83,20 +97,20 @@ const calibrate = (data) => {
 // Calibration state control
 
 const start = () => {
-  acquisitionService.stopAnalysis(); // TODO: Update stopAnalysis
-  const config = JSON.parse(JSON.stringify(this.configService.getConfig())); // TODO: Update getConfig
+  acquisitionService.stopAnalysis();
+  const config = JSON.parse(JSON.stringify(configService.getConfig()));
   config["windowLength"] = 100;
   config["averages"] = 1;
   configService.sendConfig(config);
 };
 
 const startCalibrationCheck = () => {
-  isChecking = true;
+  checking = true;
   start();
 };
 
 const startCalibration = () => {
-  isCalibrating = true;
+  calibrating = true;
   currentCalibration = {
     sensitivity: {
       x: 1,
@@ -115,23 +129,26 @@ const startCalibration = () => {
 const stopCalibration = () => {
   configService.restoreConfig();
 
-  isChecking = false;
-  isCalibrating = false;
-};
-
-const isCalibrationRunning = () => {
-  return isChecking || isCalibrating;
+  checking = false;
+  calibrating = false;
 };
 
 // Setting up calibration
 
-currentCalibration = await calibrationModel.loadCalibration();
+calibrationModel
+  .loadCalibration()
+  .then((newCalibration) => {
+    currentCalibration = newCalibration;
+  })
+  .catch(() => {
+    log.error("Could not load calibration from the database, using default");
+  });
 
 // Exports
 
 module.exports = {
-  currentCalibration,
-  acceleration,
+  getCalibration,
+  getAcceleration,
   isCalibrationRunning,
   startCalibration,
   startCalibrationCheck,

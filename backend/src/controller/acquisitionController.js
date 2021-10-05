@@ -8,9 +8,9 @@ const acquisitionService = require("../service/acquisitionService");
 
 router.get("/", (req, res) => {
   res.json({
-    analyzing: acquisitionService.isAnalyzing,
-    capturing: acquisitionService.isCapturing,
-    label: acquisitionService.currentLabel,
+    analyzing: acquisitionService.isAnalyzing(),
+    capturing: acquisitionService.isCapturing(),
+    label: acquisitionService.getLabel(),
   });
 });
 
