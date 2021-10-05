@@ -4,9 +4,7 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const { container, setup } = require("./di-setup");
-setup();
-const log = container.resolve("logging").createLogger(__filename);
+const log = require('./log/logger')(__filename);
 
 log.info("Connecting to database...");
 const MongoClient = require("mongoose");
@@ -23,7 +21,7 @@ MongoClient.connect(process.env.DB_URL, {
   });
 
 log.info("Setting up MQTT client...");
-container.resolve("mqttDispatcher").init();
+require("./mqtt/mqtt");
 
 const port = process.env.PORT || 4200;
 

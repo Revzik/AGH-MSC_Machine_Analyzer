@@ -1,18 +1,17 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require('../log/logger')(__filename);
 log.info("Setting up calibration controller");
 
 const express = require("express");
 const router = express.Router();
 
-const calibrationService = container.resolve("calibrationService");
+const calibrationService = require("../service/calibrationService");
 
 router.get("/", (req, res) => {
-  res.json(calibrationService.getData());
+  res.json(calibrationService.getAcceleration());
 });
 
 router.get("/status", (req, res) => {
-  res.json({ status: calibrationService.isRunning() });
+  res.json({ status: calibrationService.isCalibrationRunning() });
 });
 
 router.post("/cal", (req, res) => {
@@ -21,7 +20,7 @@ router.post("/cal", (req, res) => {
 });
 
 router.post("/startCheck", (req, res) => {
-  calibrationService.startCheck();
+  calibrationService.startCalibrationCheck();
   res.sendStatus(200);
 });
 
@@ -31,7 +30,7 @@ router.post("/startCal", (req, res) => {
 });
 
 router.post("/stop", (req, res) => {
-  calibrationService.stop();
+  calibrationService.stopCalibration();
   res.sendStatus(200);
 });
 

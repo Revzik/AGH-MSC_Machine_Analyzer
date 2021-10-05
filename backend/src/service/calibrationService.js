@@ -1,174 +1,158 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require("../log/logger")(__filename);
 log.info("Setting up calibration service");
 
+// Imports
+
 const { PythonShell } = require("python-shell");
+const calibrationModel = require("../data/calibrationModel");
+const configService = require("./configService");
 
-class CalibrationService {
-  constructor({ calibrationModel, acquisitionService, configService }) {
-    this.calibrationModel = calibrationModel;
-    this.acquisitionService = acquisitionService;
-    this.configService = configService;
+// Data
 
-    this.isChecking = false;
-    this.isCalibrating = false;
+let currentCalibration = {
+  sensitivity: {
+    x: 1,
+    y: 1,
+    z: 1,
+  },
+  offset: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+};
 
-    this.data = {
+let acceleration = {
+  x: 0,
+  y: 0,
+  z: 0,
+};
+
+let checking = false;
+let calibrating = false;
+
+// Getters
+
+const isCalibrationRunning = () => {
+  return checking || calibrating;
+};
+
+const getCalibration = () => {
+  return currentCalibration;
+};
+
+const getAcceleration = () => {
+  return acceleration;
+};
+
+// Analysis functions
+
+const checkCalibration = (data) => {
+  const options = {
+    mode: "text",
+    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    scriptPath: __dirname + "/../scripts",
+  };
+  const pyshell = new PythonShell("calibration_check.py", options);
+
+  const msg = {
+    x: data.x,
+    y: data.y,
+    z: data.z,
+  };
+
+  pyshell.send(JSON.stringify(msg));
+  pyshell.on("message", (message) => {
+    acceleration = JSON.parse(message);
+  });
+  pyshell.end((err) => {
+    if (err) {
+      throw err;
+    }
+    log.info("Calibration check calibrationData processed!");
+  });
+};
+
+const calibrate = (data) => {
+  const options = {
+    mode: "text",
+    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    scriptPath: __dirname + "/../scripts",
+  };
+  const pyshell = new PythonShell("calibrate.py", options);
+
+  pyshell.send(JSON.stringify(data));
+  pyshell.on("message", (message) => {
+    currentCalibration = JSON.parse(message);
+    calibrationModel.saveCalibration(currentCalibration);
+  });
+  pyshell.end((err) => {
+    if (err) {
+      throw err;
+    }
+    log.info("Calibration calibrationData processed!");
+  });
+};
+
+// Calibration state control
+
+const start = () => {
+  acquisitionService.stopAnalysis();
+  const config = JSON.parse(JSON.stringify(configService.getConfig()));
+  config["windowLength"] = 100;
+  config["averages"] = 1;
+  configService.sendConfig(config);
+};
+
+const startCalibrationCheck = () => {
+  checking = true;
+  start();
+};
+
+const startCalibration = () => {
+  calibrating = true;
+  currentCalibration = {
+    sensitivity: {
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    offset: {
       x: 0,
       y: 0,
       z: 0,
-    };
+    },
+  };
+  start();
+};
 
-    this.cal = {
-      sensitivity: {
-        x: 1,
-        y: 1,
-        z: 1,
-      },
-      offset: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-    };
+const stopCalibration = () => {
+  configService.restoreConfig();
 
-    this.loadCalibration();
-  }
+  checking = false;
+  calibrating = false;
+};
 
-  getData() {
-    return this.data;
-  }
+// Setting up calibration
 
-  getCalibration() {
-    return this.cal;
-  }
+calibrationModel
+  .loadCalibration()
+  .then((newCalibration) => {
+    currentCalibration = newCalibration;
+  })
+  .catch(() => {
+    log.error("Could not load calibration from the database, using default");
+  });
 
-  setCalibration(cal) {
-    this.cal = cal;
-  }
+// Exports
 
-  checkCalibration(data) {
-    const options = {
-      mode: "text",
-      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
-      scriptPath: __dirname + "/../scripts",
-    };
-    const pyshell = new PythonShell("calibration_check.py", options);
-
-    const msg = {
-      x: data.x,
-      y: data.y,
-      z: data.z,
-    };
-
-    pyshell.send(JSON.stringify(msg));
-    pyshell.on("message", (message) => {
-      this.data = JSON.parse(message);
-    });
-    pyshell.end((err) => {
-      if (err) {
-        throw err;
-      }
-      log.info("Calibration check data processed!");
-    });
-  }
-
-  calibrate(data) {
-    const options = {
-      mode: "text",
-      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
-      scriptPath: __dirname + "/../scripts",
-    };
-    const pyshell = new PythonShell("calibrate.py", options);
-
-    pyshell.send(JSON.stringify(data));
-    pyshell.on("message", (message) => {
-      this.saveCalibration(JSON.parse(message));
-    });
-    pyshell.end((err) => {
-      if (err) {
-        throw err;
-      }
-      log.info("Calibration data processed!");
-    });
-  }
-
-  startCheck() {
-    this.isChecking = true;
-    this.start();
-  }
-
-  startCalibration() {
-    this.isCalibrating = true;
-    this.cal = {
-      sensitivity: {
-        x: 1,
-        y: 1,
-        z: 1,
-      },
-      offset: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-    };
-    this.start();
-  }
-
-  start() {
-    this.acquisitionService.stopAnalysis();
-    const config = JSON.parse(JSON.stringify(this.configService.getConfig()));
-    config["windowLength"] = 100;
-    config["averages"] = 1;
-    this.configService.sendConfig(config);
-  }
-
-  stop() {
-    this.configService.restoreConfig();
-    if (this.isCalibrating) {
-      this.loadCalibration();
-    }
-
-    this.isChecking = false;
-    this.isCalibrating = false;
-  }
-
-  isRunning() {
-    return this.isChecking || this.isCalibrating;
-  }
-
-  saveCalibration(cal) {
-    log.info("Saving calibration to the database");
-    this.cal = cal;
-
-    return new Promise((resolve, reject) => {
-      this.calibrationModel.updateOne({ _id: 1 }, { ...cal }, (err) => {
-        if (err) {
-          log.error(`Could not update calibration with id 1`);
-          reject(err);
-          return;
-        }
-        log.info("Calibration updated");
-        resolve();
-      });
-    });
-  }
-
-  loadCalibration() {
-    log.info("Loading calibration from the database");
-    return new Promise((resolve, reject) => {
-      this.calibrationModel.findById(1, (err, res) => {
-        if (err) {
-          log.error(`Could not fetch calibration with id 1`);
-          reject(err);
-          return;
-        }
-        log.info("Fetched calibration from the database");
-        this.cal = res;
-        resolve(res);
-      });
-    });
-  }
-}
-
-module.exports = CalibrationService;
+module.exports = {
+  getCalibration,
+  getAcceleration,
+  isCalibrationRunning,
+  startCalibration,
+  startCalibrationCheck,
+  stopCalibration,
+  checkCalibration,
+  calibrate,
+};

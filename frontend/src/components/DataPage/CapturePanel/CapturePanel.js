@@ -105,6 +105,7 @@ function CapturePanel(props) {
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }
+      setCapturing(false);
     } catch (err) {
       console.error(err);
     } finally {

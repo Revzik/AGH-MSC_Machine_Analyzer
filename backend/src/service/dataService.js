@@ -1,156 +1,137 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require("../log/logger")(__filename);
 log.info("Setting up data service");
 
+// Imports
+
 const { PythonShell } = require("python-shell");
+const dataModel = require("../data/dataModel");
+const acquisitionService = require("./acquisitionService");
+const calibrationService = require("./calibrationService");
+const configService = require("./configService");
 
-class DataService {
-  constructor({
-    acquisitionService,
-    configService,
-    calibrationService,
-    dataModel,
-  }) {
-    this.acquisitionService = acquisitionService;
-    this.configService = configService;
-    this.calibrationService = calibrationService;
+// Data
 
-    this.dataModel = dataModel;
+let rawData = {
+  t0: 0,
+  dt: 0,
+  nt: 0,
+  t: [],
+  x: [],
+  y: [],
+  z: [],
+  f: [],
+  ft: [],
+};
 
-    this.rawData = {
-      t0: 0,
-      dt: 0,
-      nt: 0,
-      t: [],
-      x: [],
-      y: [],
-      z: [],
-      f: [],
-      ft: [],
-    };
+let data = {
+  f: 0,
+  x: {
+    rms: 0,
+    peak: 0,
+    kurtosis: 0,
+    crestFactor: 0,
+    orderSpectrum: [],
+  },
+  y: {
+    rms: 0,
+    peak: 0,
+    kurtosis: 0,
+    crestFactor: 0,
+    orderSpectrum: [],
+  },
+  z: {
+    rms: 0,
+    peak: 0,
+    kurtosis: 0,
+    crestFactor: 0,
+    orderSpectrum: [],
+  },
+  orders: [],
+};
 
-    this.data = {
-      f: 0,
-      x: {
-        rms: 0,
-        peak: 0,
-        kurtosis: 0,
-        crestFactor: 0,
-        orderSpectrum: [],
-      },
-      y: {
-        rms: 0,
-        peak: 0,
-        kurtosis: 0,
-        crestFactor: 0,
-        orderSpectrum: [],
-      },
-      z: {
-        rms: 0,
-        peak: 0,
-        kurtosis: 0,
-        crestFactor: 0,
-        orderSpectrum: [],
-      },
-      orders: [],
-    };
+// Getters
+
+const getData = () => {
+  return data;
+};
+
+const getRawData = () => {
+  return rawData;
+};
+
+// Analysis functions
+
+const processData = (data) => {
+  analyzeRawData(data);
+
+  if (calibrationService.isCalibrationRunning()) {
+    calibrationService.checkCalibration(rawData);
+    return;
   }
 
-  processData(data) {
-    this.processRawData(data);
+  if (acquisitionService.isAnalyzing()) {
+    analyzeData(data);
+  }
+};
 
-    if (this.calibrationService.isRunning()) {
-      this.calibrationService.checkCalibration(this.rawData);
-      return;
+const analyzeRawData = (newData) => {
+  const options = {
+    mode: "text",
+    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    scriptPath: __dirname + "/../scripts",
+  };
+  const pyshell = new PythonShell("process_raw.py", options);
+
+  const msg = {
+    data: newData,
+    cal: calibrationService.getCalibration(),
+  };
+
+  pyshell.send(JSON.stringify(msg));
+  pyshell.on("message", (message) => {
+    rawData = JSON.parse(message);
+  });
+  pyshell.end((err) => {
+    if (err) {
+      throw err;
     }
+    log.info("Raw data processed!");
+  });
+};
 
-    const acquisitionStatus = this.acquisitionService.getStatus();
-    if (acquisitionStatus.analyzing) {
-      this.analyzeData(data);
+const analyzeData = (newData) => {
+  const options = {
+    mode: "text",
+    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    scriptPath: __dirname + "/../scripts",
+  };
+  const pyshell = new PythonShell("analyze.py", options);
 
-      // if (acquisitionStatus.capturing) {
-      //   this.save(acquisitionStatus.label);
-      // }
+  const msg = {
+    data: newData,
+    cal: calibrationService.getCalibration(),
+    config: configService.getConfig(),
+    base_dir: process.env.DATA_DIR,
+    capture: acquisitionService.isCapturing(),
+    label: acquisitionService.getLabel(),
+  };
+
+  pyshell.send(JSON.stringify(msg));
+  pyshell.on("message", (message) => {
+    data = JSON.parse(message);
+
+    if (acquisitionService.isCapturing()) {
+      dataModel.saveData(acquisitionService.getLabel(), data);
     }
-  }
+  });
+  pyshell.end((err) => {
+    if (err) {
+      throw err;
+    }
+    log.info("Data processed!");
+  });
+};
 
-  processRawData(data) {
-    const options = {
-      mode: "text",
-      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
-      scriptPath: __dirname + "/../scripts",
-    };
-    const pyshell = new PythonShell("process_raw.py", options);
+// Exports
 
-    const msg = {
-      data: data,
-      cal: this.calibrationService.getCalibration(),
-    };
-
-    pyshell.send(JSON.stringify(msg));
-    pyshell.on("message", (message) => {
-      this.rawData = JSON.parse(message);
-    });
-    pyshell.end((err) => {
-      if (err) {
-        throw err;
-      }
-      log.info("Raw data processed!");
-    });
-  }
-
-  analyzeData(data) {
-    const options = {
-      mode: "text",
-      pythonPath: __dirname + "/../../venv/Scripts/python.exe",
-      scriptPath: __dirname + "/../scripts",
-    };
-    const pyshell = new PythonShell("analyze.py", options);
-
-    const acqData = this.acquisitionService.getStatus();
-    const msg = {
-      data: data,
-      cal: this.calibrationService.getCalibration(),
-      config: this.configService.getConfig(),
-      base_dir: process.env.DATA_DIR,
-      capture: acqData.capturing,
-      label: acqData.label,
-    };
-
-    pyshell.send(JSON.stringify(msg));
-    pyshell.on("message", (message) => {
-      this.data = JSON.parse(message);
-    });
-    pyshell.end((err) => {
-      if (err) {
-        throw err;
-      }
-      log.info("Data processed!");
-    });
-  }
-
-  save(label) {
-    const newDataModel = new this.dataModel({
-      label: label,
-      ...this.data,
-    });
-    newDataModel.save((err) => {
-      if (err) {
-        log.error("Error while saving data!");
-        log.error(err);
-        return;
-      }
-      log.info("Data saved");
-    });
-  }
-
-  getRawData() {
-    return this.rawData;
-  }
-
-  getData() {
-    return this.data;
-  }
-}
-
-module.exports = DataService;
+module.exports = { getData, getRawData, processData };

@@ -1,40 +1,56 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require("../log/logger")(__filename);
 log.info("Setting up acquisition service");
 
-class AcquisitionService {
-  constructor() {
-    this.analyzing = false;
-    this.capturing = false;
-    this.label = null;
-  }
+const calibrationService = require("./calibrationService");
 
-  getStatus() {
-    return {
-      analyzing: this.analyzing,
-      capturing: this.capturing,
-      label: this.label,
-    };
-  }
+// Data
 
-  startAnalysis() {
-    // Add calibration stop when removing classes
-    this.analyzing = true;
-  }
+let analyzing = false;
+let capturing = false;
+let currentLabel = "";
 
-  stopAnalysis() {
-    this.stopCapturing();
-    this.analyzing = false;
-  }
+// Functions
 
-  startCapturing(newLabel) {
-    this.capturing = true;
-    this.label = newLabel;
-  }
+const isAnalyzing = () => {
+  return analyzing;
+};
 
-  stopCapturing() {
-    this.capturing = false;
-  }
-}
+const isCapturing = () => {
+  return capturing;
+};
 
-module.exports = AcquisitionService;
+const getLabel = () => {
+  return currentLabel;
+};
+
+const startAnalysis = () => {
+  calibrationService.stopCalibration();
+  analyzing = true;
+};
+
+const stopAnalysis = () => {
+  stopCapturing();
+  analyzing = false;
+};
+
+const startCapturing = (newLabel) => {
+  capturing = true;
+  currentLabel = newLabel;
+};
+
+const stopCapturing = () => {
+  capturing = false;
+  currentLabel = "";
+};
+
+// Exports
+
+module.exports = {
+  isAnalyzing,
+  isCapturing,
+  getLabel,
+  startAnalysis,
+  stopAnalysis,
+  startCapturing,
+  stopCapturing,
+};

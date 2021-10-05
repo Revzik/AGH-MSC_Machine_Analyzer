@@ -1,8 +1,9 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require("../log/logger")(__filename);
 
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+
+// Schema, model and its id
 
 const defaultId = 1;
 const configSchema = new Schema({
@@ -13,11 +14,44 @@ const configSchema = new Schema({
   maxOrder: { type: Number, default: 10 },
   windowLength: { type: Number, default: 200 },
   windowOverlap: { type: Number, default: 50 },
-  tachoPoints: { type: Number, default: 1 },
   averages: { type: Number, default: 10 },
 });
 
 const ConfigModel = mongoose.model("Config", configSchema);
+
+// Save and load functions
+
+const saveConfig = (config) => {
+  log.info("Saving config to the database");
+  return new Promise((resolve, reject) => {
+    ConfigModel.updateOne({ _id: defaultId }, { ...config }, (err) => {
+      if (err) {
+        log.error(`Could not update config with id ${defaultId}`);
+        reject(err);
+        return;
+      }
+      log.info("Config updated");
+      resolve();
+    });
+  });
+};
+
+const loadConfig = () => {
+  log.info("Loading config from the database");
+  return new Promise((resolve, reject) => {
+    ConfigModel.findById(defaultId, (err, res) => {
+      if (err) {
+        log.error(`Could not fetch config with id ${defaultId}`);
+        reject(err);
+        return;
+      }
+      log.info("Fetched config from the database");
+      resolve(res);
+    });
+  });
+};
+
+// Setting up default configuration if it doesn't exist
 
 function createDefaultConfig() {
   const defaultConfig = new ConfigModel({ _id: defaultId });
@@ -45,4 +79,6 @@ ConfigModel.exists({ _id: defaultId }, (err, exists) => {
   createDefaultConfig();
 });
 
-module.exports = ConfigModel;
+// Exports
+
+module.exports = { saveConfig, loadConfig };
