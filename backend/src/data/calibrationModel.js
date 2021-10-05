@@ -43,7 +43,7 @@ const saveCalibration = (calibration) => {
   });
 };
 
-const loadCalibration = () => {
+const loadCalibration = async() => {
   log.info("Loading calibration from the database");
   return new Promise((resolve, reject) => {
     CalibrationModel.findById(defaultId, (err, res) => {

@@ -36,7 +36,7 @@ const saveConfig = (config) => {
   });
 };
 
-const loadConfig = () => {
+const loadConfig = async() => {
   log.info("Loading config from the database");
   return new Promise((resolve, reject) => {
     ConfigModel.findById(defaultId, (err, res) => {

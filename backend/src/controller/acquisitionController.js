@@ -1,14 +1,17 @@
-const { container } = require("../di-setup");
-const log = container.resolve("logging").createLogger(__filename);
+const log = require("../log/logger")(__filename);
 log.info("Setting up capture controller");
 
 const express = require("express");
 const router = express.Router();
 
-const acquisitionService = container.resolve("acquisitionService");
+const acquisitionService = require("../service/acquisitionService");
 
 router.get("/", (req, res) => {
-  res.json(acquisitionService.getStatus());
+  res.json({
+    analyzing: acquisitionService.isAnalyzing,
+    capturing: acquisitionService.isCapturing,
+    label: acquisitionService.currentLabel,
+  });
 });
 
 router.post("/start", (req, res) => {
@@ -24,14 +27,15 @@ router.post("/stop", (req, res) => {
 });
 
 router.post("/capture/start", (req, res) => {
-  if (!req.body.label) {
+  const newLabel = req.body.label;
+  if (!newLabel || newLabel === "") {
     log.error("No label found!");
     res.sendStatus(400);
     return;
   }
 
-  log.info(`Starting capture with label: ${req.body.label}`);
-  acquisitionService.startCapturing(req.body.label);
+  log.info(`Starting capture with label: ${newLabel}`);
+  acquisitionService.startCapturing(newLabel);
   res.sendStatus(200);
 });
 

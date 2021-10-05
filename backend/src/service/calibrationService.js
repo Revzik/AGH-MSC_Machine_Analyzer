@@ -125,14 +125,7 @@ const isCalibrationRunning = () => {
 
 // Setting up calibration
 
-calibrationModel
-  .loadCalibration()
-  .then((calibration) => {
-    currentCalibration = calibration;
-  })
-  .catch(
-    log.error("Failed to load calibration from the database, using default")
-  );
+currentCalibration = await calibrationModel.loadCalibration();
 
 // Exports
 

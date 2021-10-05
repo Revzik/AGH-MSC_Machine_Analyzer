@@ -37,13 +37,7 @@ const sendConfig = (config) => {
 
 // Setup
 
-loadConfig()
-  .then((config) => {
-    currentConfig = config;
-  })
-  .catch(() => {
-    log.error("Could not load config, using default");
-  });
+currentConfig = await configModel.loadConfig();
 
 // Exports
 
