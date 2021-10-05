@@ -4,6 +4,7 @@ log.info("Setting up config service");
 // Imports
 
 const configModel = require("../data/configModel");
+const thresholdsModel = require("../data/thresholdsModel");
 const mqtt = require("../mqtt/mqtt");
 
 // Data
@@ -15,15 +16,42 @@ let currentConfig = {
   maxOrder: 10,
   windowLength: 1000,
   windowOverlap: 50,
-  tachoPoints: 1,
   averages: 5,
+};
+
+let currentThresholds = {
+  x: {
+    rms: { min: -Infinity, max: Infinity },
+    peak: { min: -Infinity, max: Infinity },
+    kurtosis: { min: -Infinity, max: Infinity },
+    crestFactor: { min: -Infinity, max: Infinity },
+    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+  },
+  y: {
+    rms: { min: -Infinity, max: Infinity },
+    peak: { min: -Infinity, max: Infinity },
+    kurtosis: { min: -Infinity, max: Infinity },
+    crestFactor: { min: -Infinity, max: Infinity },
+    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+  },
+  z: {
+    rms: { min: -Infinity, max: Infinity },
+    peak: { min: -Infinity, max: Infinity },
+    kurtosis: { min: -Infinity, max: Infinity },
+    crestFactor: { min: -Infinity, max: Infinity },
+    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+  },
 };
 
 // Functions
 
 const getConfig = () => {
   return currentConfig;
-}
+};
+
+const getThresholds = () => {
+  return currentThresholds;
+};
 
 const saveConfig = (config) => {
   currentConfig = config;
@@ -39,6 +67,11 @@ const sendConfig = (config) => {
   mqtt.publishConfig(config);
 };
 
+const saveThresholds = (thresholds) => {
+  currentThresholds = thresholds;
+  thresholdsModel.saveThresholds(thresholds);
+};
+
 // Setup
 
 configModel
@@ -52,4 +85,11 @@ configModel
 
 // Exports
 
-module.exports = { getConfig, saveConfig, restoreConfig, sendConfig };
+module.exports = {
+  getConfig,
+  getThresholds,
+  saveConfig,
+  restoreConfig,
+  sendConfig,
+  saveThresholds,
+};

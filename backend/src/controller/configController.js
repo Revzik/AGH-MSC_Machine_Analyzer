@@ -7,11 +7,19 @@ const router = express.Router();
 const configService = require("../service/configService");
 
 router.get("/", (req, res) => {
-  res.json(configService.getConfig());
+  res.json({
+    config: configService.getConfig(),
+    thresholds: configService.getThresholds(),
+  });
 });
 
 router.post("/", (req, res) => {
   configService.saveConfig(req.body);
+  res.sendStatus(200);
+});
+
+router.post("/thresholds", (req, res) => {
+  configService.saveThresholds(req.body);
   res.sendStatus(200);
 });
 
