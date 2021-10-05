@@ -39,7 +39,7 @@ const startCapturing = (newLabel) => {
 };
 
 const stopCapturing = () => {
-  this.capturing = false;
+  capturing = false;
   currentLabel = "";
 };
 

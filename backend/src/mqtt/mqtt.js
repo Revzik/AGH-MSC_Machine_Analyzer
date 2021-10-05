@@ -2,6 +2,7 @@ const log = require("../log/logger")(__filename);
 log.info("Setting up MQTT dispatcher");
 
 const mqtt = require("mqtt");
+const dataSevice = require("../service/dataService");
 
 const PUB_CONFIG = "sensor/config";
 const SUB_DATA = "sensor/data";
@@ -16,6 +17,14 @@ client = mqtt.connect(process.env.MQTT_URL, {
 
 client.on("connect", () => {
   log.info("Connected to the MQTT broker");
+  client.subscribe(SUB_DATA, (err) => {
+    if (err) {
+      log.error(`Could not subscribe to the ${SUB_DATA} topic`);
+      log.error("No data will be received");
+      return;
+    }
+    log.info(`Subscribed to topic ${SUB_DATA}`);
+  });
 });
 
 client.on("error", (error) => {
@@ -34,7 +43,7 @@ client.on("message", (topic, message, packet) => {
 const dispatch = (topic, message, packet) => {
   switch (topic) {
     case SUB_DATA:
-      this.dataSubscriber.process(message); // TODO: Update with dataService.processData(JSON.parse(message.toString()));
+      dataSevice.processData(JSON.parse(message.toString()));
       break;
     default:
       log.error(`Unknown subscriber topic ${topic}`);
@@ -49,4 +58,4 @@ const publishConfig = (config) => {
 
 // Exports
 
-module.exports = { publishConfig };
+module.exports.publishConfig = publishConfig;

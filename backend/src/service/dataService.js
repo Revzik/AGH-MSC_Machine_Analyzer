@@ -4,6 +4,7 @@ log.info("Setting up data service");
 // Imports
 
 const { PythonShell } = require("python-shell");
+const dataModel = require("../data/dataModel");
 const acquisitionService = require("./acquisitionService");
 const calibrationService = require("./calibrationService");
 const configService = require("./configService");
@@ -70,14 +71,10 @@ const processData = (data) => {
 
   if (acquisitionService.isAnalyzing()) {
     analyzeData(data);
-
-    if (acquisitionService.isCapturing()) {
-      save(acquisitionService.getLabel());
-    }
   }
 };
 
-const analyzeRawData = (data) => {
+const analyzeRawData = (newData) => {
   const options = {
     mode: "text",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
@@ -86,7 +83,7 @@ const analyzeRawData = (data) => {
   const pyshell = new PythonShell("process_raw.py", options);
 
   const msg = {
-    data: data,
+    data: newData,
     cal: calibrationService.getCalibration(),
   };
 
@@ -102,7 +99,7 @@ const analyzeRawData = (data) => {
   });
 };
 
-const analyzeData = (data) => {
+const analyzeData = (newData) => {
   const options = {
     mode: "text",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
@@ -111,7 +108,7 @@ const analyzeData = (data) => {
   const pyshell = new PythonShell("analyze.py", options);
 
   const msg = {
-    data: data,
+    data: newData,
     cal: calibrationService.getCalibration(),
     config: configService.getConfig(),
     base_dir: process.env.DATA_DIR,
@@ -122,6 +119,10 @@ const analyzeData = (data) => {
   pyshell.send(JSON.stringify(msg));
   pyshell.on("message", (message) => {
     data = JSON.parse(message);
+
+    if (acquisitionService.isCapturing()) {
+      dataModel.saveData(acquisitionService.getLabel(), data);
+    }
   });
   pyshell.end((err) => {
     if (err) {
