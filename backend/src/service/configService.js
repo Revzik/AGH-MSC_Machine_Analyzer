@@ -21,26 +21,24 @@ let currentConfig = {
 
 let currentThresholds = {
   x: {
-    rms: { min: -Infinity, max: Infinity },
-    peak: { min: -Infinity, max: Infinity },
-    kurtosis: { min: -Infinity, max: Infinity },
-    crestFactor: { min: -Infinity, max: Infinity },
-    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+    rms: null,
+    peak: null,
+    kurtosis: { min: null, max: null },
+    crestFactor: { min: null, max: null },
   },
   y: {
-    rms: { min: -Infinity, max: Infinity },
-    peak: { min: -Infinity, max: Infinity },
-    kurtosis: { min: -Infinity, max: Infinity },
-    crestFactor: { min: -Infinity, max: Infinity },
-    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+    rms: null,
+    peak: null,
+    kurtosis: { min: null, max: null },
+    crestFactor: { min: null, max: null },
   },
   z: {
-    rms: { min: -Infinity, max: Infinity },
-    peak: { min: -Infinity, max: Infinity },
-    kurtosis: { min: -Infinity, max: Infinity },
-    crestFactor: { min: -Infinity, max: Infinity },
-    orderSpectrum: [{ order: 0, min: -Infinity, max: Infinity }],
+    rms: null,
+    peak: null,
+    kurtosis: { min: null, max: null },
+    crestFactor: { min: null, max: null },
   },
+  orderSpectrum: [{ order: 0, x: null, y: null, z: null }],
 };
 
 // Functions
@@ -80,7 +78,16 @@ configModel
     currentConfig = newConfig;
   })
   .catch(() => {
-    log.error("Could not load calibration from the database, using default");
+    log.error("Could not load config from the database, using default");
+  });
+
+thresholdsModel
+  .loadThresholds()
+  .then((newThresholds) => {
+    currentThresholds = newThresholds;
+  })
+  .catch(() => {
+    log.error("Could not load thresholds from the database, using default");
   });
 
 // Exports

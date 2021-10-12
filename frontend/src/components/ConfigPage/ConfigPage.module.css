@@ -16,3 +16,37 @@
 .button {
   margin: 1rem auto;
 }
+
+.title, .title_first {
+  margin: auto;
+  margin-top: 0.5rem;
+  font-weight: bold;
+}
+
+.title_first {
+  margin-top: 0rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.header > * {
+  flex-basis: 100%;
+  text-align: center;
+}
+
+.header > .inner {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.header > .inner > * {
+  flex-basis: 100%;
+  text-align: center;
+}
+

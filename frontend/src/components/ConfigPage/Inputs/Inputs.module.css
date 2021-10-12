@@ -1,0 +1,44 @@
+.param {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.param > * {
+  flex-basis: 100%;
+}
+
+.param > .inner {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.param > .inner > * {
+  flex-basis: 100%;
+}
+
+.inner input {
+  max-width: 5rem;
+}
+
+.param input,
+.param select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.param input:focus,
+.param select:focus {
+  outline: none;
+  border-color: #ff9500;
+}
+
+.param select {
+  background-color: #fff;
+}
+
+.invalid {
+  border-color: #d00;
+  background-color: #d99;
+}

@@ -1,10 +1,10 @@
 import React from "react";
 
-import classes from "./ConfigParam.module.css";
+import classes from "./Inputs.module.css";
 
-function SelectConfigParam(props) {
+function Select(props) {
   function changeHandler(event) {
-    props.changeHandler(event.target.name, event.target.value);
+    props.changeHandler(event.target.name, event.target.value, true);
   }
 
   return (
@@ -21,4 +21,4 @@ function SelectConfigParam(props) {
   );
 }
 
-export default SelectConfigParam;
+export default Select;

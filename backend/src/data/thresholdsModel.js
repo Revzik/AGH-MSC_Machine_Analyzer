@@ -5,33 +5,30 @@ const { Schema } = mongoose;
 
 // Schema, model and its id
 
-const POS_INF = { type: Number, default: Infinity };
-const NEG_INF = { type: Number, default: -Infinity };
+const NULL = { type: Number, default: null };
 
 const defaultId = 1;
 const thresholdsSchema = new Schema({
   _id: Number,
   x: {
-    rms: { min: NEG_INF, max: POS_INF },
-    peak: { min: NEG_INF, max: POS_INF },
-    kurtosis: { min: NEG_INF, max: POS_INF },
-    crestFactor: { min: NEG_INF, max: POS_INF },
-    orderSpectrum: [],
+    rms: NULL,
+    peak: NULL,
+    kurtosis: { min: NULL, max: NULL },
+    crestFactor: { min: NULL, max: NULL },
   },
   y: {
-    rms: { min: NEG_INF, max: POS_INF },
-    peak: { min: NEG_INF, max: POS_INF },
-    kurtosis: { min: NEG_INF, max: POS_INF },
-    crestFactor: { min: NEG_INF, max: POS_INF },
-    orderSpectrum: [],
+    rms: NULL,
+    peak: NULL,
+    kurtosis: { min: NULL, max: NULL },
+    crestFactor: { min: NULL, max: NULL },
   },
   z: {
-    rms: { min: NEG_INF, max: POS_INF },
-    peak: { min: NEG_INF, max: POS_INF },
-    kurtosis: { min: NEG_INF, max: POS_INF },
-    crestFactor: { min: NEG_INF, max: POS_INF },
-    orderSpectrum: [],
+    rms: NULL,
+    peak: NULL,
+    kurtosis: { min: NULL, max: NULL },
+    crestFactor: { min: NULL, max: NULL },
   },
+  orderSpectrum: [{ order: NULL, x: NULL, y: NULL, z: NULL }],
 });
 
 const ThresholdsModel = mongoose.model("Threshold", thresholdsSchema);
