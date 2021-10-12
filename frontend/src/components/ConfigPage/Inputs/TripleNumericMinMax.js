@@ -31,7 +31,7 @@ function TripleNumericMinMax(props) {
     if (props.optional && value === "") {
       return true;
     }
-    
+
     let numeric = +value;
     if (isNaN(+numeric)) {
       return false;
@@ -50,7 +50,7 @@ function TripleNumericMinMax(props) {
   return (
     <div className={classes.param}>
       <div>{props.description}</div>
-      <div className={classes.inner}>
+      <div className={`${classes.inner_param} ${classes.small_inputs}`}>
         <input
           className={`${!props.content.xMin.valid && classes.invalid}`}
           name={props.name}
@@ -66,7 +66,7 @@ function TripleNumericMinMax(props) {
           onChange={xMaxChangeHandler}
         />
       </div>
-      <div className={classes.inner}>
+      <div className={`${classes.inner_param} ${classes.small_inputs}`}>
         <input
           className={`${!props.content.yMin.valid && classes.invalid}`}
           name={props.name}
@@ -82,7 +82,7 @@ function TripleNumericMinMax(props) {
           onChange={yMaxChangeHandler}
         />
       </div>
-      <div className={classes.inner}>
+      <div className={`${classes.inner_param} ${classes.small_inputs}`}>
         <input
           className={`${!props.content.zMin.valid && classes.invalid}`}
           name={props.name}

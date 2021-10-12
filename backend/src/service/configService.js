@@ -38,7 +38,7 @@ let currentThresholds = {
     kurtosis: { min: null, max: null },
     crestFactor: { min: null, max: null },
   },
-  orderSpectrum: [{ order: 0, x: null, y: null, z: null }],
+  orderSpectrum: [],
 };
 
 // Functions

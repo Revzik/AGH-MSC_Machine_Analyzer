@@ -1,13 +1,5 @@
-.fieldset {
-  border: none;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-}
-
 .card {
+  text-align: center;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -18,7 +10,6 @@
 }
 
 .title, .title_first {
-  margin: auto;
   margin-top: 0.5rem;
   font-weight: bold;
 }
@@ -49,4 +40,3 @@
   flex-basis: 100%;
   text-align: center;
 }
-

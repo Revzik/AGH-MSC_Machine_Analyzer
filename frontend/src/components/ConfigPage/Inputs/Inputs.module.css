@@ -7,19 +7,27 @@
   flex-basis: 100%;
 }
 
-.param > .inner {
+.param > .inner_param {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
   justify-content: center;
 }
 
-.param > .inner > * {
+.param > .inner_param > * {
   flex-basis: 100%;
 }
 
-.inner input {
+.small_inputs input {
   max-width: 5rem;
+}
+
+.medium_inputs input {
+  max-width: 7rem;
+}
+
+.large_inputs input {
+  max-width: 9rem;
 }
 
 .param input,

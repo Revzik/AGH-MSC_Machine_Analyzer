@@ -17,11 +17,12 @@ router.post("/", (req, res) => {
 });
 
 router.get("/thresholds", (req, res) => {
-  log.debug(JSON.stringify(configService.getThresholds()))
+  log.debug("sending: " + JSON.stringify(configService.getThresholds()))
   res.json(configService.getThresholds());
 });
 
 router.post("/thresholds", (req, res) => {
+  log.debug("receiving: " + JSON.stringify(req.body))
   configService.saveThresholds(req.body);
   res.sendStatus(200);
 });

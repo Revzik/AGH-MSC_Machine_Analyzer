@@ -120,7 +120,6 @@ function ConfigPanel(props) {
   }, [config]);
 
   function parameterUpdated(key, value, valid) {
-    console.log(`key: ${key}, value: ${value}, valid: ${valid}`);
     setConfig((prevState) => {
       return { ...prevState, [key]: { value: value, valid: valid } };
     });
