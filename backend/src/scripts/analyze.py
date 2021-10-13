@@ -1,7 +1,6 @@
 import sys
 import json
 import numpy as np
-import scipy.signal as sig
 import scipy.stats as stat
 import time
 import os
@@ -34,9 +33,6 @@ ft = np.array(data["ft"])
 
 acc = acc - np.mean(acc, axis=1).reshape(3, 1)
 
-b, a = sig.butter(27, 0.9, btype="low", analog=False)
-acc = sig.lfilter(b, a, acc, axis=1)
-
 
 # Computing statistical parameters
 
@@ -53,14 +49,12 @@ crest = peak / rms
 
 n_orders = int(config["maxOrder"] / config["dOrder"]) + 1
 orders = np.linspace(0, config["maxOrder"], n_orders)
-orders = np.zeros(1)
 t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
 f_interp = np.interp(t, ft, f)
 window = np.hanning(win_len).reshape(win_len)
 window = window / np.mean(window)
 
 spec = np.zeros((3, n_orders))
-spec = np.zeros((3, 1))
 
 j = 0
 for i in range(config["averages"]):

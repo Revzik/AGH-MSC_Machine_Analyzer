@@ -22,7 +22,7 @@ function processEmpty(value) {
     return null;
   }
 
-  return value;
+  return parseFloat(value);
 }
 
 function ThresholdsPanel(props) {
@@ -231,7 +231,7 @@ function ThresholdsPanel(props) {
       let items = [...prevState];
       items.splice(index, 1);
       return items;
-    })
+    });
   }
 
   useEffect(() => {
@@ -402,10 +402,7 @@ function ThresholdsPanel(props) {
         />
         <div className={classes.title}>Order spectrum</div>
         {orderContent}
-        <Button
-          className={classes.button}
-          onClick={addOrderThreshold}
-        >
+        <Button className={classes.button} onClick={addOrderThreshold}>
           Add order threshold
         </Button>
         <Button

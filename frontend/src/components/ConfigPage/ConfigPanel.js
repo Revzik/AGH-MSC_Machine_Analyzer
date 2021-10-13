@@ -49,7 +49,7 @@ function ConfigPanel(props) {
       maxOrder: parseFloat(config.maxOrder.value),
       windowLength: parseInt(config.windowLength.value),
       windowOverlap: parseInt(config.windowOverlap.value),
-      averages: parseInt(config.windowOverlap.value),
+      averages: parseInt(config.averages.value),
     });
   }
 

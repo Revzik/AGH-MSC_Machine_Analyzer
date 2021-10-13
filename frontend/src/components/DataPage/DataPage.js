@@ -12,6 +12,7 @@ function DataPage(props) {
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
+  const [validations, setValidations] = useState(null);
 
   async function fetchDataHandler(isPeriodic) {
     setLoading(!isPeriodic && true);
@@ -23,9 +24,10 @@ function DataPage(props) {
       if (!response.ok) {
         throw new Error(`Response status ${response.status}`);
       }
-      const data = await response.json();
+      const body = await response.json();
 
-      setData(data);
+      setData(body.data);
+      setValidations(body.validations);
     } catch (error) {
       setError(error.message);
       setData(null);
@@ -53,8 +55,14 @@ function DataPage(props) {
       {button}
     </React.Fragment>
   );
-  if (data) {
-    dataContent = <DataPanel refreshAction={fetchDataHandler} data={data} />;
+  if (data && validations) {
+    dataContent = (
+      <DataPanel
+        refreshAction={fetchDataHandler}
+        data={data}
+        validations={validations}
+      />
+    );
   }
   if (error) {
     dataContent = (
@@ -67,7 +75,7 @@ function DataPage(props) {
 
   return (
     <MainContainer>
-      <CapturePanel/>
+      <CapturePanel />
       {dataContent}
       {isLoading && <Loader />}
     </MainContainer>
