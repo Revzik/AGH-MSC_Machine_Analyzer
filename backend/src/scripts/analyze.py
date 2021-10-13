@@ -31,13 +31,18 @@ ft = np.array(data["ft"])
 
 # Preprocessing
 
+n_windows = config["averages"]
+if n_windows > 1:
+    n_windows -= 1
+    acc = acc[:, win_step::]
+    t = t[win_step::]
+
 acc = acc - np.mean(acc, axis=1).reshape(3, 1)
 
 
 # Computing statistical parameters
 
 f_avg = np.mean(f)
-f_avg = 0
 
 rms = np.sqrt(np.mean(np.square(acc), axis=1))
 peak = np.max(np.abs(acc), axis=1)
@@ -57,7 +62,7 @@ window = window / np.mean(window)
 spec = np.zeros((3, n_orders))
 
 j = 0
-for i in range(config["averages"]):
+for i in range(n_windows):
     kernel = (
         np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern))
         * window
@@ -65,7 +70,7 @@ for i in range(config["averages"]):
     spec += np.abs(kernel.dot(acc[:, j : j + win_len].T)).T / win_len
     j += win_step
 
-spec = spec / config["averages"]
+spec = spec / n_windows
 
 
 # Backup data to a file if capturing
