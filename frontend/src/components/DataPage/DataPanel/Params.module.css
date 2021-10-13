@@ -11,13 +11,17 @@
 
 .table {
     table-layout: fixed;
-    width: 20rem;
+    width: 30rem;
 }
 
 .table .namecol {
-    width: 8rem;
+    width: 10rem;
 }
 
 .table .namerow {
     text-align: left;
+}
+
+.invalid {
+    color: #d00;
 }

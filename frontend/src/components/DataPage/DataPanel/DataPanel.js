@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from "react";
 
 import StatisticalParams from "./StatisticalParams";
 import Chart from "../../UI/Chart";
+import OrderThresholds from "./OrderThresholds";
 
 function DataPanel(props) {
   const refresh = useCallback(() => {
@@ -15,7 +16,7 @@ function DataPanel(props) {
     };
   }, [refresh]);
 
-  function getDataArray() {
+  function getOrderSpectrumArray() {
     return [
       { name: "x", x: props.data.orders, y: props.data.x.orderSpectrum },
       { name: "y", x: props.data.orders, y: props.data.y.orderSpectrum },
@@ -25,9 +26,10 @@ function DataPanel(props) {
 
   return (
     <React.Fragment>
-      <StatisticalParams data={props.data}></StatisticalParams>
+      <StatisticalParams data={props.data} validations={props.validations} />
+      <OrderThresholds validations={props.validations}/>
       <Chart
-        data={getDataArray()}
+        data={getOrderSpectrumArray()}
         title="Order spectrum"
         xlabel="order"
         ylabel="a [m/s^2]"

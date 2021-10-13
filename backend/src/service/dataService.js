@@ -49,10 +49,39 @@ let data = {
   orders: [],
 };
 
+let validations = {
+  x: {
+    rms: true,
+    peak: true,
+    kurtosis: true,
+    crestFactor: true,
+  },
+  y: {
+    rms: true,
+    peak: true,
+    kurtosis: true,
+    crestFactor: true,
+  },
+  z: {
+    rms: true,
+    peak: true,
+    kurtosis: true,
+    crestFactor: true,
+  },
+  orders: [],
+};
+
 // Getters
 
 const getData = () => {
   return data;
+};
+
+const getValidatedData = () => {
+  return {
+    data: data,
+    validations: validations,
+  };
 };
 
 const getRawData = () => {
@@ -61,8 +90,8 @@ const getRawData = () => {
 
 // Analysis functions
 
-const processData = (data) => {
-  analyzeRawData(data);
+const processData = (newData) => {
+  analyzeRawData(newData);
 
   if (calibrationService.isCalibrationRunning()) {
     calibrationService.checkCalibration(rawData);
@@ -70,7 +99,7 @@ const processData = (data) => {
   }
 
   if (acquisitionService.isAnalyzing()) {
-    analyzeData(data);
+    analyzeData(newData);
   }
 };
 
@@ -123,6 +152,8 @@ const analyzeData = (newData) => {
     if (acquisitionService.isCapturing()) {
       dataModel.saveData(acquisitionService.getLabel(), data);
     }
+
+    analyzeThresholds(data);
   });
   pyshell.end((err) => {
     if (err) {
@@ -132,6 +163,31 @@ const analyzeData = (newData) => {
   });
 };
 
+const analyzeThresholds = (analyzedData) => {
+  const options = {
+    mode: "text",
+    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    scriptPath: __dirname + "/../scripts",
+  };
+  const pyshell = new PythonShell("validate.py", options);
+
+  const msg = {
+    data: analyzedData,
+    thresholds: configService.getThresholds(),
+  };
+
+  pyshell.send(JSON.stringify(msg));
+  pyshell.on("message", (message) => {
+    validations = JSON.parse(message);
+  });
+  pyshell.end((err) => {
+    if (err) {
+      throw err;
+    }
+    log.info("Data validated!");
+  });
+};
+
 // Exports
 
-module.exports = { getData, getRawData, processData };
+module.exports = { getData, getValidatedData, getRawData, processData };

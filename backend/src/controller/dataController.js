@@ -7,7 +7,7 @@ const router = express.Router();
 const dataService = require("../service/dataService")
 
 router.get("/", (req, res) => {
-  res.json(dataService.getData());
+  res.json(dataService.getValidatedData());
 });
 
 router.get("/raw", (req, res) => {

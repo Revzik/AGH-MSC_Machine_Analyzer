@@ -22,7 +22,7 @@ function Button(props) {
 
   return (
     <button
-      className={`${classes.button} ${props.className}`}
+      className={`${classes.button} ${props.small && classes.small} ${props.className}`}
       onClick={onClick}
       type={props.type ? props.type : "button"}
       disabled={props.disabled}
