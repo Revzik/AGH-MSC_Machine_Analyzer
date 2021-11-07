@@ -45,6 +45,7 @@ function Chart(props) {
       },
     ],
     layout: {
+      height: 400,
       margin: {
         l: 65,
         r: 65,

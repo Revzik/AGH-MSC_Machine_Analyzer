@@ -42,7 +42,9 @@ acc = acc - np.mean(acc, axis=1).reshape(3, 1)
 
 # Computing statistical parameters
 
-f_avg = np.mean(f)
+f_avg = 0
+if f.size > 0:
+    f_avg = np.mean(f)
 
 rms = np.sqrt(np.mean(np.square(acc), axis=1))
 peak = np.max(np.abs(acc), axis=1)
@@ -54,23 +56,25 @@ crest = peak / rms
 
 n_orders = int(config["maxOrder"] / config["dOrder"]) + 1
 orders = np.linspace(0, config["maxOrder"], n_orders)
-t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
-f_interp = np.interp(t, ft, f)
-window = np.hanning(win_len).reshape(win_len)
-window = window / np.mean(window)
-
 spec = np.zeros((3, n_orders))
 
-j = 0
-for i in range(n_windows):
-    kernel = (
-        np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern))
-        * window
-    )
-    spec += np.abs(kernel.dot(acc[:, j : j + win_len].T)).T / win_len
-    j += win_step
+if f.size > 0:
 
-spec = spec / n_windows
+    t_kern = np.linspace(0, win_len_s, win_len, endpoint=False)
+    f_interp = np.interp(t, ft, f)
+    window = np.hanning(win_len).reshape(win_len)
+    window = window / np.mean(window)
+
+    j = 0
+    for i in range(n_windows):
+        kernel = (
+            np.exp(2j * np.pi * np.outer(orders, f_interp[j : j + win_len] * t_kern))
+            * window
+        )
+        spec += np.abs(kernel.dot(acc[:, j : j + win_len].T)).T / win_len
+        j += win_step
+
+    spec = spec / n_windows
 
 
 # Backup data to a file if capturing
