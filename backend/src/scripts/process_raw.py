@@ -12,7 +12,10 @@ cal = input_data["cal"]
 x = (np.array(data["x"]) + cal["offset"]["x"]) * cal["sensitivity"]["x"]
 y = (np.array(data["y"]) + cal["offset"]["y"]) * cal["sensitivity"]["y"]
 z = (np.array(data["z"]) + cal["offset"]["z"]) * cal["sensitivity"]["z"]
-t = np.linspace(data["t0"], data["t0"] + data["nt"] * data["dt"], data["nt"])
+t = np.linspace(0, data["nt"] * data["dt"], data["nt"])
+
+if len(data["ft"]) > 0:
+    data["ft"] = (np.array(data["ft"]) - data["ft"][0]).tolist()
 
 processedData = {
     "t0": data["t0"],

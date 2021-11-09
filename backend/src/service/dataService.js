@@ -105,7 +105,7 @@ const processData = (newData) => {
 
 const analyzeRawData = (newData) => {
   const options = {
-    mode: "text",
+    mode: "json",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
     scriptPath: __dirname + "/../scripts",
   };
@@ -116,21 +116,23 @@ const analyzeRawData = (newData) => {
     cal: calibrationService.getCalibration(),
   };
 
-  pyshell.send(JSON.stringify(msg));
+  pyshell.send(msg);
   pyshell.on("message", (message) => {
-    rawData = JSON.parse(message);
+    rawData = message;
   });
   pyshell.end((err) => {
     if (err) {
-      throw err;
+      log.error("Could not process raw data!");
+      log.error(err);
+    } else {
+      log.info("Raw data processed");
     }
-    log.info("Raw data processed!");
   });
 };
 
 const analyzeData = (newData) => {
   const options = {
-    mode: "text",
+    mode: "json",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
     scriptPath: __dirname + "/../scripts",
   };
@@ -145,9 +147,9 @@ const analyzeData = (newData) => {
     label: acquisitionService.getLabel(),
   };
 
-  pyshell.send(JSON.stringify(msg));
+  pyshell.send(msg);
   pyshell.on("message", (message) => {
-    data = JSON.parse(message);
+    data = message;
 
     if (acquisitionService.isCapturing()) {
       dataModel.saveData(acquisitionService.getLabel(), data);
@@ -157,15 +159,17 @@ const analyzeData = (newData) => {
   });
   pyshell.end((err) => {
     if (err) {
-      throw err;
+      log.error("Could not analyze data!");
+      log.error(err);
+    } else {
+      log.info("Data analyzed");
     }
-    log.info("Data processed!");
   });
 };
 
 const analyzeThresholds = (analyzedData) => {
   const options = {
-    mode: "text",
+    mode: "json",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
     scriptPath: __dirname + "/../scripts",
   };
@@ -176,15 +180,17 @@ const analyzeThresholds = (analyzedData) => {
     thresholds: configService.getThresholds(),
   };
 
-  pyshell.send(JSON.stringify(msg));
+  pyshell.send(msg);
   pyshell.on("message", (message) => {
-    validations = JSON.parse(message);
+    validations = message;
   });
   pyshell.end((err) => {
     if (err) {
-      throw err;
+      log.error("Could not validate data!");
+      log.error(err);
+    } else {
+      log.info("Data validated");
     }
-    log.info("Data validated!");
   });
 };
 

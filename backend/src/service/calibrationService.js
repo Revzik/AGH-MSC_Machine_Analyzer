@@ -49,7 +49,7 @@ const getAcceleration = () => {
 
 const checkCalibration = (data) => {
   const options = {
-    mode: "text",
+    mode: "json",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
     scriptPath: __dirname + "/../scripts",
   };
@@ -61,36 +61,40 @@ const checkCalibration = (data) => {
     z: data.z,
   };
 
-  pyshell.send(JSON.stringify(msg));
+  pyshell.send(msg);
   pyshell.on("message", (message) => {
-    acceleration = JSON.parse(message);
+    acceleration = message;
   });
   pyshell.end((err) => {
     if (err) {
-      throw err;
+      log.error("Could not process calibration data!");
+      log.error(err);
+    } else {
+      log.info("Calibration data processed");
     }
-    log.info("Calibration check calibrationData processed!");
   });
 };
 
 const calibrate = (data) => {
   const options = {
-    mode: "text",
+    mode: "json",
     pythonPath: __dirname + "/../../venv/Scripts/python.exe",
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("calibrate.py", options);
 
-  pyshell.send(JSON.stringify(data));
+  pyshell.send(data);
   pyshell.on("message", (message) => {
-    currentCalibration = JSON.parse(message);
+    currentCalibration = message;
     calibrationModel.saveCalibration(currentCalibration);
   });
   pyshell.end((err) => {
     if (err) {
-      throw err;
+      log.error("Could not calculate calibration factors!");
+      log.error(err);
+    } else {
+      log.info("Calibration factors calculated");
     }
-    log.info("Calibration calibrationData processed!");
   });
 };
 
@@ -126,8 +130,9 @@ const startCalibration = () => {
   start();
 };
 
-const stopCalibration = () => {
+const stopCalibration = async () => {
   configService.restoreConfig();
+  currentCalibration = await calibrationModel.loadCalibration();
 
   checking = false;
   calibrating = false;
