@@ -58,7 +58,14 @@ function ConfigPanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4200/config/");
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/config/`, {
+      const response = await fetch(`http://localhost:4200/config/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Could not fetch config! ${response}`);
@@ -88,10 +95,12 @@ function ConfigPanel(props) {
     const configJson = parseConfig();
 
     try {
-      const response = await fetch("http://localhost:4200/config/", {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/config/`, {
+      const response = await fetch(`http://localhost:4200/config/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: configJson,
       });

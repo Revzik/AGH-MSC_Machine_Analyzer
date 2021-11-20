@@ -37,8 +37,13 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/acquire/start`, {
       const response = await fetch(`http://localhost:4200/acquire/start`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
@@ -54,8 +59,13 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/acquire/stop`, {
       const response = await fetch(`http://localhost:4200/acquire/stop`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
@@ -71,12 +81,12 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:4200/acquire/capture/start`,
-        {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/acquire/capture/start`, {
+      const response = await fetch(`http://localhost:4200/acquire/capture/start`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
           },
           body: JSON.stringify({ label: label }),
         }
@@ -96,10 +106,13 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:4200/acquire/capture/stop`,
-        {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/acquire/capture/stop`, {
+      const response = await fetch(`http://localhost:4200/acquire/capture/stop`, {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
       );
       if (!response.ok) {
@@ -117,7 +130,14 @@ function CapturePanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4200/acquire");
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/acquire`, {
+      const response = await fetch(`http://localhost:4200/acquire`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }

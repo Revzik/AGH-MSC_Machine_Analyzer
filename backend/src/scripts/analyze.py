@@ -2,8 +2,6 @@ import sys
 import json
 import numpy as np
 import scipy.stats as stat
-import time
-import os
 
 
 # Loading and parsing data
@@ -75,30 +73,6 @@ if f.size > 0:
         j += win_step
 
     spec = spec / n_windows
-
-
-# Backup data to a file if capturing
-
-if input_data["capture"]:
-    dir = input_data["base_dir"] + os.path.sep + input_data["label"]
-    if not os.path.isdir(dir):
-        os.mkdir(dir)
-
-    fn_base = (
-        dir
-        + os.path.sep
-        + input_data["label"]
-        + "_"
-        + str(config["fs"])
-        + "Hz_"
-        + time.strftime("%Y-%m-%d_%H-%M-%S")
-    )
-    fn = fn_base
-    counter = 1
-    while os.path.isfile(fn + ".npz"):
-        fn = fn_base + "_" + str(counter)
-        counter += 1
-    np.savez_compressed(fn, x=x, y=y, z=z, f=f_interp, spec=spec)
 
 
 # Parsing and sending output data

@@ -114,7 +114,15 @@ function ThresholdsPanel(props) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4200/config/thresholds");
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/config/thresholds`, {
+      const response = await fetch(`http://localhost:4200/config/thresholds`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Could not fetch thresholds! ${response}`);
@@ -193,13 +201,16 @@ function ThresholdsPanel(props) {
     const thresholdsJson = parseThresholds();
 
     try {
-      const response = await fetch("http://localhost:4200/config/thresholds", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: thresholdsJson,
-      });
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/config/thresholds`, {
+      const response = await fetch(`http://localhost:4200/config/thresholds`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: thresholdsJson,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Could not fetch thresholds! ${response}`);

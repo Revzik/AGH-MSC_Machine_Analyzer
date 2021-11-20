@@ -5,8 +5,6 @@ services:
     container_name: mongodb
     volumes:
       - ${DB_PATH}:/data/db
-    ports:
-      - 27017:27017
     restart: unless-stopped
   mosquitto:
     image: eclipse-mosquitto
@@ -18,3 +16,25 @@ services:
     ports:
       - 1883:1883
     restart: unless-stopped
+  analyzer-backend:
+    depends_on:
+      - mosquitto
+      - mongodb
+    image: revzik/analyzer-backend
+    container_name: analyzer-backend
+    environment:
+      - FRONTEND_ORIGIN=http://localhost:3000
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_URL=mongodb://mongodb:27017/analyzer
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - MQTT_URL=mqtt://mosquitto
+      - MQTT_PORT=1883
+    ports:
+      - 4200:4200
+  analyzer-frontend:
+    image: revzik/analyzer-frontend
+    container_name: analyzer-frontend
+    ports:
+      - 3000:80

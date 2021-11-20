@@ -35,8 +35,13 @@ function CalibrationPage(props) {
 
   async function get() {
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/calibrate/`, {
       const response = await fetch(`http://localhost:4200/calibrate/`, {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
@@ -50,9 +55,15 @@ function CalibrationPage(props) {
 
   async function getStatus() {
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/calibrate/status`, {
       const response = await fetch(`http://localhost:4200/calibrate/status`, {
-        method: "GET",
-      });
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }

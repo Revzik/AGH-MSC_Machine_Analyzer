@@ -9,10 +9,13 @@ function CheckState(props) {
 
   async function post(path) {
     try {
-      const response = await fetch(
-        `http://localhost:4200/calibrate/${path}`,
-        {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/calibrate/${path}`, {
+      const response = await fetch(`http://localhost:4200/calibrate/${path}`, {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
       );
       if (!response.ok) {
@@ -35,7 +38,11 @@ function CheckState(props) {
     post("stop");
   }
 
-  let content = <Button onClick={start} disabled={props.disabled}>Start</Button>;
+  let content = (
+    <Button onClick={start} disabled={props.disabled}>
+      Start
+    </Button>
+  );
   if (props.isRunning) {
     content = (
       <React.Fragment>

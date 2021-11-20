@@ -29,9 +29,15 @@ function CalibrationPanel(props) {
 
   async function post(path) {
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/calibrate/${path}`, {
       const response = await fetch(`http://localhost:4200/calibrate/${path}`, {
-        method: "POST",
-      });
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error(`Could not post command ${response}`);
       }
@@ -44,13 +50,16 @@ function CalibrationPanel(props) {
 
   async function postData() {
     try {
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/calibrate/cal/`, {
       const response = await fetch(`http://localhost:4200/calibrate/cal/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(calibrationData),
-      });
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(calibrationData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Could not fetch config! ${response}`);

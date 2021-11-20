@@ -16,7 +16,14 @@ function RawPanel(props) {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:4200/data/raw/");
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/data/raw/`, {
+      const response = await fetch(`http://localhost:4200/data/raw/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Response status ${response.status}`);
@@ -55,9 +62,7 @@ function RawPanel(props) {
   }
 
   function getFreqArray() {
-    return [
-      { name: "f", x: data.ft, y: data.f },
-    ];
+    return [{ name: "f", x: data.ft, y: data.f }];
   }
 
   const button = (
@@ -75,18 +80,18 @@ function RawPanel(props) {
   if (data) {
     content = (
       <React.Fragment>
-      <Chart
-        data={getDataArray()}
-        title="Raw data"
-        xlabel="t [s]"
-        ylabel="a [m/s^2]"
-      />
-      <Chart
-        data={getFreqArray()}
-        title="Frequency"
-        xlabel="t [s]"
-        ylabel="f [Hz]"
-      />
+        <Chart
+          data={getDataArray()}
+          title="Raw data"
+          xlabel="t [s]"
+          ylabel="a [m/s^2]"
+        />
+        <Chart
+          data={getFreqArray()}
+          title="Frequency"
+          xlabel="t [s]"
+          ylabel="f [Hz]"
+        />
       </React.Fragment>
     );
   }

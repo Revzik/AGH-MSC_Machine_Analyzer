@@ -106,7 +106,7 @@ const processData = (newData) => {
 const analyzeRawData = (newData) => {
   const options = {
     mode: "json",
-    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    pythonPath: process.env.PYTHON_PATH,
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("process_raw.py", options);
@@ -133,7 +133,7 @@ const analyzeRawData = (newData) => {
 const analyzeData = (newData) => {
   const options = {
     mode: "json",
-    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    pythonPath: process.env.PYTHON_PATH,
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("analyze.py", options);
@@ -142,7 +142,6 @@ const analyzeData = (newData) => {
     data: newData,
     cal: calibrationService.getCalibration(),
     config: configService.getConfig(),
-    base_dir: process.env.DATA_DIR,
     capture: acquisitionService.isCapturing(),
     label: acquisitionService.getLabel(),
   };
@@ -170,7 +169,7 @@ const analyzeData = (newData) => {
 const analyzeThresholds = (analyzedData) => {
   const options = {
     mode: "json",
-    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    pythonPath: process.env.PYTHON_PATH,
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("validate.py", options);

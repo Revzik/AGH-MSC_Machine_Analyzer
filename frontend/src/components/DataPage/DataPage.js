@@ -19,7 +19,14 @@ function DataPage(props) {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:4200/data/");
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/data/`, {
+      const response = await fetch(`http://localhost:4200/data/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Response status ${response.status}`);

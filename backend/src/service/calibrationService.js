@@ -50,7 +50,7 @@ const getAcceleration = () => {
 const checkCalibration = (data) => {
   const options = {
     mode: "json",
-    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    pythonPath: process.env.PYTHON_PATH,
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("calibration_check.py", options);
@@ -78,7 +78,7 @@ const checkCalibration = (data) => {
 const calibrate = (data) => {
   const options = {
     mode: "json",
-    pythonPath: __dirname + "/../../venv/Scripts/python.exe",
+    pythonPath: process.env.PYTHON_PATH,
     scriptPath: __dirname + "/../scripts",
   };
   const pyshell = new PythonShell("calibrate.py", options);
