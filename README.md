@@ -8,7 +8,7 @@ This is a Raspberry Pi machine vibration analyzer. This set of apps is used to m
 ReactJS app that talks to the backend via http. It presents data from the database and the broker to the user.
 
 ### Backend:
-Simple Express app that saves the data from the broker to the database and exposes endpoints for the frontend. It also is capable of executing basic commands and updating configuration.
+An Express app that saves and processes the data from the broker to the database and exposes endpoints for the frontend. It also is capable of executing basic commands and updating configuration.
 
 ### Pi:
-Simple python app that captures data from a vibration sensor and processes it extracting basic features based on given configuration.
+Simple python app that captures data from a vibration sensor based on given configuration.
